@@ -1,0 +1,327 @@
+[2025-07-09T05:45:45.770Z] GET /admin/users?page=1&limit=10&search=&status=&role=&sort_by=created_at&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:100:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:45:49.691Z] GET /admin/tickets?limit=5&sort_by=created_at&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:475:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:45:50.211Z] GET /trading/trades?page=1&limit=10&sort_by=timestamp&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTrades (/Users/michaelelijah/Desktop/Genesis/backend/controllers/tradingController.js:231:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:45:50.774Z] GET /admin/users?page=1&limit=10&search=&status=&role=&sort_by=created_at&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:100:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:49:46.349Z] GET /admin/tickets?limit=5&sort_by=created_at&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:475:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:49:55.059Z] GET /trading/trades?page=1&limit=10&sort_by=timestamp&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTrades (/Users/michaelelijah/Desktop/Genesis/backend/controllers/tradingController.js:231:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:54:47.238Z] GET /trading/trades?page=1&limit=10&sort_by=timestamp&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTrades (/Users/michaelelijah/Desktop/Genesis/backend/controllers/tradingController.js:234:46)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-09T05:59:50.754Z] GET /admin/tickets?limit=5&sort_by=created_at&sort_order=desc
+Error: Incorrect arguments to mysqld_stmt_execute
+Stack: Error: Incorrect arguments to mysqld_stmt_execute
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:477:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T10:43:47.502Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:208:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T10:44:15.620Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:208:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T10:47:40.818Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:208:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:05:02.054Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:208:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:25:22.366Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:213:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:25:39.543Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:213:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:30:21.379Z] GET /admin/users/56
+Error: Unknown column 'name' in 'field list'
+Stack: Error: Unknown column 'name' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:213:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:32:36.167Z] GET /admin/users/56
+Error: Unknown column 'address' in 'field list'
+Stack: Error: Unknown column 'address' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:213:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:32:43.865Z] GET /admin/users/55
+Error: Unknown column 'address' in 'field list'
+Stack: Error: Unknown column 'address' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:213:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:32:53.359Z] GET /admin/users/56
+Error: Unknown column 'address' in 'field list'
+Stack: Error: Unknown column 'address' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getUserById (/Users/michaelelijah/Desktop/Genesis/backend/controllers/adminController.js:213:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:54:28.200Z] GET /admin/tickets?limit=5&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:57:06.328Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:57:48.501Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:58:20.556Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:58:34.212Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:58:36.910Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T11:59:07.412Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T12:02:45.799Z] GET /admin/tickets?page=1&limit=10&search=&status=&sort_by=created_at&sort_order=desc
+Error: Unknown column 't.priority' in 'field list'
+Stack: Error: Unknown column 't.priority' in 'field list'
+    at PromisePoolConnection.query (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:29:22)
+    at getAllTickets (/Users/michaelelijah/Desktop/Genesis/backend/controllers/supportController.js:560:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T12:46:03.465Z] POST /trading/upload-csv
+Error: Unexpected token 'A', "Amend Id,T"... is not valid JSON
+Stack: SyntaxError: Unexpected token 'A', "Amend Id,T"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at createStrictSyntaxError (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/body-parser/lib/types/json.js:169:10)
+    at parse (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/body-parser/lib/types/json.js:86:15)
+    at /Users/michaelelijah/Desktop/Genesis/backend/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/raw-body/index.js:238:16)
+    at done (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:507:28)
+    at IncomingMessage.emit (node:domain:489:12)
+
+[2025-07-10T12:46:19.731Z] POST /trading/upload-csv
+Error: Unexpected token 'A', "Amend Id,T"... is not valid JSON
+Stack: SyntaxError: Unexpected token 'A', "Amend Id,T"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at createStrictSyntaxError (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/body-parser/lib/types/json.js:169:10)
+    at parse (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/body-parser/lib/types/json.js:86:15)
+    at /Users/michaelelijah/Desktop/Genesis/backend/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/raw-body/index.js:238:16)
+    at done (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:507:28)
+    at IncomingMessage.emit (node:domain:489:12)
+
+[2025-07-10T15:31:51.751Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:55:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:31:54.745Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:55:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:31:56.796Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:55:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:32:04.465Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:55:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:32:19.189Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:55:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:33:56.673Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:63:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:40:54.438Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:63:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:51:21.268Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:77:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T15:51:23.147Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:77:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T16:06:58.150Z] GET /support/tickets
+Error: Cannot read properties of undefined (reading 'ticketService')
+Stack: TypeError: Cannot read properties of undefined (reading 'ticketService')
+    at getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:77:40)
+    at Layer.handle [as handle_request] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/express/lib/router/route.js:149:13)
+    at authenticateToken (/Users/michaelelijah/Desktop/Genesis/backend/middleware/authenticateToken.js:32:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+[2025-07-10T16:12:53.642Z] GET /support/tickets
+Error: Unknown column 'email_verified' in 'field list'
+Stack: Error: Unknown column 'email_verified' in 'field list'
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at UserRepository.findById (/Users/michaelelijah/Desktop/Genesis/backend/src/repositories/UserRepository.js:33:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async TicketService.getUserTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/services/TicketService.js:83:22)
+    at async SupportController.getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:77:29)
+
+[2025-07-10T16:13:06.848Z] GET /support/tickets
+Error: Unknown column 'email_verified' in 'field list'
+Stack: Error: Unknown column 'email_verified' in 'field list'
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at UserRepository.findById (/Users/michaelelijah/Desktop/Genesis/backend/src/repositories/UserRepository.js:33:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async TicketService.getUserTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/services/TicketService.js:83:22)
+    at async SupportController.getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:77:29)
+
+[2025-07-10T16:13:37.081Z] GET /support/tickets
+Error: Unknown column 'email_verified' in 'field list'
+Stack: Error: Unknown column 'email_verified' in 'field list'
+    at PromisePoolConnection.execute (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at UserRepository.findById (/Users/michaelelijah/Desktop/Genesis/backend/src/repositories/UserRepository.js:33:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async TicketService.getUserTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/services/TicketService.js:83:22)
+    at async SupportController.getTickets (/Users/michaelelijah/Desktop/Genesis/backend/src/controllers/SupportController.js:77:29)
+

@@ -1,0 +1,891 @@
+[2025-03-09T14:53:33.901Z] ERROR: Error: Unknown column 'updated_at' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:128:47)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-09T14:55:20.641Z] ERROR: TypeError: Bind parameters must not contain undefined. To pass SQL NULL specify JS null
+    at /home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/base/connection.js:660:17
+    at Array.forEach (<anonymous>)
+    at PoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/base/connection.js:652:22)
+    at /home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:56:11
+    at new Promise (<anonymous>)
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:53:12)
+    at /home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:138:52
+    at Array.map (<anonymous>)
+    at getTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:137:54)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-09T14:56:27.295Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at /home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:145:55
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Promise.all (index 0)
+    at async getTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:137:25)
+[2025-03-13T12:27:13.742Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-13T12:27:13.746Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"220.239.76.120","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"}
+[2025-03-13T12:27:13.746Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-13T12:27:13.759Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-13T12:27:13.833Z] DEBUG: Password match result: true
+[2025-03-13T12:27:13.834Z] DEBUG: Generated tokens successfully
+[2025-03-13T12:27:13.834Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-13T12:27:13.836Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-13T12:27:13.836Z] DEBUG: Login transaction committed successfully
+[2025-03-13T12:27:13.837Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-13T12:59:04.432Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:04.800Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:05.154Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:05.504Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:05.862Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:06.215Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:06.563Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:06.959Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:07.364Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:07.814Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:08.169Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:08.599Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:08.953Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:09.358Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:09.743Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:10.174Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:10.629Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:11.040Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:11.436Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T12:59:11.827Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:20.763Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:21.242Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:21.644Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:49.306Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:49.782Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:50.189Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:50.588Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:00:50.938Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:16:51.321Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:16:51.685Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:16:52.039Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:16:52.408Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:16:52.758Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-13T13:16:53.119Z] ERROR: Error: Table 'cenh3619_brokerfirm_2025.ticket_responses' doesn't exist
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getTicketById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:172:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-19T01:26:45.464Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-19T01:26:45.465Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.26","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-19T01:26:45.466Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-19T01:26:45.468Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-19T01:26:45.542Z] DEBUG: Password match result: true
+[2025-03-19T01:26:45.543Z] DEBUG: Generated tokens successfully
+[2025-03-19T01:26:45.543Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-19T01:26:45.544Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-19T01:26:45.545Z] DEBUG: Login transaction committed successfully
+[2025-03-19T01:26:45.545Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-20T06:41:34.928Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-20T06:41:34.969Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-20T06:41:34.972Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-20T06:41:34.982Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-20T06:41:35.054Z] DEBUG: Password match result: true
+[2025-03-20T06:41:35.060Z] DEBUG: Generated tokens successfully
+[2025-03-20T06:41:35.060Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-20T06:41:35.064Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-20T06:41:35.065Z] DEBUG: Login transaction committed successfully
+[2025-03-20T06:41:35.069Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-20T10:45:20.154Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-20T10:45:20.155Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.204","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-20T10:45:20.155Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-20T10:45:20.157Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-20T10:45:20.229Z] DEBUG: Password match result: false
+[2025-03-20T10:45:20.229Z] DEBUG: Login error: Invalid email or password
+[2025-03-20T10:45:20.229Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/authController.js:122:19)
+[2025-03-20T10:45:20.231Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-20T10:45:28.639Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-20T10:45:28.639Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-20T10:45:28.640Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-20T10:45:28.641Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-20T10:45:28.713Z] DEBUG: Password match result: true
+[2025-03-20T10:45:28.715Z] DEBUG: Generated tokens successfully
+[2025-03-20T10:45:28.715Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-20T10:45:28.716Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-20T10:45:28.717Z] DEBUG: Login transaction committed successfully
+[2025-03-20T10:45:28.718Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T03:31:32.834Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T03:31:32.865Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T03:31:32.868Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T03:31:32.877Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T03:31:32.950Z] DEBUG: Password match result: true
+[2025-03-21T03:31:32.955Z] DEBUG: Generated tokens successfully
+[2025-03-21T03:31:32.955Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-21T03:31:32.958Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-21T03:31:32.959Z] DEBUG: Login transaction committed successfully
+[2025-03-21T03:31:32.962Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T03:38:29.900Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T03:38:29.900Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T03:38:29.901Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T03:38:29.903Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T03:38:29.982Z] DEBUG: Password match result: true
+[2025-03-21T03:38:29.984Z] DEBUG: Generated tokens successfully
+[2025-03-21T03:38:29.984Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-21T03:38:29.985Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-21T03:38:29.985Z] DEBUG: Login transaction committed successfully
+[2025-03-21T03:38:29.986Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T03:43:50.525Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T03:43:50.526Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T03:43:50.527Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T03:43:50.528Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T03:43:50.600Z] DEBUG: Password match result: true
+[2025-03-21T03:43:50.602Z] DEBUG: Generated tokens successfully
+[2025-03-21T03:43:50.602Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-21T03:43:50.603Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-21T03:43:50.604Z] DEBUG: Login transaction committed successfully
+[2025-03-21T03:43:50.605Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T03:59:03.585Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T03:59:03.585Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T03:59:03.586Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T03:59:03.588Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T03:59:03.661Z] DEBUG: Password match result: false
+[2025-03-21T03:59:03.661Z] DEBUG: Login error: Invalid email or password
+[2025-03-21T03:59:03.661Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/authController.js:122:19)
+[2025-03-21T03:59:03.663Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T03:59:11.861Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T03:59:11.861Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T03:59:11.862Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T03:59:11.863Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T03:59:11.937Z] DEBUG: Password match result: true
+[2025-03-21T03:59:11.938Z] DEBUG: Generated tokens successfully
+[2025-03-21T03:59:11.939Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-21T03:59:11.939Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-21T03:59:11.940Z] DEBUG: Login transaction committed successfully
+[2025-03-21T03:59:11.941Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T04:06:06.306Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T04:06:06.306Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T04:06:06.307Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T04:06:06.308Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T04:06:06.381Z] DEBUG: Password match result: true
+[2025-03-21T04:06:06.383Z] DEBUG: Generated tokens successfully
+[2025-03-21T04:06:06.383Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-21T04:06:06.384Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-21T04:06:06.397Z] DEBUG: Login transaction committed successfully
+[2025-03-21T04:06:06.398Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-21T04:10:30.437Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-21T04:10:30.437Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.224.119","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-21T04:10:30.438Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-21T04:10:30.440Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-21T04:10:30.513Z] DEBUG: Password match result: true
+[2025-03-21T04:10:30.514Z] DEBUG: Generated tokens successfully
+[2025-03-21T04:10:30.515Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-21T04:10:30.516Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-21T04:10:30.517Z] DEBUG: Login transaction committed successfully
+[2025-03-21T04:10:30.517Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-26T04:10:32.157Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-03-26T04:10:32.159Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.235.32","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-03-26T04:10:32.159Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-03-26T04:10:32.160Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-03-26T04:10:32.233Z] DEBUG: Password match result: true
+[2025-03-26T04:10:32.234Z] DEBUG: Generated tokens successfully
+[2025-03-26T04:10:32.234Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-03-26T04:10:32.235Z] DEBUG: No IP address provided, skipping IP logging
+[2025-03-26T04:10:32.236Z] DEBUG: Login transaction committed successfully
+[2025-03-26T04:10:32.236Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-03-27T02:30:09.331Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:31:03.750Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:31:18.385Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:31:37.366Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:31:45.368Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:31:49.369Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:31:50.362Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:39:44.753Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:39:56.363Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:39:58.349Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:40:03.359Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:40:04.349Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:44:53.320Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:45:48.058Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:46:55.794Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:47:00.739Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:47:03.427Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:50:23.096Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:53:12.052Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:55:47.224Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:522:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T02:58:57.029Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:00:46.509Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:531:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:00:46.709Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:02:22.878Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:531:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:02:23.163Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:05:09.553Z] ERROR: Error: Unknown column 'u.name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllTickets (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/supportController.js:523:44)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:06:01.362Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:06:47.044Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:07:06.952Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:07:21.338Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:08:11.914Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:08:25.152Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:08:33.471Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-03-27T03:08:51.942Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getAllUsers (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:54:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-04-01T09:03:24.381Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-01T09:03:24.383Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.235.32","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-04-01T09:03:24.384Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-01T09:03:24.385Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-01T09:03:24.460Z] DEBUG: Password match result: true
+[2025-04-01T09:03:24.461Z] DEBUG: Generated tokens successfully
+[2025-04-01T09:03:24.461Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-01T09:03:24.462Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-01T09:03:24.462Z] DEBUG: Login transaction committed successfully
+[2025-04-01T09:03:24.463Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-01T14:14:38.290Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-01T14:14:38.290Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.235.32","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-04-01T14:14:38.291Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-01T14:14:38.293Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-01T14:14:38.366Z] DEBUG: Password match result: true
+[2025-04-01T14:14:38.367Z] DEBUG: Generated tokens successfully
+[2025-04-01T14:14:38.367Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-01T14:14:38.368Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-01T14:14:38.369Z] DEBUG: Login transaction committed successfully
+[2025-04-01T14:14:38.370Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-01T14:25:42.255Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-01T14:25:42.256Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"1.145.82.212","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-04-01T14:25:42.257Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-01T14:25:42.258Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-01T14:25:42.330Z] DEBUG: Password match result: true
+[2025-04-01T14:25:42.331Z] DEBUG: Generated tokens successfully
+[2025-04-01T14:25:42.331Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-01T14:25:42.332Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-01T14:25:42.333Z] DEBUG: Login transaction committed successfully
+[2025-04-01T14:25:42.334Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-01T14:26:47.080Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getUserById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:238:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-04-01T14:26:51.958Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getUserById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:238:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-04-02T04:48:15.597Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-02T04:48:15.628Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-04-02T04:48:15.631Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-02T04:48:15.640Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-02T04:48:15.712Z] DEBUG: Password match result: true
+[2025-04-02T04:48:15.718Z] DEBUG: Generated tokens successfully
+[2025-04-02T04:48:15.718Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-02T04:48:15.721Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-02T04:48:15.721Z] DEBUG: Login transaction committed successfully
+[2025-04-02T04:48:15.725Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-02T05:02:23.686Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-02T05:02:23.687Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"1.145.22.143","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"}
+[2025-04-02T05:02:23.687Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-02T05:02:23.690Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-02T05:02:23.762Z] DEBUG: Password match result: true
+[2025-04-02T05:02:23.769Z] DEBUG: Generated tokens successfully
+[2025-04-02T05:02:23.769Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-02T05:02:23.771Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-02T05:02:23.771Z] DEBUG: Login transaction committed successfully
+[2025-04-02T05:02:23.772Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-02T06:56:55.183Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-02T06:56:55.217Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-02T06:56:55.219Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-02T06:56:55.229Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-02T06:56:55.302Z] DEBUG: Password match result: true
+[2025-04-02T06:56:55.310Z] DEBUG: Generated tokens successfully
+[2025-04-02T06:56:55.310Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-02T06:56:55.316Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-02T06:56:55.317Z] DEBUG: Login transaction committed successfully
+[2025-04-02T06:56:55.320Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-02T06:58:06.738Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-02T06:58:06.738Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-02T06:58:06.739Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-02T06:58:06.740Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-02T06:58:06.816Z] DEBUG: Password match result: true
+[2025-04-02T06:58:06.818Z] DEBUG: Generated tokens successfully
+[2025-04-02T06:58:06.818Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-02T06:58:06.819Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-02T06:58:06.851Z] DEBUG: Login transaction committed successfully
+[2025-04-02T06:58:06.852Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-02T07:03:58.184Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-02T07:03:58.214Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-02T07:03:58.217Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-02T07:03:58.226Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-02T07:03:58.298Z] DEBUG: Password match result: true
+[2025-04-02T07:03:58.304Z] DEBUG: Generated tokens successfully
+[2025-04-02T07:03:58.305Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-02T07:03:58.308Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-02T07:03:58.309Z] DEBUG: Login transaction committed successfully
+[2025-04-02T07:03:58.314Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-02T09:58:17.389Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-02T09:58:17.389Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.24","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-02T09:58:17.390Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-02T09:58:17.393Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-02T09:58:17.466Z] DEBUG: Password match result: true
+[2025-04-02T09:58:17.471Z] DEBUG: Generated tokens successfully
+[2025-04-02T09:58:17.471Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-02T09:58:17.473Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-02T09:58:17.474Z] DEBUG: Login transaction committed successfully
+[2025-04-02T09:58:17.475Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-03T03:48:54.252Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-03T03:48:54.254Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.166.235.32","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-03T03:48:54.254Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-03T03:48:54.261Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-03T03:48:54.336Z] DEBUG: Password match result: true
+[2025-04-03T03:48:54.339Z] DEBUG: Generated tokens successfully
+[2025-04-03T03:48:54.339Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-03T03:48:54.341Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-03T03:48:54.341Z] DEBUG: Login transaction committed successfully
+[2025-04-03T03:48:54.342Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-03T08:38:07.273Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-03T08:38:07.274Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.26","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-03T08:38:07.274Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-03T08:38:07.276Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-03T08:38:07.348Z] DEBUG: Password match result: true
+[2025-04-03T08:38:07.350Z] DEBUG: Generated tokens successfully
+[2025-04-03T08:38:07.350Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-03T08:38:07.351Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-03T08:38:07.352Z] DEBUG: Login transaction committed successfully
+[2025-04-03T08:38:07.354Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T09:34:53.551Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T09:34:53.582Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T09:34:53.585Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T09:34:53.603Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T09:34:53.675Z] DEBUG: Password match result: true
+[2025-04-12T09:34:53.680Z] DEBUG: Generated tokens successfully
+[2025-04-12T09:34:53.681Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T09:34:53.683Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T09:34:53.684Z] DEBUG: Login transaction committed successfully
+[2025-04-12T09:34:53.689Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T09:36:19.877Z] ERROR: Error: Unknown column 'name' in 'SELECT'
+    at PromisePoolConnection.execute (/home/cenh3619/nodevenv/public_html/crm.centrium.id/node-api/20/lib/node_modules/mysql2/lib/promise/connection.js:47:22)
+    at getUserById (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/adminController.js:208:45)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-04-12T09:45:43.282Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T09:45:43.283Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T09:45:43.284Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T09:45:43.285Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T09:45:43.359Z] DEBUG: Password match result: true
+[2025-04-12T09:45:43.360Z] DEBUG: Generated tokens successfully
+[2025-04-12T09:45:43.360Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T09:45:43.361Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T09:45:43.362Z] DEBUG: Login transaction committed successfully
+[2025-04-12T09:45:43.363Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T09:46:14.432Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T09:46:14.462Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T09:46:14.465Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T09:46:14.473Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T09:46:14.546Z] DEBUG: Password match result: true
+[2025-04-12T09:46:14.551Z] DEBUG: Generated tokens successfully
+[2025-04-12T09:46:14.551Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T09:46:14.553Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T09:46:14.554Z] DEBUG: Login transaction committed successfully
+[2025-04-12T09:46:14.559Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T11:11:55.680Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T11:11:55.711Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T11:11:55.714Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T11:11:55.723Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T11:11:55.795Z] DEBUG: Password match result: true
+[2025-04-12T11:11:55.800Z] DEBUG: Generated tokens successfully
+[2025-04-12T11:11:55.801Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T11:11:55.803Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T11:11:55.804Z] DEBUG: Login transaction committed successfully
+[2025-04-12T11:11:55.809Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T11:20:42.236Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T11:20:42.237Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T11:20:42.239Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T11:20:42.243Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T11:20:42.317Z] DEBUG: Password match result: true
+[2025-04-12T11:20:42.320Z] DEBUG: Generated tokens successfully
+[2025-04-12T11:20:42.320Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T11:20:42.321Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T11:20:42.322Z] DEBUG: Login transaction committed successfully
+[2025-04-12T11:20:42.323Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T11:54:26.246Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T11:54:26.278Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T11:54:26.282Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T11:54:26.291Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T11:54:26.365Z] DEBUG: Password match result: true
+[2025-04-12T11:54:26.382Z] DEBUG: Generated tokens successfully
+[2025-04-12T11:54:26.382Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T11:54:26.386Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T11:54:26.387Z] DEBUG: Login transaction committed successfully
+[2025-04-12T11:54:26.391Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T11:56:35.188Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T11:56:35.219Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T11:56:35.222Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T11:56:35.313Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T11:56:35.385Z] DEBUG: Password match result: true
+[2025-04-12T11:56:35.391Z] DEBUG: Generated tokens successfully
+[2025-04-12T11:56:35.391Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T11:56:35.393Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T11:56:35.394Z] DEBUG: Login transaction committed successfully
+[2025-04-12T11:56:35.399Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T11:57:22.050Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T11:57:22.079Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T11:57:22.082Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-12T11:57:22.090Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-12T11:57:22.163Z] DEBUG: Password match result: true
+[2025-04-12T11:57:22.168Z] DEBUG: Generated tokens successfully
+[2025-04-12T11:57:22.168Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-12T11:57:22.170Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T11:57:22.171Z] DEBUG: Login transaction committed successfully
+[2025-04-12T11:57:22.176Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-12T13:17:56.099Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-12T13:17:56.099Z] DEBUG: Login attempt with body: {"email":"admin@gmail.com","password":"Admin.123$","ipAddress":"60.242.214.10","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-12T13:17:56.100Z] DEBUG: Query params - email: admin@gmail.com, password: [PRESENT]
+[2025-04-12T13:17:56.101Z] DEBUG: Found 1 users with email: admin@gmail.com
+[2025-04-12T13:17:56.174Z] DEBUG: Password match result: true
+[2025-04-12T13:17:56.176Z] DEBUG: Generated tokens successfully
+[2025-04-12T13:17:56.176Z] DEBUG: Insert token params - user_id: 53, tokens: [PRESENT]
+[2025-04-12T13:17:56.178Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-12T13:17:56.179Z] DEBUG: Login transaction committed successfully
+[2025-04-12T13:17:56.180Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-04-18T05:32:31.283Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-04-18T05:32:31.287Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"}
+[2025-04-18T05:32:31.288Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-04-18T05:32:31.297Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-04-18T05:32:31.369Z] DEBUG: Password match result: true
+[2025-04-18T05:32:31.371Z] DEBUG: Generated tokens successfully
+[2025-04-18T05:32:31.371Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-04-18T05:32:31.372Z] DEBUG: No IP address provided, skipping IP logging
+[2025-04-18T05:32:31.373Z] DEBUG: Login transaction committed successfully
+[2025-04-18T05:32:31.374Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-05-17T03:42:25.211Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-05-17T03:42:25.241Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.221.59.194","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"}
+[2025-05-17T03:42:25.244Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-05-17T03:42:25.261Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-05-17T03:42:25.333Z] DEBUG: Password match result: true
+[2025-05-17T03:42:25.339Z] DEBUG: Generated tokens successfully
+[2025-05-17T03:42:25.339Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-05-17T03:42:25.341Z] DEBUG: No IP address provided, skipping IP logging
+[2025-05-17T03:42:25.342Z] DEBUG: Login transaction committed successfully
+[2025-05-17T03:42:25.345Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-05-20T04:35:52.644Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-05-20T04:35:52.676Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.221.59.194","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"}
+[2025-05-20T04:35:52.679Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-05-20T04:35:52.697Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-05-20T04:35:52.770Z] DEBUG: Password match result: true
+[2025-05-20T04:35:52.776Z] DEBUG: Generated tokens successfully
+[2025-05-20T04:35:52.776Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-05-20T04:35:52.779Z] DEBUG: No IP address provided, skipping IP logging
+[2025-05-20T04:35:52.780Z] DEBUG: Login transaction committed successfully
+[2025-05-20T04:35:52.783Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-05-20T05:25:05.330Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-05-20T05:25:05.359Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.221.59.194","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"}
+[2025-05-20T05:25:05.365Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-05-20T05:25:05.376Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-05-20T05:25:05.448Z] DEBUG: Password match result: true
+[2025-05-20T05:25:05.453Z] DEBUG: Generated tokens successfully
+[2025-05-20T05:25:05.453Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-05-20T05:25:05.456Z] DEBUG: No IP address provided, skipping IP logging
+[2025-05-20T05:25:05.457Z] DEBUG: Login transaction committed successfully
+[2025-05-20T05:25:05.462Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-11T15:32:55.435Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-11T15:32:55.440Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"}
+[2025-06-11T15:32:55.442Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-11T15:32:55.445Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-11T15:32:55.518Z] DEBUG: Password match result: true
+[2025-06-11T15:32:55.521Z] DEBUG: Generated tokens successfully
+[2025-06-11T15:32:55.521Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-11T15:32:55.523Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-11T15:32:55.524Z] DEBUG: Login transaction committed successfully
+[2025-06-11T15:32:55.525Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-11T15:51:21.370Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-11T15:51:21.371Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"}
+[2025-06-11T15:51:21.371Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-11T15:51:21.373Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-11T15:51:21.447Z] DEBUG: Password match result: true
+[2025-06-11T15:51:21.451Z] DEBUG: Generated tokens successfully
+[2025-06-11T15:51:21.451Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-11T15:51:21.453Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-11T15:51:21.493Z] DEBUG: Login transaction committed successfully
+[2025-06-11T15:51:21.494Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-11T15:51:27.487Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-11T15:51:27.487Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"}
+[2025-06-11T15:51:27.488Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-11T15:51:27.490Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-11T15:51:27.562Z] DEBUG: Password match result: true
+[2025-06-11T15:51:27.564Z] DEBUG: Generated tokens successfully
+[2025-06-11T15:51:27.564Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-11T15:51:27.565Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-11T15:51:27.604Z] DEBUG: Login transaction committed successfully
+[2025-06-11T15:51:27.606Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T13:33:51.569Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T13:33:51.599Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Micahel.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T13:33:51.601Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T13:33:51.610Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T13:33:51.683Z] DEBUG: Password match result: false
+[2025-06-28T13:33:51.683Z] DEBUG: Login error: Invalid email or password
+[2025-06-28T13:33:51.683Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/authController.js:119:19)
+[2025-06-28T13:33:51.687Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T13:34:15.096Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T13:34:15.097Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T13:34:15.098Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T13:34:15.100Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T13:34:15.172Z] DEBUG: Password match result: true
+[2025-06-28T13:34:15.177Z] DEBUG: Generated tokens successfully
+[2025-06-28T13:34:15.177Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T13:34:15.180Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T13:34:15.181Z] DEBUG: Login transaction committed successfully
+[2025-06-28T13:34:15.182Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T13:49:52.222Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T13:49:52.223Z] DEBUG: Login attempt with body: {"email":"hehehe@gmail.com","password":"Micahel.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}
+[2025-06-28T13:49:52.224Z] DEBUG: Query params - email: hehehe@gmail.com, password: [PRESENT]
+[2025-06-28T13:49:52.227Z] DEBUG: Found 1 users with email: hehehe@gmail.com
+[2025-06-28T13:49:52.299Z] DEBUG: Password match result: false
+[2025-06-28T13:49:52.299Z] DEBUG: Login error: Invalid email or password
+[2025-06-28T13:49:52.299Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/authController.js:119:19)
+[2025-06-28T13:49:52.301Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T13:50:01.207Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T13:50:01.208Z] DEBUG: Login attempt with body: {"email":"hehehe@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}
+[2025-06-28T13:50:01.208Z] DEBUG: Query params - email: hehehe@gmail.com, password: [PRESENT]
+[2025-06-28T13:50:01.210Z] DEBUG: Found 1 users with email: hehehe@gmail.com
+[2025-06-28T13:50:01.282Z] DEBUG: Password match result: true
+[2025-06-28T13:50:01.288Z] DEBUG: Generated tokens successfully
+[2025-06-28T13:50:01.288Z] DEBUG: Insert token params - user_id: 56, tokens: [PRESENT]
+[2025-06-28T13:50:01.290Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T13:50:01.291Z] DEBUG: Login transaction committed successfully
+[2025-06-28T13:50:01.292Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T13:51:04.615Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T13:51:04.616Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T13:51:04.616Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T13:51:04.617Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T13:51:04.689Z] DEBUG: Password match result: true
+[2025-06-28T13:51:04.691Z] DEBUG: Generated tokens successfully
+[2025-06-28T13:51:04.691Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T13:51:04.692Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T13:51:04.692Z] DEBUG: Login transaction committed successfully
+[2025-06-28T13:51:04.693Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T13:58:42.980Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T13:58:42.980Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T13:58:42.981Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T13:58:42.982Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T13:58:43.054Z] DEBUG: Password match result: true
+[2025-06-28T13:58:43.055Z] DEBUG: Generated tokens successfully
+[2025-06-28T13:58:43.055Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T13:58:43.056Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T13:58:43.057Z] DEBUG: Login transaction committed successfully
+[2025-06-28T13:58:43.057Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T14:01:30.731Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T14:01:30.731Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Micahel.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T14:01:30.732Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T14:01:30.733Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T14:01:30.805Z] DEBUG: Password match result: false
+[2025-06-28T14:01:30.805Z] DEBUG: Login error: Invalid email or password
+[2025-06-28T14:01:30.805Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/home/cenh3619/public_html/crm.centrium.id/node-api/controllers/authController.js:119:19)
+[2025-06-28T14:01:30.806Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T14:01:36.529Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T14:01:36.529Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T14:01:36.530Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T14:01:36.530Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T14:01:36.602Z] DEBUG: Password match result: true
+[2025-06-28T14:01:36.603Z] DEBUG: Generated tokens successfully
+[2025-06-28T14:01:36.603Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T14:01:36.604Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T14:01:36.605Z] DEBUG: Login transaction committed successfully
+[2025-06-28T14:01:36.605Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T14:50:50.694Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T14:50:50.695Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}
+[2025-06-28T14:50:50.695Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T14:50:50.697Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T14:50:50.769Z] DEBUG: Password match result: true
+[2025-06-28T14:50:50.772Z] DEBUG: Generated tokens successfully
+[2025-06-28T14:50:50.772Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T14:50:50.773Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T14:50:50.774Z] DEBUG: Login transaction committed successfully
+[2025-06-28T14:50:50.774Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T14:51:40.817Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T14:51:40.818Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}
+[2025-06-28T14:51:40.818Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T14:51:40.819Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T14:51:40.891Z] DEBUG: Password match result: true
+[2025-06-28T14:51:40.892Z] DEBUG: Generated tokens successfully
+[2025-06-28T14:51:40.892Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T14:51:40.892Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T14:51:40.893Z] DEBUG: Login transaction committed successfully
+[2025-06-28T14:51:40.893Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T14:53:20.245Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T14:53:20.245Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}
+[2025-06-28T14:53:20.245Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T14:53:20.246Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T14:53:20.318Z] DEBUG: Password match result: true
+[2025-06-28T14:53:20.319Z] DEBUG: Generated tokens successfully
+[2025-06-28T14:53:20.319Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T14:53:20.320Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T14:53:20.321Z] DEBUG: Login transaction committed successfully
+[2025-06-28T14:53:20.322Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T23:21:42.818Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T23:21:42.818Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-06-28T23:21:42.819Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T23:21:42.820Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T23:21:42.892Z] DEBUG: Password match result: true
+[2025-06-28T23:21:42.893Z] DEBUG: Generated tokens successfully
+[2025-06-28T23:21:42.893Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T23:21:42.894Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T23:21:42.895Z] DEBUG: Login transaction committed successfully
+[2025-06-28T23:21:42.895Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-06-28T23:30:51.400Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-06-28T23:30:51.400Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"203.158.36.66","device_info":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"}
+[2025-06-28T23:30:51.401Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-06-28T23:30:51.402Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-06-28T23:30:51.478Z] DEBUG: Password match result: true
+[2025-06-28T23:30:51.479Z] DEBUG: Generated tokens successfully
+[2025-06-28T23:30:51.479Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-06-28T23:30:51.480Z] DEBUG: No IP address provided, skipping IP logging
+[2025-06-28T23:30:51.481Z] DEBUG: Login transaction committed successfully
+[2025-06-28T23:30:51.482Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-07-09T05:34:24.564Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-09T05:34:24.589Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2024","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-07-09T05:34:24.590Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-07-09T05:34:24.594Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-07-09T05:34:24.679Z] DEBUG: Password match result: false
+[2025-07-09T05:34:24.680Z] DEBUG: Login error: Invalid email or password
+[2025-07-09T05:34:24.680Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/Users/michaelelijah/Desktop/Genesis/backend/controllers/authController.js:119:19)
+[2025-07-09T05:34:24.684Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-07-09T05:34:32.823Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-09T05:34:32.824Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2024","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-07-09T05:34:32.825Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-07-09T05:34:32.826Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-07-09T05:34:32.908Z] DEBUG: Password match result: false
+[2025-07-09T05:34:32.909Z] DEBUG: Login error: Invalid email or password
+[2025-07-09T05:34:32.909Z] DEBUG: Error stack: Error: Invalid email or password
+    at login (/Users/michaelelijah/Desktop/Genesis/backend/controllers/authController.js:119:19)
+[2025-07-09T05:34:32.911Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-07-09T05:34:38.937Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-09T05:34:38.938Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-07-09T05:34:38.938Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-07-09T05:34:38.939Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-07-09T05:34:39.023Z] DEBUG: Password match result: true
+[2025-07-09T05:34:39.025Z] DEBUG: Login error: secretOrPrivateKey must have a value
+[2025-07-09T05:34:39.025Z] DEBUG: Error stack: Error: secretOrPrivateKey must have a value
+    at module.exports [as sign] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/jsonwebtoken/sign.js:111:20)
+    at generateTokens (/Users/michaelelijah/Desktop/Genesis/backend/utils/jwt.js:9:29)
+    at login (/Users/michaelelijah/Desktop/Genesis/backend/controllers/authController.js:122:82)
+[2025-07-09T05:34:39.026Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-07-09T05:34:42.876Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-09T05:34:42.876Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-07-09T05:34:42.877Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-07-09T05:34:42.878Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-07-09T05:34:42.961Z] DEBUG: Password match result: true
+[2025-07-09T05:34:42.962Z] DEBUG: Login error: secretOrPrivateKey must have a value
+[2025-07-09T05:34:42.962Z] DEBUG: Error stack: Error: secretOrPrivateKey must have a value
+    at module.exports [as sign] (/Users/michaelelijah/Desktop/Genesis/backend/node_modules/jsonwebtoken/sign.js:111:20)
+    at generateTokens (/Users/michaelelijah/Desktop/Genesis/backend/utils/jwt.js:9:29)
+    at login (/Users/michaelelijah/Desktop/Genesis/backend/controllers/authController.js:122:82)
+[2025-07-09T05:34:42.963Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-07-09T05:45:42.569Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-09T05:45:42.603Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-07-09T05:45:42.604Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-07-09T05:45:42.610Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-07-09T05:45:42.697Z] DEBUG: Password match result: true
+[2025-07-09T05:45:42.702Z] DEBUG: Generated tokens successfully
+[2025-07-09T05:45:42.702Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-07-09T05:45:42.705Z] DEBUG: No IP address provided, skipping IP logging
+[2025-07-09T05:45:42.707Z] DEBUG: Login transaction committed successfully
+[2025-07-09T05:45:42.708Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
+[2025-07-10T08:36:41.803Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-10T08:37:25.024Z] DEBUG: === LOGIN FUNCTION STARTED ===
+[2025-07-10T08:37:25.047Z] DEBUG: Login attempt with body: {"email":"natawidjajamichael@gmail.com","password":"Michael.2004","ipAddress":"129.94.128.31","device_info":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"}
+[2025-07-10T08:37:25.048Z] DEBUG: Query params - email: natawidjajamichael@gmail.com, password: [PRESENT]
+[2025-07-10T08:37:25.060Z] DEBUG: Found 1 users with email: natawidjajamichael@gmail.com
+[2025-07-10T08:37:25.113Z] DEBUG: Password match result: true
+[2025-07-10T08:37:25.115Z] DEBUG: Generated tokens successfully
+[2025-07-10T08:37:25.115Z] DEBUG: Insert token params - user_id: 52, tokens: [PRESENT]
+[2025-07-10T08:37:25.117Z] DEBUG: No IP address provided, skipping IP logging
+[2025-07-10T08:37:25.118Z] DEBUG: Login transaction committed successfully
+[2025-07-10T08:37:25.118Z] DEBUG: === LOGIN FUNCTION COMPLETED ===
