@@ -150,8 +150,8 @@ const TicketDetail = ({ adminView = false }) => {
         }
     };
 
-    const adminListPath = '/dashboard/admin';
-    const customerListPath = '/dashboard/tickets';
+    const adminListPath = '/dashboard/admin/tickets';
+    const customerListPath = '/dashboard/support';
 
     if (loading) {
         return (
@@ -235,7 +235,7 @@ const TicketDetail = ({ adminView = false }) => {
                                     <h5 className="mb-1">Customer</h5>
                                     <p className="mb-0">
                                         {adminView ? (
-                                            <Link to={`/admin/users/${ticket.user_id}`}>
+                                            <Link to={`/dashboard/admin/users/${ticket.user_id}`}>
                                                 {ticket.customer.name}
                                             </Link>
                                         ) : (
@@ -406,23 +406,13 @@ const TicketDetail = ({ adminView = false }) => {
                             </div>
                             
                             <div className="text-center mt-3">
-                                {adminView ? (
-                                    <Link 
-                                        to={`/admin/users/${ticket.customer?.id}`}
-                                        className="btn btn-primary"
-                                    >
-                                        <i className="mdi mdi-account-details me-1"></i>
-                                        View Profile
-                                    </Link>
-                                ) : (
-                                    <Link 
-                                        to={`/dashboard/tickets/${ticketId}`}
-                                        className="btn btn-primary"
-                                    >
-                                        <i className="mdi mdi-account-details me-1"></i>
-                                        View Profile
-                                    </Link>
-                                )}
+                                <Link 
+                                    to={`/dashboard/admin/users/${ticket.customer?.id}`}
+                                    className="btn btn-primary"
+                                >
+                                    <i className="mdi mdi-account-details me-1"></i>
+                                    View Profile
+                                </Link>
                             </div>
                         </Card.Body>
                     </Card>
