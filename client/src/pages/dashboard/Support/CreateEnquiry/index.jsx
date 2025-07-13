@@ -3,17 +3,21 @@ import { Row, Col, Card, FormLabel } from 'react-bootstrap';
 import { Form, TextInput, TextAreaInput } from '@/components';
 import { FileUploader } from '@/components';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useCreateEnquiry from './useCreateEnquiry';
 import { useNotificationContext } from '@/common';
 
-const CreateEnquiry = () => {
+const CreateEnquiry = ({ adminView = false }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const { showNotification } = useNotificationContext();
     const { loading, createEnquiry } = useCreateEnquiry();
     const [showSuccess, setShowSuccess] = useState(false);
     const [files, setFiles] = useState([]);
+
+    // Determine if this is admin view based on URL path if prop is not provided
+    const isAdminView = adminView || location.pathname.includes('/admin/');
 
     useEffect(() => {
         return () => {
@@ -27,7 +31,8 @@ const CreateEnquiry = () => {
 
     const handleCancel = () => {
         setFiles([]);
-        navigate('/dashboard/support');
+        const cancelPath = isAdminView ? '/dashboard/admin/tickets' : '/dashboard/support';
+        navigate(cancelPath);
     };
 
     const handleSubmit = async (formValues) => {
@@ -98,11 +103,20 @@ const CreateEnquiry = () => {
             
             setTimeout(() => {
                 setShowSuccess(false);
-                navigate('/dashboard/support');
+                const successPath = isAdminView ? '/dashboard/admin/tickets' : '/dashboard/support';
+                navigate(successPath);
             }, 2000);
         } catch (error) {
             // Error is already handled in useCreateEnquiry hook
         }
+    };
+
+    const getPageTitle = () => {
+        return isAdminView ? 'Create New Ticket' : 'Make an Enquiry';
+    };
+
+    const getSubmitButtonText = () => {
+        return isAdminView ? 'Create Ticket' : 'Submit Enquiry';
     };
 
     return (
@@ -112,7 +126,10 @@ const CreateEnquiry = () => {
                     {showSuccess ? (
                         <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '70vh' }}>
                             <div className="alert alert-success text-center" style={{ maxWidth: '500px' }}>
-                                Your enquiry has been submitted successfully! We will get back to you soon.
+                                {isAdminView 
+                                    ? 'Ticket has been created successfully!' 
+                                    : 'Your enquiry has been submitted successfully! We will get back to you soon.'
+                                }
                             </div>
                         </div>
                     ) : (
@@ -124,7 +141,7 @@ const CreateEnquiry = () => {
                             }}
                         >
                             <div className="text-center mb-4">
-                                <h3>Make an Enquiry</h3>
+                                <h3>{getPageTitle()}</h3>
                             </div>
 
                             <Row className="mb-2">
@@ -189,7 +206,7 @@ const CreateEnquiry = () => {
                                         <span><i className="mdi mdi-loading mdi-spin me-1"></i> Submitting...</span>
                                     ) : (
                                         <>
-                                            <i className="mdi mdi-email-outline me-1"></i> Submit Enquiry
+                                            <i className="mdi mdi-email-outline me-1"></i> {getSubmitButtonText()}
                                         </>
                                     )}
                                 </button>

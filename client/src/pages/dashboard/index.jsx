@@ -40,6 +40,7 @@ export default function Dashboard() {
                         <Route path="users/:userId" element={<UserDetails />} />
                         <Route path="users/:userId/tickets" element={<UserTickets />} />
                         <Route path="tickets" element={<Support adminView={true} />} />
+                        <Route path="tickets/new" element={<CreateEnquiry adminView={true} />} />
                         <Route path="tickets/:ticketId" element={<TicketDetail adminView={true} />} />
                         {/* Redirect any unknown /dashboard/admin/* route to /dashboard/admin */}
                         <Route path="*" element={<Navigate to="/dashboard/admin" replace />} />

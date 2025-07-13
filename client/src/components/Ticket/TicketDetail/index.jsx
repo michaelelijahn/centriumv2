@@ -406,23 +406,13 @@ const TicketDetail = ({ adminView = false }) => {
                             </div>
                             
                             <div className="text-center mt-3">
-                                {adminView ? (
-                                    <Link 
-                                        to={`/dashboard/admin/users/${ticket.customer?.id}`}
-                                        className="btn btn-primary"
-                                    >
-                                        <i className="mdi mdi-account-details me-1"></i>
-                                        View Profile
-                                    </Link>
-                                ) : (
-                                    <Link 
-                                        to={`/dashboard/support/${ticketId}`}
-                                        className="btn btn-primary"
-                                    >
-                                        <i className="mdi mdi-account-details me-1"></i>
-                                        View Profile
-                                    </Link>
-                                )}
+                                <Link 
+                                    to={`/dashboard/admin/users/${ticket.customer?.id}`}
+                                    className="btn btn-primary"
+                                >
+                                    <i className="mdi mdi-account-details me-1"></i>
+                                    View Profile
+                                </Link>
                             </div>
                         </Card.Body>
                     </Card>
