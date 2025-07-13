@@ -32,6 +32,7 @@ const UserTickets = () => {
             const response = await authApi.getUserById(userId);
             
             if (response?.data) {
+                console.log(response.data);
                 setUser(response.data);
             }
         } catch (error) {
@@ -135,7 +136,7 @@ const UserTickets = () => {
                     <div>
                         <h4 className="m-0">Support Tickets</h4>
                         <p className="text-muted mb-0 mt-1">
-                            {user.name} (ID: {user.id}) - Total: {user.tickets.total || 0}
+                            {user.name} (ID: {user.user_id}) - Total: {user.tickets.total || 0}
                         </p>
                     </div>
                     <div className="d-flex align-items-center">
@@ -151,7 +152,7 @@ const UserTickets = () => {
                             <option value="closed">Closed</option>
                         </Form.Select>
                         <Link 
-                            to={`/dashboard/users/${userId}`} 
+                            to={`/dashboard/users/${user.user_id}`} 
                             className="btn btn-secondary"
                         >
                             <i className="mdi mdi-arrow-left me-1"></i>

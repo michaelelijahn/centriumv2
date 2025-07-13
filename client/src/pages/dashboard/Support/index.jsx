@@ -4,28 +4,51 @@ import { columns, sizePerPageList } from './ColumnsSet';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useGetEnquiries from './useGetEnquiries';
+import { authApi } from '@/common';
 
-const Support = () => {
+const Support = ({ adminView = false }) => {
 	const [enquiries, setEnquiries] = useState([]);
-	const { loading, getEnquiries } = useGetEnquiries();
+	const [loading, setLoading] = useState(true);
+	const { getEnquiries } = useGetEnquiries();
 	
 	useEffect(() => {
 		const fetchEnquiries = async () => {
 			try {
-				const data = await getEnquiries();
+				setLoading(true);
+				let data;
+				
+				if (adminView) {
+					// Admin gets all tickets
+					const response = await authApi.getAllTickets();
+					data = response?.data?.tickets || [];
+				} else {
+					// Customer gets only their own tickets
+					data = await getEnquiries();
+				}
+				
 				setEnquiries(data);
 			} catch (error) {
 				console.error("Error fetching enquiries:", error);
 				setEnquiries([]);
+			} finally {
+				setLoading(false);
 			}
 		};
 		
 		fetchEnquiries();
-	}, []);
+	}, [adminView, getEnquiries]);
+
+	const getPageTitle = () => {
+		return adminView ? "Admin - All Tickets" : "Help & Support";
+	};
+
+	const getAddButtonPath = () => {
+		return adminView ? "/dashboard/admin/tickets/new" : "/dashboard/support/new-enquiry";
+	};
 
 	return (
 		<>
-			<PageBreadcrumb title="Help & Support" subName="Pages" />
+			<PageBreadcrumb title={getPageTitle()} subName="Pages" />
 
             <Row>
 				<Col xs={12}>
@@ -33,14 +56,14 @@ const Support = () => {
 						<Card.Body>
                             <Row className="mb-2">
 								<Col sm={5}>
-                                    <Link to="/dashboard/support/new-enquiry" className="btn btn-success mb-2">
-                                        <i className="mdi mdi-plus-circle me-2"></i> Add Enquiry
+                                    <Link to={getAddButtonPath()} className="btn btn-success mb-2">
+                                        <i className="mdi mdi-plus-circle me-2"></i> Add {adminView ? 'Ticket' : 'Enquiry'}
                                     </Link>
 								</Col>
 							</Row>
 
 							{loading ? (
-								<div className="text-center p-4">Loading enquiries...</div>
+								<div className="text-center p-4">Loading {adminView ? 'tickets' : 'enquiries'}...</div>
 							) : (
 								<EnquiriesTable
 									columns={columns}

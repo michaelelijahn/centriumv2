@@ -88,6 +88,7 @@ const UserList = () => {
             });
             
             if (response?.data?.users) {
+                console.log(response.data.users);
                 setUsers(response.data.users);
                 
                 const paginationData = response.data.pagination;
@@ -410,13 +411,14 @@ const UserList = () => {
                                             <td>{user.created_at}</td>
                                             <td>{renderStatus(user.status)}</td>
                                             <td>
-                                                <Link 
-                                                    to={`/dashboard/users/${user.id}`} 
-                                                            className="btn btn-sm btn-primary"
+                                                <Button
+                                                    as={Link}
+                                                    to={`/dashboard/users/${user.id}`}
+                                                    variant="primary"
+                                                    size="sm"
                                                 >
-                                                    <i className="mdi mdi-account-details me-1" />
-                                                    Details
-                                                </Link>
+                                                    <i className="mdi mdi-account-details me-1"></i> Details
+                                                </Button>
                                             </td>
                                         </tr>
                                     ))

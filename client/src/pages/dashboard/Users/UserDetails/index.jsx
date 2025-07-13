@@ -30,6 +30,7 @@ const UserDetails = () => {
             const response = await authApi.getUserById(userId);
             
             if (response?.data) {
+                console.log(response.data);
                 setUser(response.data);
                 setFormData({
                     name: response.data.name || '',
@@ -37,12 +38,15 @@ const UserDetails = () => {
                     phone: response.data.phone || '',
                     status: response.data.status || 'active'
                 });
+            } else {
+                console.error('User details API response:', response);
             }
         } catch (error) {
             showNotification({
                 message: `Error fetching user details: ${error.toString()}`,
                 type: 'error'
             });
+            console.error('User details API error:', error);
         } finally {
             setLoading(false);
         }

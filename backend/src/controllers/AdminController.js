@@ -97,7 +97,9 @@ class AdminController {
 
     async getUserById(req, res, next) {
         try {
+            console.log(req.params);
             const userId = req.params.user_id;
+            console.log("userId: ", userId);
             const user = await this.userService.getUserById(userId);
 
             const formattedUser = {

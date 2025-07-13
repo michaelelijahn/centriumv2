@@ -32,14 +32,9 @@ const StatusColumn = ({ row }) => {
 // Best practice: use a wrapper component to access hooks in table columns
 const ActionColumn = (props) => {
     const { row } = props;
-    const { user } = useAuthContext();
-    const role = user?.role;
     const ticketId = row.original.id;
-    const path = role === 'admin'
-        ? `/dashboard/admin/tickets/${ticketId}`
-        : `/dashboard/tickets/${ticketId}`;
     return (
-        <Link to={path}>
+        <Link to={`/dashboard/tickets/${ticketId}`}>
             <Button variant="primary" size="sm">
                 <i className="mdi mdi-eye me-1"></i> View
             </Button>

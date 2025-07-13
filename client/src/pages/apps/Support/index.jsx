@@ -1,9 +1,9 @@
 import { Row, Col, Card, Button } from 'react-bootstrap';
 import { EnquiriesTable, PageBreadcrumb } from '@/components';
-import { columns, sizePerPageList } from './ColumnsSet';
+import { columns, sizePerPageList } from '../../dashboard/Support/ColumnsSet';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import useGetEnquiries from './useGetEnquiries';
+import useGetEnquiries from '../../dashboard/Support/useGetEnquiries';
 
 const Support = () => {
 	const [enquiries, setEnquiries] = useState([]);
