@@ -194,14 +194,14 @@ const UserTickets = () => {
                                         <tr key={ticket.id}>
                                             <td>#{ticket.id}</td>
                                             <td className="text-truncate" style={{ maxWidth: '300px' }}>
-                                                <Link to={`/dashboard/tickets/${ticket.id}`}>
+                                                <Link to={`/dashboard/admin/tickets/${ticket.id}`}>
                                                     {ticket.subject}
                                                 </Link>
                                             </td>
                                             <td>{getStatusBadge(ticket.status)}</td>
                                             <td>{ticket.created_at}</td>
                                             <td>
-                                                <Link to={`/dashboard/tickets/${ticket.id}`} className="btn btn-sm btn-primary">
+                                                <Link to={`/dashboard/admin/tickets/${ticket.id}`} className="btn btn-sm btn-primary">
                                                     <i className="mdi mdi-eye me-1"></i>
                                                     View
                                                 </Link>

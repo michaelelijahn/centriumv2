@@ -37,7 +37,7 @@ const ActionColumn = (props) => {
     const ticketId = row.original.id;
     const path = role === 'admin'
         ? `/dashboard/admin/tickets/${ticketId}`
-        : `/dashboard/tickets/${ticketId}`;
+        : `/dashboard/support/${ticketId}`;
     return (
         <Link to={path}>
             <Button variant="primary" size="sm">
