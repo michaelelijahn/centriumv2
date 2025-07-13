@@ -4,7 +4,7 @@ import { Row, Col, Card, Button, Badge, Form, Spinner, Alert } from 'react-boots
 import { authApi, useNotificationContext, useAuthContext } from '@/common';
 import TicketAttachments from '../TicketAttachments';
 
-const TicketDetail = ({ adminView = false }) => {
+const TicketDetail = () => {
     const { ticketId } = useParams();
     const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
@@ -16,11 +16,8 @@ const TicketDetail = ({ adminView = false }) => {
     const { showNotification } = useNotificationContext();
     const { user: currentUser } = useAuthContext();
 
-    useEffect(() => {
-        if (adminView && currentUser?.role !== 'admin') {
-            navigate('/dashboard/support');
-        }
-    }, [adminView, currentUser, navigate]);
+    // Auto-detect admin view based on user role
+    const adminView = currentUser?.role === 'admin';
 
     useEffect(() => {
         fetchTicketDetails();
@@ -30,9 +27,11 @@ const TicketDetail = ({ adminView = false }) => {
         setLoading(true);
         setError(null);
         try {
+            console.log(adminView);
             const response = adminView
                 ? await authApi.getAdminTicketById(ticketId)
                 : await authApi.getTicketById(ticketId);
+            console.log(response);
             
             if (response?.data) {
                 setTicket(response.data);
@@ -153,7 +152,7 @@ const TicketDetail = ({ adminView = false }) => {
         }
     };
 
-    const adminListPath = '/dashboard/admin/tickets';
+    const adminListPath = '/dashboard/tickets';
     const customerListPath = '/dashboard/support';
 
     if (loading) {

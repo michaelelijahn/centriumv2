@@ -23,14 +23,14 @@ const {
     passwordResetLimiter
 } = require('../middleware/rateLimiting');
 
-router.use(authLimiter);
+// router.use(authLimiter);
 
-router.post('/register', registrationLimiter, validateRegister, register);
-router.post('/login', validateLogin, login);
+router.post('/register', register);
+router.post('/login', login);
 router.post('/refresh', refreshToken);
-router.post('/request-reset-password', passwordResetLimiter, validatePasswordReset, requestPasswordReset);
-router.post('/verify-code', validateVerifyCode, verifyCode);
-router.post('/reset-password', validateNewPassword, resetPassword);
+router.post('/request-reset-password', requestPasswordReset);
+router.post('/verify-code', verifyCode);
+router.post('/reset-password', resetPassword);
 router.post('/logout', authenticateToken, logout);
 
 module.exports = router;

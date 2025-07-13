@@ -69,8 +69,10 @@ const getFilteredTicketsQuery = (userRole, userId, filters = {}) => {
     baseQuery += ` ORDER BY t.${sortColumn} ${sortOrder}`;
     
     if (filters.limit && filters.offset !== undefined) {
-        baseQuery += ' LIMIT ? OFFSET ?';
-        params.push(parseInt(filters.limit), parseInt(filters.offset));
+        const validLimit = Math.max(1, Math.min(100, parseInt(filters.limit) || 10));
+        const validOffset = Math.max(0, parseInt(filters.offset) || 0);
+        // Use string interpolation for LIMIT to avoid MAMP MySQL compatibility issues
+        baseQuery += ` LIMIT ${validOffset}, ${validLimit}`;
     }
     
     return { query: baseQuery, params };
@@ -120,8 +122,10 @@ const getFilteredUsersQuery = (userRole, filters = {}) => {
     baseQuery += ` ORDER BY ${sortColumn} ${sortOrder}`;
     
     if (filters.limit && filters.offset !== undefined) {
-        baseQuery += ' LIMIT ? OFFSET ?';
-        params.push(parseInt(filters.limit), parseInt(filters.offset));
+        const validLimit = Math.max(1, Math.min(100, parseInt(filters.limit) || 10));
+        const validOffset = Math.max(0, parseInt(filters.offset) || 0);
+        // Use string interpolation for LIMIT to avoid MAMP MySQL compatibility issues
+        baseQuery += ` LIMIT ${validOffset}, ${validLimit}`;
     }
     
     return { query: baseQuery, params };

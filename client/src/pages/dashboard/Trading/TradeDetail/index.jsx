@@ -52,7 +52,7 @@ const TradeDetail = () => {
             <Alert variant="danger" className="mt-4">
                 <Alert.Heading>Error</Alert.Heading>
                 <p>{error}</p>
-                <Button variant="outline-danger" onClick={() => navigate('/dashboard/trading')}>Back to Trading List</Button>
+                <Button variant="outline-danger" onClick={() => navigate('/dashboard/trades')}>Back to Trading List</Button>
             </Alert>
         );
     }
@@ -61,7 +61,7 @@ const TradeDetail = () => {
         return (
             <Alert variant="warning" className="mt-4">
                 <Alert.Heading>Trade Not Found</Alert.Heading>
-                <Button variant="outline-warning" onClick={() => navigate('/dashboard/trading')}>Back to Trading List</Button>
+                <Button variant="outline-warning" onClick={() => navigate('/dashboard/trades')}>Back to Trading List</Button>
             </Alert>
         );
     }
@@ -74,7 +74,7 @@ const TradeDetail = () => {
                     <Card>
                         <Card.Header className="d-flex justify-content-between align-items-center">
                             <h4 className="mb-0">Trade Details</h4>
-                            <Button variant="secondary" size="sm" onClick={() => navigate('/dashboard/trading')}>
+                            <Button variant="secondary" size="sm" onClick={() => navigate('/dashboard/trades')}>
                                 <i className="mdi mdi-arrow-left me-1"></i> Back to Trading List
                             </Button>
                         </Card.Header>

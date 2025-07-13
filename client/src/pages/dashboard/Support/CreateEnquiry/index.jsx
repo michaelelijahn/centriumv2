@@ -31,7 +31,7 @@ const CreateEnquiry = ({ adminView = false }) => {
 
     const handleCancel = () => {
         setFiles([]);
-        const cancelPath = isAdminView ? '/dashboard/admin/tickets' : '/dashboard/support';
+        	const cancelPath = isAdminView ? '/dashboard/tickets' : '/dashboard/support';
         navigate(cancelPath);
     };
 
@@ -103,7 +103,7 @@ const CreateEnquiry = ({ adminView = false }) => {
             
             setTimeout(() => {
                 setShowSuccess(false);
-                const successPath = isAdminView ? '/dashboard/admin/tickets' : '/dashboard/support';
+                const successPath = isAdminView ? '/dashboard/tickets' : '/dashboard/support';
                 navigate(successPath);
             }, 2000);
         } catch (error) {

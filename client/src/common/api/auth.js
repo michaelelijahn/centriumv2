@@ -47,51 +47,51 @@ function AuthService() {
             return HttpClient.post(`/support/tickets/${ticketId}/comment`, { comment });
         },
         
-        // Admin user management
+        // Admin user management - updated to match backend routes
         getAllUsers: (params = {}) => {
             const queryString = new URLSearchParams(params).toString();
-            return HttpClient.get(`/admin/users${queryString ? '?' + queryString : ''}`);
+            return HttpClient.get(`/users${queryString ? '?' + queryString : ''}`);
         },
         getUserById: (userId) => {
-            return HttpClient.get(`/admin/users/${userId}`);
+            return HttpClient.get(`/users/${userId}`);
         },
         getUserTickets: (userId, params = {}) => {
             const queryString = new URLSearchParams(params).toString();
-            return HttpClient.get(`/admin/users/${userId}/tickets${queryString ? '?' + queryString : ''}`);
+            return HttpClient.get(`/users/${userId}/tickets${queryString ? '?' + queryString : ''}`);
         },
         updateUser: (userId, userData) => {
-            return HttpClient.patch(`/admin/users/${userId}`, userData);
+            return HttpClient.patch(`/users/${userId}`, userData);
         },
         
         // Admin ticket management
         getAllTickets: (params = {}) => {
             const queryString = new URLSearchParams(params).toString();
-            console.log("queryString: ", `/admin/tickets${queryString ? '?' + queryString : ''}`)
-            return HttpClient.get(`/admin/tickets${queryString ? '?' + queryString : ''}`);
+            console.log("queryString: ", `/tickets${queryString ? '?' + queryString : ''}`)
+            return HttpClient.get(`/tickets${queryString ? '?' + queryString : ''}`);
         },
         getAdminTicketById: (ticketId) => {
-            return HttpClient.get(`/admin/tickets/${ticketId}`);
+            return HttpClient.get(`/tickets/${ticketId}`);
         },
         updateTicketStatus: (ticketId, status) => {
-            return HttpClient.post(`/admin/tickets/${ticketId}/status`, { status });
+            return HttpClient.post(`/tickets/${ticketId}/status`, { status });
         },
         submitTicketReply: (ticketId, comment) => {
-            return HttpClient.post(`/admin/tickets/${ticketId}/comment`, { comment });
+            return HttpClient.post(`/tickets/${ticketId}/comment`, { comment });
         },
         
         // Trading management
         getTrades: (params = {}) => {
             const queryString = new URLSearchParams(params).toString();
-            return HttpClient.get(`/trading/trades${queryString ? '?' + queryString : ''}`);
+            return HttpClient.get(`/trades${queryString ? '?' + queryString : ''}`);
         },
         getTradeById: (tradeId) => {
-            return HttpClient.get(`/trading/trades/${tradeId}`);
+            return HttpClient.get(`/trades/${tradeId}`);
         },
         getTradeFilterOptions: () => {
-            return HttpClient.get('/trading/filter-options');
+            return HttpClient.get('/trades/filter-options');
         },
         uploadTradesCsv: (formData) => {
-            return HttpClient.post('/trading/upload-csv', formData);
+            return HttpClient.post('/trades/upload-csv', formData);
         }
     };
 }

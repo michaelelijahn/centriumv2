@@ -83,31 +83,23 @@ const AppRoutes = () => (
                 {/* Shared routes for both roles */}
                 <Route path="ecommerce" element={<Ecommerce />} />
                 <Route path="tickets/:ticketId" element={
+                    <AuthGuard>
                     <TicketDetail />
+                    </AuthGuard>
                 } />
                 
                 {/* Admin-only routes */}
-                <Route path="admin" element={
+                <Route path="tickets" element={
                     <RoleGuard allowedRoles={['admin']}>
                         <AdminDashboard />
                     </RoleGuard>
                 } />
-                <Route path="admin/tickets" element={
-                    <RoleGuard allowedRoles={['admin']}>
-                        <Support adminView={true} />
-                    </RoleGuard>
-                } />
-                <Route path="admin/tickets/new" element={
-                    <RoleGuard allowedRoles={['admin']}>
-                        <CreateEnquiry adminView={true} />
-                    </RoleGuard>
-                } />
-                <Route path="trading" element={
+                <Route path="trades" element={
                     <RoleGuard allowedRoles={['admin']}>
                         <TradingList />
                     </RoleGuard>
                 } />
-                <Route path="trading/:tradeId" element={
+                <Route path="trades/:tradeId" element={
                     <RoleGuard allowedRoles={['admin']}>
                         <TradeDetail />
                     </RoleGuard>
@@ -122,16 +114,11 @@ const AppRoutes = () => (
                         <UserDetails />
                     </RoleGuard>
                 } />
-                <Route path="users/:userId/tickets" element={
-                    <RoleGuard allowedRoles={['admin']}>
-                        <UserTickets />
-                    </RoleGuard>
-                } />
                 
                 {/* Customer-only routes */}
                 <Route path="support" element={
                     <RoleGuard allowedRoles={['customer']}>
-                        <Support adminView={false} />
+                        <Support />
                     </RoleGuard>
                 } />
                 <Route path="support/new-enquiry" element={

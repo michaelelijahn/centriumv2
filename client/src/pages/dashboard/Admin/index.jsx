@@ -392,7 +392,7 @@ const AdminDashboard = () => {
                                                         <tr key={ticket.id}>
                                                             <td>#{ticket.id}</td>
                                                             <td>
-                                                                <Link to={`/admin/tickets/${ticket.id}`}>
+                                                                <Link to={`/dashboard/tickets/${ticket.id}`}>
                                                                     {ticket.subject}
                                                                 </Link>
                                                             </td>
@@ -407,7 +407,7 @@ const AdminDashboard = () => {
                                                             <td>{ticket.created_at}</td>
                                                             <td>
                                                                 <Link 
-                                                                    to={`/admin/tickets/${ticket.id}`} 
+                                                                    to={`/dashboard/tickets/${ticket.id}`} 
                                                                     className="btn btn-sm btn-primary"
                                                                 >
                                                                     <i className="mdi mdi-eye me-1"></i>

@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
 const errorHandler = require('./middleware/errorHandler');
-const { generalLimiter } = require('./middleware/rateLimiting');
 
 // CRITICAL: Initialize dependency injection container FIRST, before importing routes
 // This ensures container is available when controllers are instantiated during route imports
@@ -14,8 +13,9 @@ const container = require('./src/container');
 const authRoutes = require('./routes/auth');
 const bankRoutes = require('./routes/bank');
 const supportRoutes = require('./routes/support');
-const adminRoutes = require('./routes/admin');
-const tradingRoutes = require('./routes/trading');
+const tradeRoutes = require('./routes/trade');
+const ticketsRoutes = require('./routes/adminTicket');
+const usersRoutes = require('./routes/user');
 
 const app = express();
 
@@ -46,9 +46,6 @@ app.use(helmet({
   }
 }));
 
-// General rate limiting for all routes
-app.use(generalLimiter);
-
 // Updated CORS configuration to accept requests from localhost during development
 app.use(cors({
   origin: ['http://localhost:5173', 'https://crm.centrium.id'],
@@ -63,10 +60,9 @@ app.use(cors({
 app.use('/auth', express.json(), authRoutes);
 app.use('/bank', express.json(), bankRoutes);
 app.use('/support', express.json(), supportRoutes);
-app.use('/admin', express.json(), adminRoutes);
-
-// Trading routes need special handling - apply JSON parsing selectively
-app.use('/trading', tradingRoutes);
+app.use('/tickets', express.json(), ticketsRoutes);
+app.use('/trades', express.json(), tradeRoutes);
+app.use('/users', express.json(), usersRoutes);
 
 // Test route
 app.get('/test', (req, res) => {
@@ -103,7 +99,6 @@ app.use(errorHandler);
 const PORT = 3000;
 const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('New Service-Oriented Architecture initialized successfully');
 });
 
 // Graceful shutdown handling

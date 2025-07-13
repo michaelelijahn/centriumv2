@@ -147,7 +147,7 @@ function HttpClient() {
             // Direct axios call to avoid circular dependencies
             const response = await axios({
                 method: 'post',
-                url: `${import.meta.env.VITE_API_URL}/auth/refresh`,
+                url: `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/refresh`,
                 data: { refresh_token: refreshToken },
                 headers: { 'Content-Type': 'application/json' },
                 withCredentials: false
@@ -206,7 +206,7 @@ function HttpClient() {
     };
 
     const _httpClient = axios.create({
-        baseURL: import.meta.env.VITE_API_URL,
+        baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
         timeout: 30000,
         withCredentials: false // Try without credentials
     });

@@ -483,7 +483,7 @@ const TradingList = () => {
                                                     </td>
                                                     <td>{trade.counterparty || '-'}</td>
                                                     <td>
-                                                        <Link to={`/dashboard/trading/${trade.trade_id}`}>
+                                                        <Link to={`/dashboard/trades/${trade.trade_id}`}>
                                                             <Button size="sm" variant="primary">View</Button>
                                                         </Link>
                                                     </td>
