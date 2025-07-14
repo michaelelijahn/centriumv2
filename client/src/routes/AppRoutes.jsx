@@ -57,10 +57,8 @@ const RootRedirect = () => {
     if (!isAuthenticated) {
         return <Navigate to="/account/login" replace />;
     }
-    
-    // Redirect to appropriate dashboard based on role
-    const defaultRoute = user?.role === 'admin' ? '/dashboard/admin' : '/dashboard/ecommerce';
-    return <Navigate to={defaultRoute} replace />;
+
+    return <Navigate to={'/dashboard/ecommerce'} replace />;
 };
 
 const AppRoutes = () => (

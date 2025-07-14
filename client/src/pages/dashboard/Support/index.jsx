@@ -7,14 +7,13 @@ import useGetEnquiries from './useGetEnquiries';
 
 const Support = () => {
 	const [enquiries, setEnquiries] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const { getEnquiries } = useGetEnquiries();
 	
 	useEffect(() => {
 		const fetchEnquiries = async () => {
 			try {
 				setLoading(true);
-					// Customer gets only their own tickets
 				const data = await getEnquiries();
 				setEnquiries(data);
 			} catch (error) {

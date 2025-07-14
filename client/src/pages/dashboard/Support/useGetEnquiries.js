@@ -1,18 +1,16 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { authApi } from '@/common';
 
 const useGetEnquiries = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const getEnquiries = async () => {
+    const getEnquiries = useCallback(async () => {
         setLoading(true);
         setError(null);
         
         try {
-            console.log('Fetching user enquiries');
             const response = await authApi.getEnquiries();
-            console.log('Enquiries response:', response);
             
             if (response?.success && response.data) {
                 return response.data;
@@ -30,7 +28,7 @@ const useGetEnquiries = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []); // Empty dependency array since this function doesn't depend on any props or state
 
     return {
         loading,
