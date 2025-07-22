@@ -83,11 +83,13 @@ export { EcommerceDashboard };
 
 import React, { useState } from 'react';
 import { Row, Col, Card, Form, Button, InputGroup, Badge, ProgressBar } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/common/context';
 import { PageBreadcrumb } from '@/components';
 
 const SimpleDashboard = () => {
 	const { user } = useAuthContext();
+	const navigate = useNavigate();
 	const [globalSearch, setGlobalSearch] = useState('');
 	const [activeTab, setActiveTab] = useState('live'); // 'live' or 'demo'
 
@@ -100,6 +102,24 @@ const SimpleDashboard = () => {
 		pendingLive: 0,
 		pendingDemo: 0,
 		completionRate: 0
+	};
+
+	const handleLiveAccountRequest = () => {
+		navigate('/dashboard/live-account-request');
+	};
+
+	const handleDemoAccountRequest = () => {
+		console.log('Demo account request clicked');
+		// Add demo account request logic here
+	};
+
+	const handleGetSupport = () => {
+		navigate('/dashboard/support');
+	};
+
+	const handleLearningCenter = () => {
+		console.log('Learning center clicked');
+		// Add learning center logic here
 	};
 
 	const QuickActionCard = ({ icon, title, description, buttonText, variant = "primary", onClick }) => (
@@ -117,7 +137,7 @@ const SimpleDashboard = () => {
 		</Card>
 	);
 
-	const AccountTabContent = ({ type, searchPlaceholder }) => (
+	const AccountTabContent = ({ type, searchPlaceholder, onNewRequest, onLearnMore }) => (
 		<div className="px-3 pt-1 pb-3">
 			<Row className="align-items-center mb-2">
 				<Col md={6}>
@@ -139,7 +159,7 @@ const SimpleDashboard = () => {
 						<i className="mdi mdi-filter-variant me-1"></i>
 						Filters
 					</Button>
-					<Button variant="primary" size="sm">
+					<Button variant="primary" size="sm" onClick={onNewRequest}>
 						<i className="mdi mdi-plus me-1"></i>
 						New Request
 					</Button>
@@ -158,11 +178,15 @@ const SimpleDashboard = () => {
 						? 'Your live trading account requests will appear here once submitted.' 
 						: 'Demo account requests for practice trading will be shown here.'}
 				</p>
-				<Button variant="outline-primary" className="me-2" size="sm">
+				<Button variant="outline-primary" className="me-2" size="sm" onClick={onLearnMore}>
 					<i className="mdi mdi-information-outline me-1"></i>
 					Learn More
 				</Button>
-				<Button variant="primary" size="sm">
+				<Button 
+					variant="primary" 
+					size="sm"
+					onClick={onNewRequest}
+				>
 					<i className="mdi mdi-plus me-1"></i>
 					Request {type === 'live' ? 'Live' : 'Demo'} Account
 				</Button>
@@ -199,6 +223,7 @@ const SimpleDashboard = () => {
 						description="Start trading with real money"
 						buttonText="Get Started"
 						variant="success"
+						onClick={handleLiveAccountRequest}
 					/>
 				</Col>
 				<Col sm={6} lg={3}>
@@ -208,6 +233,7 @@ const SimpleDashboard = () => {
 						description="Practice with virtual funds"
 						buttonText="Start Demo"
 						variant="info"
+						onClick={handleDemoAccountRequest}
 					/>
 				</Col>
 				<Col sm={6} lg={3}>
@@ -217,6 +243,7 @@ const SimpleDashboard = () => {
 						description="Contact our support team"
 						buttonText="Get Support"
 						variant="warning"
+						onClick={handleGetSupport}
 					/>
 				</Col>
 				<Col sm={6} lg={3}>
@@ -226,6 +253,7 @@ const SimpleDashboard = () => {
 						description="Trading guides and tutorials"
 						buttonText="Learn More"
 						variant="primary"
+						onClick={handleLearningCenter}
 					/>
 				</Col>
 			</Row>
@@ -263,12 +291,16 @@ const SimpleDashboard = () => {
 								<AccountTabContent 
 									type="live" 
 									searchPlaceholder="Search live account requests..."
+									onNewRequest={handleLiveAccountRequest}
+									onLearnMore={() => console.log('Learn more clicked')}
 								/>
 							)}
 							{activeTab === 'demo' && (
 								<AccountTabContent 
 									type="demo" 
 									searchPlaceholder="Search demo account requests..."
+									onNewRequest={handleDemoAccountRequest}
+									onLearnMore={() => console.log('Learn more clicked')}
 								/>
 							)}
 						</Card.Body>

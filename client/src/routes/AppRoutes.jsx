@@ -21,6 +21,7 @@ const UserTickets = lazy(() => import('@/pages/dashboard/Users/UserTickets'));
 const Support = lazy(() => import('@/pages/dashboard/Support'));
 const CreateEnquiry = lazy(() => import('@/pages/dashboard/Support/CreateEnquiry'));
 const TicketDetail = lazy(() => import('@/components/Ticket/TicketDetail'));
+const LiveAccountRequest = lazy(() => import('@/pages/dashboard/LiveAccountRequest'));
 
 // Authentication Guard Component
 const AuthGuard = ({ children }) => {
@@ -78,13 +79,14 @@ const AppRoutes = () => (
                     <VerticalLayout />
                 </AuthGuard>
             }>
-                {/* Shared routes for both roles */}
-                <Route path="ecommerce" element={<Ecommerce />} />
-                <Route path="tickets/:ticketId" element={
-                    <AuthGuard>
-                    <TicketDetail />
-                    </AuthGuard>
-                } />
+                				{/* Shared routes for both roles */}
+				<Route path="ecommerce" element={<Ecommerce />} />
+				<Route path="live-account-request" element={<LiveAccountRequest />} />
+				<Route path="tickets/:ticketId" element={
+					<AuthGuard>
+					<TicketDetail />
+					</AuthGuard>
+				} />
                 
                 {/* Admin-only routes */}
                 <Route path="tickets" element={
