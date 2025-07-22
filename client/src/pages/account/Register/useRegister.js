@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/common/api';
 import { useAuthContext, useNotificationContext } from '@/common/context';
 import createPasswordSchema, { usePasswordValidation } from '@/utils/passwordValidation';
@@ -7,6 +8,7 @@ import createPasswordSchema, { usePasswordValidation } from '@/utils/passwordVal
 export default function useRegister() {
     const [loading, setLoading] = useState(false);
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { isAuthenticated } = useAuthContext();
     const { showNotification } = useNotificationContext();
     const { validatePassword } = usePasswordValidation();
@@ -28,6 +30,15 @@ export default function useRegister() {
                 ip_address,
                 device_info,
             });
+            
+            // Show success message and redirect to login
+            showNotification({
+                message: 'Registration successful! Please log in with your credentials.',
+                type: 'success',
+            });
+            
+            // Navigate to login page after successful registration
+            navigate('/account/login');
             
             return { success: true, data: res.data };
         } catch (e) {

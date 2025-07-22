@@ -5,8 +5,8 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { CheckInput, Form, PasswordInput, TextInput, PageBreadcrumb } from '@/components';
 import AccountWrapper from '../AccountWrapper';
 import useRegister from './useRegister';
-import useBankRegister from './useBankRegister';
-import { decryptData, deriveKey, encryptData, generateSalt } from '@/utils/encryption';
+// import useBankRegister from './useBankRegister';  // COMMENTED OUT: Banking step removed
+// import { decryptData, deriveKey, encryptData, generateSalt } from '@/utils/encryption';  // COMMENTED OUT: Banking step removed
 import { useIpAddress } from '@/utils/useIpAddress';
 
 const BottomLink = () => {
@@ -28,9 +28,9 @@ const BottomLink = () => {
 export default function Register() {
     const { t } = useTranslation();
     const { loading: userLoading, register, isAuthenticated, schema, validatePassword } = useRegister();
-    const { loading: bankLoading, registerBank, bankSchema } = useBankRegister();
+    // const { loading: bankLoading, registerBank, bankSchema } = useBankRegister();  // COMMENTED OUT: Banking step removed
     const { ipAddress, loading: ipLoading } = useIpAddress();
-    const [currentStep, setCurrentStep] = useState(1);
+    // const [currentStep, setCurrentStep] = useState(1);  // COMMENTED OUT: Banking step removed
     const [passwordFeedback, setPasswordFeedback] = useState('');
     
     const [personalData, setPersonalData] = useState({
@@ -43,14 +43,15 @@ export default function Register() {
         checkbox: false
     });
    
-    const [bankData, setBankData] = useState({
-        bank_name: '',
-        bank_branch: '',
-        bank_address: '',
-        swift_code: '',
-        account_number: '',
-        account_holder_name: ''
-    });
+    // COMMENTED OUT: Banking step removed
+    // const [bankData, setBankData] = useState({
+    //     bank_name: '',
+    //     bank_branch: '',
+    //     bank_address: '',
+    //     swift_code: '',
+    //     account_number: '',
+    //     account_holder_name: ''
+    // });
 
     const handlePersonalChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -65,15 +66,17 @@ export default function Register() {
         }
     };
 
-    const handleBankChange = (e) => {
-        const { name, value } = e.target;
-        setBankData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    // COMMENTED OUT: Banking step removed
+    // const handleBankChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setBankData(prev => ({
+    //         ...prev,
+    //         [name]: value
+    //     }));
+    // };
     
-    const handleNextStep = async (data) => {
+    // MODIFIED: Complete registration in one step instead of moving to step 2
+    const handleRegistration = async (data) => {
         try {
             const { isValid, error } = validatePassword(data.password1);
 
@@ -83,54 +86,72 @@ export default function Register() {
             }
 
             setPasswordFeedback('');
-            setPersonalData(data);
-            setCurrentStep(2);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-
-    const handleBankSubmit = async (data) => {
-        try {
-            const salt = generateSalt();
-
+            
+            // Complete registration immediately
             const userResult = await register({
                 data: {
-                    first_name: personalData.first_name,
-                    last_name: personalData.last_name,
-                    email: personalData.email,
-                    phone: personalData.phone,
-                    password: personalData.password1,
-                    salt,
+                    first_name: data.first_name,
+                    last_name: data.last_name,
+                    email: data.email,
+                    phone: data.phone,
+                    password: data.password1,
+                    salt: Math.random().toString(36).substring(2, 15), // Simple salt generation
                     ip_address: ipAddress,
                     device_info: navigator.userAgent,
                 }
             });
 
-            if (userResult?.success && userResult?.data?.id) {
-                const encryptionKey = await deriveKey(salt, userResult.data.id);
-                const encryptedAccountNumber = await encryptData(data.account_number, encryptionKey);
-
-                const bankResult = await registerBank({
-                    data: {
-                        user_id: userResult.data.id,
-                        bank_name: data.bank_name,
-                        bank_branch: data.bank_branch,
-                        bank_address: data.bank_address,
-                        swift_code: data.swift_code || '',
-                        account_number: encryptedAccountNumber,
-                        account_holder_name: data.account_holder_name
-                    }
-                });
-
-                if (bankResult?.success) {
-                    console.log("Registration complete!");
-                }
+            if (userResult?.success) {
+                console.log("Registration complete!");
+                // Navigation will be handled by useRegister hook
             }
         } catch (error) {
             console.error('Error in registration:', error);
         }
     };
+
+    // COMMENTED OUT: Banking step removed
+    // const handleBankSubmit = async (data) => {
+    //     try {
+    //         const salt = generateSalt();
+
+    //         const userResult = await register({
+    //             data: {
+    //                 first_name: personalData.first_name,
+    //                 last_name: personalData.last_name,
+    //                 email: personalData.email,
+    //                 phone: personalData.phone,
+    //                 password: personalData.password1,
+    //                 salt,
+    //                 ip_address: ipAddress,
+    //                 device_info: navigator.userAgent,
+    //             }
+    //         });
+
+    //         if (userResult?.success && userResult?.data?.id) {
+    //             const encryptionKey = await deriveKey(salt, userResult.data.id);
+    //             const encryptedAccountNumber = await encryptData(data.account_number, encryptionKey);
+
+    //             const bankResult = await registerBank({
+    //                 data: {
+    //                     user_id: userResult.data.id,
+    //                     bank_name: data.bank_name,
+    //                     bank_branch: data.bank_branch,
+    //                     bank_address: data.bank_address,
+    //                     swift_code: data.swift_code || '',
+    //                     account_number: encryptedAccountNumber,
+    //                     account_holder_name: data.account_holder_name
+    //                 }
+    //             });
+
+    //             if (bankResult?.success) {
+    //                 console.log("Registration complete!");
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error('Error in registration:', error);
+    //     }
+    // };
 
     if (isAuthenticated) {
         return <Navigate to="/" replace />;
@@ -138,17 +159,17 @@ export default function Register() {
 
     return (
         <>
-            <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-                <PageBreadcrumb title="Register" />
-                <AccountWrapper bottomLinks={<BottomLink />}>
-                    <div className="text-center w-75 m-auto">
-                        <h4 className="text-dark-50 text-center mt-0 fw-bold">{t('Free Sign Up')}</h4>
-                        <p className="text-muted mb-4">
-                            {t("Don't have an account? Create your account, it takes less than a minute")}
-                        </p>
-                    </div>
+            {/* MODIFIED: Removed currentStep conditional rendering - single step registration */}
+            <PageBreadcrumb title="Register" />
+            <AccountWrapper bottomLinks={<BottomLink />}>
+                <div className="text-center w-75 m-auto">
+                    <h4 className="text-dark-50 text-center mt-0 fw-bold">{t('Free Sign Up')}</h4>
+                    <p className="text-muted mb-4">
+                        {t("Don't have an account? Create your account, it takes less than a minute")}
+                    </p>
+                </div>
 
-                    <Form onSubmit={handleNextStep} schema={schema}>
+                <Form onSubmit={handleRegistration} schema={schema}>
                         <TextInput
                             label={t('First name')}
                             type="text"
@@ -225,13 +246,14 @@ export default function Register() {
 
                         <div className="mb-3 text-center">
                             <Button variant="primary" type="submit" disabled={userLoading}>
-                                {t('Next')}
+                                {t('Complete Registration')}
                             </Button>
                         </div>
                     </Form>
                 </AccountWrapper>
-            </div>
 
+            {/* COMMENTED OUT: Banking step removed */}
+            {/* 
             <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
                 <PageBreadcrumb title="Bank Details" />
                 <AccountWrapper>
@@ -317,6 +339,7 @@ export default function Register() {
                     </Form>
                 </AccountWrapper>
             </div>
+            */}
         </>
     );
 }
