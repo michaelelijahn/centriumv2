@@ -264,23 +264,48 @@ const TicketDetail = () => {
                         {ticket.responses && ticket.responses.length > 0 && (
                             <div className="mt-4">
                                 <h5>Responses</h5>
-                                {ticket.responses.map((response, index) => (
-                                    <div 
-                                        key={response.id || index} 
-                                        className={`p-3 rounded mb-3 ${
-                                            (adminView && response.user === 'Support Agent') || 
-                                            (!adminView && response.user === 'You')
-                                                ? 'bg-light border-start border-5 border-primary'
-                                                : 'bg-light'
-                                        }`}
-                                    >
-                                        <div className="d-flex justify-content-between">
-                                            <strong>{response.user}</strong>
-                                            <small>{response.date}</small>
+                                {ticket.responses.map((response, index) => {
+                                    // Determine if this is an admin response
+                                    const isAdminResponse = response.user === 'Support Agent' || 
+                                                          (adminView && response.user !== 'You' && response.user !== currentUser?.name);
+                                    const isCustomerResponse = response.user === 'You' || 
+                                                             (!adminView && response.user !== 'Support Agent');
+                                    
+                                    return (
+                                        <div 
+                                            key={response.id || index} 
+                                            className={`p-3 rounded mb-3 position-relative ${
+                                                isAdminResponse 
+                                                    ? 'bg-primary bg-opacity-10 border-start border-4 border-primary'
+                                                    : isCustomerResponse 
+                                                        ? 'bg-success bg-opacity-10 border-start border-4 border-success'
+                                                        : 'bg-light border-start border-4 border-secondary'
+                                            }`}
+                                        >
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <div className="d-flex align-items-center">
+                                                    <strong className={`${
+                                                        isAdminResponse 
+                                                            ? 'text-primary' 
+                                                            : isCustomerResponse 
+                                                                ? 'text-success' 
+                                                                : 'text-dark'
+                                                    }`}>
+                                                        {response.user}
+                                                    </strong>
+                                                    {isAdminResponse && (
+                                                        <span className="badge bg-primary ms-2 small">Admin</span>
+                                                    )}
+                                                    {isCustomerResponse && (
+                                                        <span className="badge bg-success ms-2 small">Customer</span>
+                                                    )}
+                                                </div>
+                                                <small className="text-muted">{response.date}</small>
+                                            </div>
+                                            <p className="mb-0 mt-2">{response.message}</p>
                                         </div>
-                                        <p className="mb-0 mt-2">{response.message}</p>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                         

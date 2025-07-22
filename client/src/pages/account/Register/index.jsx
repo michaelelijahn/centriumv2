@@ -117,7 +117,7 @@ export default function Register() {
                         bank_name: data.bank_name,
                         bank_branch: data.bank_branch,
                         bank_address: data.bank_address,
-                        swift_code: data.swift_code,
+                        swift_code: data.swift_code || '',
                         account_number: encryptedAccountNumber,
                         account_holder_name: data.account_holder_name
                     }
