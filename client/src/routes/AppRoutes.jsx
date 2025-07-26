@@ -23,6 +23,13 @@ const CreateEnquiry = lazy(() => import('@/pages/dashboard/Support/CreateEnquiry
 const TicketDetail = lazy(() => import('@/components/Ticket/TicketDetail'));
 const LiveAccountRequest = lazy(() => import('@/pages/dashboard/LiveAccountRequest'));
 
+// KYC Form components
+const ForeignCompanyForm = lazy(() => import('@/pages/dashboard/KYCForms/ForeignCompanyForm'));
+const ForeignPersonForm = lazy(() => import('@/pages/dashboard/KYCForms/ForeignPersonForm'));
+const IndonesianCompanyForm = lazy(() => import('@/pages/dashboard/KYCForms/IndonesianCompanyForm'));
+const IndonesianPersonForm = lazy(() => import('@/pages/dashboard/KYCForms/IndonesianPersonForm'));
+const RegulatedCompanyForm = lazy(() => import('@/pages/dashboard/KYCForms/RegulatedCompanyForm'));
+
 // Authentication Guard Component
 const AuthGuard = ({ children }) => {
     const { isAuthenticated, user } = useAuthContext();
@@ -79,9 +86,17 @@ const AppRoutes = () => (
                     <VerticalLayout />
                 </AuthGuard>
             }>
-                				{/* Shared routes for both roles */}
+
 				<Route path="ecommerce" element={<Ecommerce />} />
 				<Route path="live-account-request" element={<LiveAccountRequest />} />
+				
+				{/* KYC Form routes */}
+				<Route path="kyc/foreign-company" element={<ForeignCompanyForm />} />
+				<Route path="kyc/foreign-person" element={<ForeignPersonForm />} />
+				<Route path="kyc/indonesian-company" element={<IndonesianCompanyForm />} />
+				<Route path="kyc/indonesian-person" element={<IndonesianPersonForm />} />
+				<Route path="kyc/regulated-company" element={<RegulatedCompanyForm />} />
+				
 				<Route path="tickets/:ticketId" element={
 					<AuthGuard>
 					<TicketDetail />

@@ -210,7 +210,6 @@ const TradingList = () => {
     const handleFileUpload = async (file) => {
         setUploading(true);
         try {
-            // Create FormData and append the file with the correct field name
             const formData = new FormData();
             formData.append('file', file);
             
@@ -219,7 +218,7 @@ const TradingList = () => {
                 message: 'Trades uploaded successfully',
                 type: 'success'
             });
-            fetchTrades(true); // Refresh data after upload
+            fetchTrades(true);
         } catch (error) {
             showNotification({
                 message: `Upload failed: ${error.toString()}`,
@@ -243,7 +242,6 @@ const TradingList = () => {
         }).format(num);
     };
 
-    // Calculate display range with bounds checking
     const safePage = Math.max(1, pagination.page);
     const safeLimit = Math.max(1, pagination.limit);
     const safeTotal = Math.max(0, pagination.total);

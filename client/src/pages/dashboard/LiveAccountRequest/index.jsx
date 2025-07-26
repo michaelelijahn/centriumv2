@@ -60,26 +60,26 @@ const LiveAccountRequest = () => {
 
     const handleAccountTypeClick = (accountType) => {
         console.log(`Selected account type: ${accountType.title}`);
-        // Here you would navigate to the specific registration form
-        // For now, we'll show an alert
-        alert(`You selected: ${accountType.title}\n\nThis would normally navigate to a registration form for ${accountType.title.toLowerCase()}.`);
+        
+        // Navigate to the appropriate KYC form based on account type
+        const routes = {
+            'FOREIGN COMPANY': '/dashboard/kyc/foreign-company',
+            'FOREIGN PERSON': '/dashboard/kyc/foreign-person',
+            'INDONESIAN COMPANY': '/dashboard/kyc/indonesian-company',
+            'INDONESIAN PERSON': '/dashboard/kyc/indonesian-person',
+            'REGULATED COMPANY': '/dashboard/kyc/regulated-company'
+        };
+        
+        const route = routes[accountType.title];
+        if (route) {
+            window.location.href = route;
+        } else {
+            alert(`You selected: ${accountType.title}\n\nForm will be available soon.`);
+        }
     };
 
     return (
         <>
-            {/* Back Button */}
-            <div className="mt-4">
-                <Link to="/dashboard/ecommerce" className="btn btn-link text-muted p-0 text-decoration-none">
-                    <i className="mdi mdi-arrow-left me-1"></i>
-                    Back
-                </Link>
-            </div>
-
-            {/* Simple Header */}
-            <div className="mt-3">
-                <p className="text-muted mb-0 small"><strong>Register your KYC, our registration process will take no more than 10 minutes</strong></p>
-            </div>
-
             {/* Page Title and Breadcrumb */}
             <div className="row">
                 <div className="col-sm-12">
@@ -96,8 +96,12 @@ const LiveAccountRequest = () => {
                 </div>
             </div>
 
+            <div className="mb-2">
+                <p className="text-muted mb-0 large"><strong>Register your KYC, our registration process will take no more than 10 minutes</strong></p>
+            </div>
+
             <Row>
-                {/* Account Categories Section */}
+
                 <Col lg={8}>
                     <Card className="border-0 shadow-sm">
                         <Card.Header className="bg-white border-bottom-0 p-3 pb-1">

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Row, Col, Breadcrumb } from 'react-bootstrap';
 import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
 
 const PageBreadcrumb = ({ subName, title, children }) => {
 	return (
@@ -14,7 +15,9 @@ const PageBreadcrumb = ({ subName, title, children }) => {
 						<div className="page-title-box">
 							<div className="page-title-right">
 								<Breadcrumb listProps={{ className: 'm-0' }}>
-									<Breadcrumb.Item as={'li'}>Home</Breadcrumb.Item>
+									<Breadcrumb.Item as={'li'}>
+										<Link to="/dashboard/ecommerce">Home</Link>
+									</Breadcrumb.Item>
 									<Breadcrumb.Item as={'li'}>{subName}</Breadcrumb.Item>
 									<Breadcrumb.Item as={'li'} active>
 										{title}
