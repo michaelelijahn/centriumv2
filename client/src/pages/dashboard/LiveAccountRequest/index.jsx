@@ -63,11 +63,11 @@ const LiveAccountRequest = () => {
         
         // Navigate to the appropriate KYC form based on account type
         const routes = {
-            'FOREIGN COMPANY': '/dashboard/kyc/foreign-company',
-            'FOREIGN PERSON': '/dashboard/kyc/foreign-person',
-            'INDONESIAN COMPANY': '/dashboard/kyc/indonesian-company',
-            'INDONESIAN PERSON': '/dashboard/kyc/indonesian-person',
-            'REGULATED COMPANY': '/dashboard/kyc/regulated-company'
+            'FOREIGN COMPANY': '/dashboard/accounts/foreign-company',
+            'FOREIGN PERSON': '/dashboard/accounts/foreign-person',
+            'INDONESIAN COMPANY': '/dashboard/accounts/indonesian-company',
+            'INDONESIAN PERSON': '/dashboard/accounts/indonesian-person',
+            'REGULATED COMPANY': '/dashboard/accounts/regulated-company'
         };
         
         const route = routes[accountType.title];
@@ -87,9 +87,8 @@ const LiveAccountRequest = () => {
                         <h4 className="page-title mb-0">Live Account Request</h4>
                         <div className="page-title-right">
                             <ol className="breadcrumb m-0">
-                                <li className="breadcrumb-item"><a href="/dashboard">Home</a></li>
-                                <li className="breadcrumb-item">Trading</li>
-                                <li className="breadcrumb-item active">Live Account Request</li>
+                                <li className="breadcrumb-item"><Link to="/dashboard/home">Home</Link></li>
+                                <li className="breadcrumb-item active">Accounts</li>
                             </ol>
                         </div>
                     </div>

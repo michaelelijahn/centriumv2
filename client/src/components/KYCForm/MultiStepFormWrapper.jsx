@@ -38,7 +38,7 @@ const MultiStepFormWrapper = ({
     };
 
     const handleCancel = () => {
-        navigate('/dashboard/live-account-request');
+        navigate('/dashboard/accounts');
     };
 
     const handleSubmit = () => {

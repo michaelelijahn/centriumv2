@@ -15,29 +15,58 @@ const ForeignPersonForm = () => {
             description: "Email registration"
         },
         {
-            title: "Personal Details",
-            description: "Complete information"
+            title: "Personal Data",
+            description: "Personal information & contact details"
         },
         {
-            title: "Upload Documents",
-            description: "Required documents"
+            title: "Emergency Contact",
+            description: "Emergency contact person"
+        },
+        {
+            title: "Employment Data",
+            description: "Work & financial information"
+        },
+        {
+            title: "Bank Accounts",
+            description: "Margin deposit & withdrawal accounts"
+        },
+        {
+            title: "Document Upload",
+            description: "Required documents upload"
         },
         {
             title: "Review & Submit",
-            description: "Final review"
+            description: "Final review and agreements"
         }
     ];
 
-    // Placeholder document requirements - user will provide actual requirements later
+    // Document requirements for Foreign Person registration
     const documentRequirements = [
         {
-            category: "Required Documents",
+            category: "Identity Documents",
             documents: [
-                "Bank Account Statement / Credit Card Bill",
-                "Telephone / Electricity Bill",
-                "Photo Selfie",
-                "Passport"
+                "Passport",
+                "Photo Selfie"
             ]
+        },
+        {
+            category: "Financial Documents",
+            documents: [
+                "Bank Account Statement or Credit Card Bill"
+            ]
+        },
+        {
+            category: "Utility Documents",
+            documents: [
+                "Telephone or Electricity Bill"
+            ]
+        },
+        {
+            category: "Tax Documents (Optional)",
+            documents: [
+                "Personal Tax Document"
+            ],
+            optional: true
         }
     ];
 
@@ -48,11 +77,17 @@ const ForeignPersonForm = () => {
             case 1:
                 return <PersonalEmailRegistrationStep data={stepData} onChange={updateFormData} />;
             case 2:
-                return <PersonalDetailsStep data={stepData} onChange={updateFormData} />;
+                return <PersonalDataStep data={stepData} onChange={updateFormData} />;
             case 3:
-                return <DocumentUploadStep data={stepData} onChange={updateFormData} />;
+                return <EmergencyContactStep data={stepData} onChange={updateFormData} />;
             case 4:
-                return <ReviewStep allData={formData} />;
+                return <EmploymentDataStep data={stepData} onChange={updateFormData} />;
+            case 5:
+                return <BankAccountStep data={stepData} onChange={updateFormData} />;
+            case 6:
+                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} />;
+            case 7:
+                return <ReviewStep allData={formData} onChange={updateFormData} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
@@ -60,6 +95,14 @@ const ForeignPersonForm = () => {
 
     const handleStepChange = (step, data) => {
         console.log(`Moving to step ${step}`, data);
+        // Auto-populate demo account from email step
+        if (step === 2 && data.demoAccountNo) {
+            setFormData(prevData => ({
+                ...prevData,
+                ...data,
+                demoAccountNo: data.demoAccountNo
+            }));
+        }
     };
 
     const handleSubmit = (data) => {
@@ -86,51 +129,50 @@ const RequirementsStep = ({ requirements }) => {
     }, []);
 
     return (
-    <div>
-        <div className="text-center mb-4">
+        <div>
+            <div className="text-center mb-4">
                 <h4 className="text-primary mb-3">Document Requirements</h4>
                 <p className="text-muted fs-5">Please ensure you have all the following documents ready before proceeding</p>
+            </div>
+
+            <Row className="justify-content-center">
+                {requirements.map((category, index) => (
+                    <Col md={8} lg={6} key={index} className="mb-4">
+                        <Card className="border-0 shadow-sm h-100" style={{ minHeight: '280px', maxHeight: '320px' }}>
+                            <Card.Header className="bg-light border-0 py-2">
+                                <h5 className="mb-0 text-primary">
+                                    <i className="mdi mdi-folder-outline me-2"></i>
+                                    {category.category}
+                                </h5>
+                            </Card.Header>
+                            <Card.Body className="p-2 d-flex flex-column">
+                                <ListGroup variant="flush" className="flex-grow-1">
+                                    {category.documents.map((doc, docIndex) => (
+                                        <ListGroup.Item key={docIndex} className="px-0 py-2 border-0">
+                                            <i className="mdi mdi-file-document-outline text-muted me-2"></i>
+                                            <span className="text-muted">{doc}</span>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                ))}
+            </Row>
+
+            <Alert variant="info" className="mt-4">
+                <h6 className="mb-2">
+                    <i className="mdi mdi-information me-2"></i>
+                    Important Notes
+                </h6>
+                <ul className="mb-0 small">
+                    <li>Documents should be clear, legible scans or photos</li>
+                    <li>Maximum file size: 10MB per document</li>
+                    <li>Accepted formats: PDF, JPG, JPEG, PNG</li>
+                </ul>
+            </Alert>
         </div>
-
-        <Row>
-            {requirements.map((category, index) => (
-                <Col md={6} key={index} className="mb-4">
-                    <Card className="border-0 shadow-sm h-100" style={{ minHeight: '180px', maxHeight: '250px' }}>
-                        <Card.Header className="bg-light border-0 py-2">
-                            <h5 className="mb-0 text-primary">
-                                <i className="mdi mdi-folder-outline me-2"></i>
-                                {category.category}
-                            </h5>
-                        </Card.Header>
-                        <Card.Body className="p-2 d-flex flex-column">
-                            <ListGroup variant="flush" className="flex-grow-1">
-                                {category.documents.map((doc, docIndex) => (
-                                    <ListGroup.Item key={docIndex} className="px-0 py-2 border-0">
-                                        <i className="mdi mdi-file-document-outline text-muted me-2"></i>
-                                        <span className="text-muted">{doc}</span>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            ))}
-        </Row>
-
-        <Alert variant="info" className="mt-4">
-            <h6 className="mb-2">
-                <i className="mdi mdi-information me-2"></i>
-                Important Notes
-            </h6>
-            <ul className="mb-0 small">
-                {/* <li>All documents must be in English or officially translated</li> */}
-                <li>Documents should be clear, legible scans or photos</li>
-                <li>Maximum file size: 10MB per document</li>
-                <li>Accepted formats: PDF, JPG, JPEG, PNG</li>
-            </ul>
-        </Alert>
-    </div>
-);
+    );
 };
 
 const PersonalEmailRegistrationStep = ({ data = {}, onChange }) => {
@@ -159,7 +201,7 @@ const PersonalEmailRegistrationStep = ({ data = {}, onChange }) => {
                 <Col lg={8}>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Register Personal Email</Form.Label>
+                            <Form.Label>Register Personal Email <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter personal email address"
@@ -170,7 +212,7 @@ const PersonalEmailRegistrationStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Select Demo Account No.</Form.Label>
+                            <Form.Label>Select Demo Account No. <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
@@ -191,42 +233,18 @@ const PersonalEmailRegistrationStep = ({ data = {}, onChange }) => {
     );
 };
 
-const PersonalDetailsStep = ({ data = {}, onChange }) => {
-    const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', swiftCode: '', accountNo: '', accountName: '' }]);
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
-
-    const addBankAccount = () => {
-        const newAccounts = [...bankAccounts, { bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', swiftCode: '', accountNo: '', accountName: '' }];
-        setBankAccounts(newAccounts);
-        onChange({ ...data, bankAccounts: newAccounts });
-    };
-
-    const removeBankAccount = (index) => {
-        const newAccounts = bankAccounts.filter((_, i) => i !== index);
-        setBankAccounts(newAccounts);
-        onChange({ ...data, bankAccounts: newAccounts });
-    };
-
-    const updateBankAccount = (index, field, value) => {
-        const newAccounts = [...bankAccounts];
-        newAccounts[index][field] = value;
-        setBankAccounts(newAccounts);
-        onChange({ ...data, bankAccounts: newAccounts });
-    };
+const PersonalDataStep = ({ data = {}, onChange }) => {
 
     return (
         <div>
             <div className="text-center mb-4">
-                <h4 className="text-primary mb-3">Personal Information</h4>
-                <p className="text-muted fs-5">Please provide your complete personal details</p>
+                <h4 className="text-primary mb-3">Personal Data</h4>
+                <p className="text-muted fs-5">Please provide your complete personal information and contact details</p>
             </div>
 
             <Form>
                 {/* Basic Personal Information */}
-                <h5 className="text-primary mb-3">Personal Details</h5>
+                <h5 className="text-primary mb-3">Personal Information</h5>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -268,14 +286,16 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Passport ID No. <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter passport ID number"
-                                value={data.passportIdNo || ''}
-                                onChange={(e) => onChange({ ...data, passportIdNo: e.target.value })}
+                            <Form.Label>Gender <span className="text-danger">*</span></Form.Label>
+                            <Form.Select
+                                value={data.gender || ''}
+                                onChange={(e) => onChange({ ...data, gender: e.target.value })}
                                 required
-                            />
+                            >
+                                <option value="">Please Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </Form.Select>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -283,16 +303,14 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Gender <span className="text-danger">*</span></Form.Label>
-                            <Form.Select
-                                value={data.gender || ''}
-                                onChange={(e) => onChange({ ...data, gender: e.target.value })}
+                            <Form.Label>Passport ID No. <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter passport ID number"
+                                value={data.passportId || ''}
+                                onChange={(e) => onChange({ ...data, passportId: e.target.value })}
                                 required
-                            >
-                                <option value="">Select gender</option>
-                                <option value="MALE">Male</option>
-                                <option value="FEMALE">Female</option>
-                            </Form.Select>
+                            />
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -304,32 +322,14 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                 required
                             >
                                 <option value="">Select marital status</option>
-                                <option value="SINGLE">Single</option>
-                                <option value="MARRIED">Married</option>
-                                <option value="DIVORCED">Divorced</option>
-                                <option value="WIDOWED">Widowed</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Divorced">Divorced</option>
+                                <option value="Widowed">Widowed</option>
                             </Form.Select>
                         </Form.Group>
                     </Col>
                 </Row>
-
-                {/* Conditional Spouse Name Field */}
-                {data.maritalStatus === 'MARRIED' && (
-                    <Row>
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Spouse Name <span className="text-danger">*</span></Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter spouse name"
-                                    value={data.spouseName || ''}
-                                    onChange={(e) => onChange({ ...data, spouseName: e.target.value })}
-                                    required
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                )}
 
                 <Row>
                     <Col md={6}>
@@ -344,6 +344,84 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                             />
                         </Form.Group>
                     </Col>
+                </Row>
+
+                {/* Address Information */}
+                <h5 className="text-primary mb-3 mt-4">Address Information</h5>
+                <Row>
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter street address"
+                                value={data.streetAddress || ''}
+                                onChange={(e) => onChange({ ...data, streetAddress: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter city"
+                                value={data.city || ''}
+                                onChange={(e) => onChange({ ...data, city: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+
+                <Row>
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Postal / Zip Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter postal/zip code"
+                                value={data.postalCode || ''}
+                                onChange={(e) => onChange({ ...data, postalCode: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Country <span className="text-danger">*</span></Form.Label>
+                            <Form.Select
+                                value={data.country || ''}
+                                onChange={(e) => onChange({ ...data, country: e.target.value })}
+                                required
+                            >
+                                <option value="">Select country</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="SG">Singapore</option>
+                                <option value="MY">Malaysia</option>
+                                <option value="AU">Australia</option>
+                                <option value="CA">Canada</option>
+                                <option value="OTHER">Other</option>
+                            </Form.Select>
+                            {data.country === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other country"
+                                    value={data.countryOther || ''}
+                                    onChange={(e) => onChange({ ...data, countryOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
+                        </Form.Group>
+                    </Col>
+                </Row>
+
+                {/* Contact Information */}
+                <h5 className="text-primary mb-3 mt-4">Contact Information</h5>
+                <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label>Phone Number <span className="text-danger">*</span></Form.Label>
@@ -376,95 +454,82 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                             </Row>
                         </Form.Group>
                     </Col>
-                </Row>
-
-                {/* Address Information */}
-                <h6 className="text-primary mb-3">Address Information</h6>
-                <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Email <span className="text-danger">*</span></Form.Label>
                             <Form.Control
-                                type="text"
-                                placeholder="Enter street address"
-                                value={data.streetAddress || ''}
-                                onChange={(e) => onChange({ ...data, streetAddress: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter city"
-                                value={data.city || ''}
-                                onChange={(e) => onChange({ ...data, city: e.target.value })}
+                                type="email"
+                                placeholder="Enter email address"
+                                value={data.contactEmail || ''}
+                                onChange={(e) => onChange({ ...data, contactEmail: e.target.value })}
                                 required
                             />
                         </Form.Group>
                     </Col>
                 </Row>
 
+                {/* Background Information */}
+                <h5 className="text-primary mb-3 mt-4">Background Information</h5>
                 <Row>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Postal / ZIP Code <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter postal/ZIP code"
-                                value={data.postalCode || ''}
-                                onChange={(e) => onChange({ ...data, postalCode: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Country <span className="text-danger">*</span></Form.Label>
-                            <Form.Select
-                                value={data.country || ''}
-                                onChange={(e) => onChange({ ...data, country: e.target.value })}
-                                required
-                            >
-                                <option value="">Select country</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
-                                <option value="SG">Singapore</option>
-                                <option value="MY">Malaysia</option>
-                                <option value="AU">Australia</option>
-                                <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
-                                <option value="OTHER">Other</option>
-                            </Form.Select>
-                        </Form.Group>
-                    </Col>
-                </Row>
-
-                {/* Account and Experience Information */}
-                <h5 className="text-primary mb-3 mt-4">Account Information</h5>
-                <Row>
-                    <Col md={6}>
+                    <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Account Opening Purpose <span className="text-danger">*</span></Form.Label>
-                            <Form.Select
-                                value={data.accountOpeningPurpose || ''}
-                                onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value })}
-                                required
-                            >
-                                <option value="">Select purpose</option>
-                                <option value="HEDGING">Hedging</option>
-                                <option value="GAIN">Gain</option>
-                                <option value="SPECULATION">Speculation</option>
-                                <option value="OTHERS">Others</option>
-                            </Form.Select>
+                            <div>
+                                <Form.Check
+                                    inline
+                                    type="radio"
+                                    label="Hedging"
+                                    name="accountOpeningPurpose"
+                                    value="Hedging"
+                                    checked={data.accountOpeningPurpose === 'Hedging'}
+                                    onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value })}
+                                    required
+                                />
+                                <Form.Check
+                                    inline
+                                    type="radio"
+                                    label="Gain"
+                                    name="accountOpeningPurpose"
+                                    value="Gain"
+                                    checked={data.accountOpeningPurpose === 'Gain'}
+                                    onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value })}
+                                    required
+                                />
+                                <Form.Check
+                                    inline
+                                    type="radio"
+                                    label="Speculation"
+                                    name="accountOpeningPurpose"
+                                    value="Speculation"
+                                    checked={data.accountOpeningPurpose === 'Speculation'}
+                                    onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value })}
+                                    required
+                                />
+                                <Form.Check
+                                    inline
+                                    type="radio"
+                                    label="Others"
+                                    name="accountOpeningPurpose"
+                                    value="Others"
+                                    checked={data.accountOpeningPurpose === 'Others'}
+                                    onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            {data.accountOpeningPurpose === 'Others' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other account opening purpose"
+                                    value={data.accountOpeningPurposeOther || ''}
+                                    onChange={(e) => onChange({ ...data, accountOpeningPurposeOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
 
-                {/* Yes/No Questions */}
-                <h6 className="text-primary mb-3">Background Information</h6>
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
@@ -475,20 +540,32 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     type="radio"
                                     label="Yes"
                                     name="investmentExperience"
-                                    value="YES"
-                                    checked={data.investmentExperience === 'YES'}
+                                    value="Yes"
+                                    checked={data.investmentExperience === 'Yes'}
                                     onChange={(e) => onChange({ ...data, investmentExperience: e.target.value })}
+                                    required
                                 />
                                 <Form.Check
                                     inline
                                     type="radio"
-                                    label="No"
+                                    label="None"
                                     name="investmentExperience"
-                                    value="NO"
-                                    checked={data.investmentExperience === 'NO'}
+                                    value="None"
+                                    checked={data.investmentExperience === 'None'}
                                     onChange={(e) => onChange({ ...data, investmentExperience: e.target.value })}
+                                    required
                                 />
                             </div>
+                            {data.investmentExperience === 'Yes' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify your investment experience"
+                                    value={data.investmentExperienceDetails || ''}
+                                    onChange={(e) => onChange({ ...data, investmentExperienceDetails: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -503,18 +580,20 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     type="radio"
                                     label="Yes"
                                     name="familyInBappebti"
-                                    value="YES"
-                                    checked={data.familyInBappebti === 'YES'}
+                                    value="Yes"
+                                    checked={data.familyInBappebti === 'Yes'}
                                     onChange={(e) => onChange({ ...data, familyInBappebti: e.target.value })}
+                                    required
                                 />
                                 <Form.Check
                                     inline
                                     type="radio"
                                     label="No"
                                     name="familyInBappebti"
-                                    value="NO"
-                                    checked={data.familyInBappebti === 'NO'}
+                                    value="No"
+                                    checked={data.familyInBappebti === 'No'}
                                     onChange={(e) => onChange({ ...data, familyInBappebti: e.target.value })}
+                                    required
                                 />
                             </div>
                         </Form.Group>
@@ -531,33 +610,49 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     type="radio"
                                     label="Yes"
                                     name="declaredBankrupt"
-                                    value="YES"
-                                    checked={data.declaredBankrupt === 'YES'}
+                                    value="Yes"
+                                    checked={data.declaredBankrupt === 'Yes'}
                                     onChange={(e) => onChange({ ...data, declaredBankrupt: e.target.value })}
+                                    required
                                 />
                                 <Form.Check
                                     inline
                                     type="radio"
                                     label="No"
                                     name="declaredBankrupt"
-                                    value="NO"
-                                    checked={data.declaredBankrupt === 'NO'}
+                                    value="No"
+                                    checked={data.declaredBankrupt === 'No'}
                                     onChange={(e) => onChange({ ...data, declaredBankrupt: e.target.value })}
+                                    required
                                 />
                             </div>
                         </Form.Group>
                     </Col>
                 </Row>
+            </Form>
+        </div>
+    );
+};
 
-                {/* Emergency Contact */}
-                <h5 className="text-primary mb-3 mt-4">Emergency Contact Person</h5>
+const EmergencyContactStep = ({ data = {}, onChange }) => {
+
+    return (
+        <div>
+            <div className="text-center mb-4">
+                <h4 className="text-primary mb-3">Emergency Contact</h4>
+                <p className="text-muted fs-5">Please provide emergency contact person details</p>
+            </div>
+
+            <Form>
+                {/* Emergency Contact Information */}
+                <h5 className="text-primary mb-3">Emergency Contact Information</h5>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Full Name of Emergency Contact <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Full Name <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter emergency contact name"
+                                placeholder="Enter emergency contact full name"
                                 value={data.emergencyContactName || ''}
                                 onChange={(e) => onChange({ ...data, emergencyContactName: e.target.value })}
                                 required
@@ -576,20 +671,31 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="SPOUSE">Spouse</option>
                                 <option value="FAMILY">Family</option>
                                 <option value="CHILD">Child</option>
-                                <option value="OTHERS">Others</option>
+                                <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.emergencyContactRelationship === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other relationship"
+                                    value={data.emergencyContactRelationshipOther || ''}
+                                    onChange={(e) => onChange({ ...data, emergencyContactRelationshipOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
 
-                <h6 className="text-primary mb-3">Emergency Contact Address</h6>
+                {/* Address Information */}
+                <h5 className="text-primary mb-3 mt-4">Address Information</h5>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter emergency contact street address"
+                                placeholder="Enter street address"
                                 value={data.emergencyContactStreetAddress || ''}
                                 onChange={(e) => onChange({ ...data, emergencyContactStreetAddress: e.target.value })}
                                 required
@@ -601,7 +707,7 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label>City <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter emergency contact city"
+                                placeholder="Enter city"
                                 value={data.emergencyContactCity || ''}
                                 onChange={(e) => onChange({ ...data, emergencyContactCity: e.target.value })}
                                 required
@@ -613,10 +719,10 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Postal / ZIP Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Postal / Zip Code <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter emergency contact postal/ZIP code"
+                                placeholder="Enter postal/zip code"
                                 value={data.emergencyContactPostalCode || ''}
                                 onChange={(e) => onChange({ ...data, emergencyContactPostalCode: e.target.value })}
                                 required
@@ -638,13 +744,24 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="MY">Malaysia</option>
                                 <option value="AU">Australia</option>
                                 <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.emergencyContactCountry === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other country"
+                                    value={data.emergencyContactCountryOther || ''}
+                                    onChange={(e) => onChange({ ...data, emergencyContactCountryOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
 
+                {/* Contact Information */}
+                <h5 className="text-primary mb-3 mt-4">Contact Information</h5>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -669,7 +786,7 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                 <Col md={8}>
                                     <Form.Control
                                         type="tel"
-                                        placeholder="Enter emergency contact phone number"
+                                        placeholder="Enter phone number"
                                         value={data.emergencyContactPhoneNumber || ''}
                                         onChange={(e) => onChange({ ...data, emergencyContactPhoneNumber: e.target.value })}
                                         required
@@ -678,12 +795,41 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                             </Row>
                         </Form.Group>
                     </Col>
-                </Row>
-
-                {/* Employment Status */}
-                <h5 className="text-primary mb-3 mt-4">Employment Status</h5>
-                <Row>
                     <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="email"
+                                placeholder="Enter email address"
+                                value={data.emergencyContactEmail || ''}
+                                onChange={(e) => onChange({ ...data, emergencyContactEmail: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+            </Form>
+        </div>
+    );
+};
+
+const EmploymentDataStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    const showEmploymentDetails = data.employmentStatus === 'WORK' || data.employmentStatus === 'ENTREPRENEUR';
+
+    return (
+        <div>
+            <div className="text-center mb-4">
+                <h4 className="text-primary mb-3">Employment Data</h4>
+                <p className="text-muted fs-5">Please provide your employment information</p>
+            </div>
+
+            <Form>
+                <Row className="justify-content-center">
+                    <Col lg={8}>
                         <Form.Group className="mb-3">
                             <Form.Label>Employment Status <span className="text-danger">*</span></Form.Label>
                             <Form.Select
@@ -701,19 +847,19 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                 </Row>
 
-                {/* Conditional Employment Details */}
-                {(data.employmentStatus === 'WORK' || data.employmentStatus === 'ENTREPRENEUR') && (
+                {showEmploymentDetails && (
                     <>
-                        <h6 className="text-primary mb-3">Employment Details</h6>
+                        {/* Employment Information */}
+                        <h5 className="text-primary mb-3 mt-4">Employment Information</h5>
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Company Name <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
+                                    <Form.Control
+                                        type="text"
                                         placeholder="Enter company name"
-                                        value={data.employmentCompanyName || ''}
-                                        onChange={(e) => onChange({ ...data, employmentCompanyName: e.target.value })}
+                                        value={data.companyName || ''}
+                                        onChange={(e) => onChange({ ...data, companyName: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -724,35 +870,35 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter nature of business"
-                                        value={data.employmentNatureOfBusiness || ''}
-                                        onChange={(e) => onChange({ ...data, employmentNatureOfBusiness: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                </Row>
+                                        value={data.businessNature || ''}
+                                        onChange={(e) => onChange({ ...data, businessNature: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
 
                         <Row>
                             <Col md={6}>
-                <Form.Group className="mb-3">
+                                <Form.Group className="mb-3">
                                     <Form.Label>Position <span className="text-danger">*</span></Form.Label>
-                    <Form.Control
+                                    <Form.Control
                                         type="text"
                                         placeholder="Enter your position"
-                                        value={data.employmentPosition || ''}
-                                        onChange={(e) => onChange({ ...data, employmentPosition: e.target.value })}
-                        required
-                    />
-                </Form.Group>
+                                        value={data.position || ''}
+                                        onChange={(e) => onChange({ ...data, position: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Length of Work <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="e.g. 2 years, 6 months"
-                                        value={data.employmentLengthOfWork || ''}
-                                        onChange={(e) => onChange({ ...data, employmentLengthOfWork: e.target.value })}
+                                        placeholder="e.g., 2 years, 6 months"
+                                        value={data.lengthOfWork || ''}
+                                        onChange={(e) => onChange({ ...data, lengthOfWork: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -765,9 +911,9 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     <Form.Label>Previous Company</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Enter previous company (optional)"
-                                        value={data.employmentPreviousCompany || ''}
-                                        onChange={(e) => onChange({ ...data, employmentPreviousCompany: e.target.value })}
+                                        placeholder="Enter previous company (if any)"
+                                        value={data.previousCompany || ''}
+                                        onChange={(e) => onChange({ ...data, previousCompany: e.target.value })}
                                     />
                                 </Form.Group>
                             </Col>
@@ -777,8 +923,8 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     <Row>
                                         <Col md={4}>
                                             <Form.Select
-                                                value={data.employmentOfficeCountryCode || ''}
-                                                onChange={(e) => onChange({ ...data, employmentOfficeCountryCode: e.target.value })}
+                                                value={data.officeCountryCode || ''}
+                                                onChange={(e) => onChange({ ...data, officeCountryCode: e.target.value })}
                                                 required
                                             >
                                                 <option value="">Code</option>
@@ -795,8 +941,8 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                             <Form.Control
                                                 type="tel"
                                                 placeholder="Enter office phone number"
-                                                value={data.employmentOfficePhoneNumber || ''}
-                                                onChange={(e) => onChange({ ...data, employmentOfficePhoneNumber: e.target.value })}
+                                                value={data.officePhoneNumber || ''}
+                                                onChange={(e) => onChange({ ...data, officePhoneNumber: e.target.value })}
                                                 required
                                             />
                                         </Col>
@@ -805,16 +951,17 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                             </Col>
                         </Row>
 
-                        <h6 className="text-primary mb-3">Office Address</h6>
+                        {/* Office Address */}
+                        <h5 className="text-primary mb-3 mt-4">Office Address</h5>
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Address <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Enter office address"
-                                        value={data.employmentOfficeAddress || ''}
-                                        onChange={(e) => onChange({ ...data, employmentOfficeAddress: e.target.value })}
+                                        placeholder="Enter office street address"
+                                        value={data.officeStreetAddress || ''}
+                                        onChange={(e) => onChange({ ...data, officeStreetAddress: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -825,8 +972,8 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter office city"
-                                        value={data.employmentOfficeCity || ''}
-                                        onChange={(e) => onChange({ ...data, employmentOfficeCity: e.target.value })}
+                                        value={data.officeCity || ''}
+                                        onChange={(e) => onChange({ ...data, officeCity: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -836,12 +983,12 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Postal / ZIP Code <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label>Postal / Zip Code <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Enter office postal/ZIP code"
-                                        value={data.employmentOfficePostalCode || ''}
-                                        onChange={(e) => onChange({ ...data, employmentOfficePostalCode: e.target.value })}
+                                        placeholder="Enter office postal/zip code"
+                                        value={data.officePostalCode || ''}
+                                        onChange={(e) => onChange({ ...data, officePostalCode: e.target.value })}
                                         required
                                     />
                                 </Form.Group>
@@ -850,8 +997,8 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                 <Form.Group className="mb-3">
                                     <Form.Label>Country <span className="text-danger">*</span></Form.Label>
                                     <Form.Select
-                                        value={data.employmentOfficeCountry || ''}
-                                        onChange={(e) => onChange({ ...data, employmentOfficeCountry: e.target.value })}
+                                        value={data.officeCountry || ''}
+                                        onChange={(e) => onChange({ ...data, officeCountry: e.target.value })}
                                         required
                                     >
                                         <option value="">Select country</option>
@@ -861,17 +1008,64 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                         <option value="MY">Malaysia</option>
                                         <option value="AU">Australia</option>
                                         <option value="CA">Canada</option>
-                                        <option value="ID">Indonesia</option>
                                         <option value="OTHER">Other</option>
                                     </Form.Select>
+                                    {data.officeCountry === 'OTHER' && (
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Please specify other country"
+                                            value={data.officeCountryOther || ''}
+                                            onChange={(e) => onChange({ ...data, officeCountryOther: e.target.value })}
+                                            className="mt-2"
+                                            required
+                                        />
+                                    )}
                                 </Form.Group>
                             </Col>
                         </Row>
                     </>
                 )}
+            </Form>
+        </div>
+    );
+};
 
+const BankAccountStep = ({ data = {}, onChange }) => {
+    const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', swiftCode: '', accountNo: '', accountName: '' }]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    const addBankAccount = () => {
+        const newAccounts = [...bankAccounts, { bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', swiftCode: '', accountNo: '', accountName: '' }];
+        setBankAccounts(newAccounts);
+        onChange({ ...data, bankAccounts: newAccounts });
+    };
+
+    const removeBankAccount = (index) => {
+        const newAccounts = bankAccounts.filter((_, i) => i !== index);
+        setBankAccounts(newAccounts);
+        onChange({ ...data, bankAccounts: newAccounts });
+    };
+
+    const updateBankAccount = (index, field, value) => {
+        const newAccounts = [...bankAccounts];
+        newAccounts[index][field] = value;
+        setBankAccounts(newAccounts);
+        onChange({ ...data, bankAccounts: newAccounts });
+    };
+
+    return (
+        <div>
+            <div className="text-center mb-4">
+                <h4 className="text-primary mb-3">Bank Account Information</h4>
+                <p className="text-muted fs-5">Please provide your bank account details</p>
+            </div>
+
+            <Form>
                 {/* Bank Accounts */}
-                <h5 className="text-primary mb-3 mt-4">Bank Accounts</h5>
+                <h5 className="text-primary mb-3">Bank Accounts</h5>
                 {bankAccounts.map((account, index) => (
                     <Card key={index} className="mb-3 border-0 shadow-sm">
                         <Card.Header className="bg-light border-0 py-2 d-flex justify-content-between align-items-center">
@@ -955,7 +1149,6 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                                             <option value="MY">Malaysia</option>
                                             <option value="AU">Australia</option>
                                             <option value="CA">Canada</option>
-                                            <option value="ID">Indonesia</option>
                                             <option value="OTHER">Other</option>
                                         </Form.Select>
                                     </Form.Group>
@@ -1001,16 +1194,12 @@ const PersonalDetailsStep = ({ data = {}, onChange }) => {
                         Add Another Bank Account
                     </button>
                 </div>
-
-
             </Form>
         </div>
     );
 };
 
-
-
-const DocumentUploadStep = ({ data = {}, onChange }) => {
+const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
@@ -1018,89 +1207,41 @@ const DocumentUploadStep = ({ data = {}, onChange }) => {
     return (
         <div>
             <div className="text-center mb-4">
-                <h4 className="text-primary mb-3">Upload Documents</h4>
-                <p className="text-muted fs-5">Please upload the required documents</p>
+                <h4 className="text-primary mb-3">Document Upload</h4>
+                <p className="text-muted fs-5">Upload all required documents</p>
             </div>
 
-            <Card className="mb-4 border-0 shadow-sm">
-                <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">Required Documents</h6>
+            {requirements.map((category, index) => (
+                <Card key={index} className="mb-4 border-0 shadow-sm">
+                    <Card.Header className="bg-light border-0">
+                        <h6 className="mb-0 text-primary">{category.category}</h6>
                     </Card.Header>
                     <Card.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Bank Account Statement / Credit Card Bill <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, bankStatementFile: e.target.files[0] })}
-                            required 
-                        />
+                        {category.documents.map((doc, docIndex) => (
+                            <Form.Group key={docIndex} className="mb-3">
+                                <Form.Label>
+                                    {doc} 
+                                    {!category.optional && <span className="text-danger">*</span>}
+                                </Form.Label>
+                                <Form.Control type="file" accept=".pdf,.jpg,.jpeg,.png" />
                                 <Form.Text className="text-muted">
                                     Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                                 </Form.Text>
                             </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Telephone / Electricity Bill <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, telephoneElectricityBillFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Photo Selfie <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, photoSelfieFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Passport <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, passportFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Personal Tax Document</Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf" 
-                            onChange={(e) => onChange({ ...data, personalTaxDocumentFile: e.target.files[0] })}
-                        />
-                        <Form.Text className="text-muted">
-                            Optional - Max 10MB. Accepted format: PDF only
-                        </Form.Text>
-                    </Form.Group>
+                        ))}
                     </Card.Body>
                 </Card>
+            ))}
         </div>
     );
 };
 
-const ReviewStep = ({ allData, onChange }) => {
+const ReviewStep = ({ allData }) => {
     const [agreements, setAgreements] = useState({
         companyProfile: false,
         statementSimulation: false,
         statementExperience: false,
+        disclosureStatement: false,
         accountOpening: false,
         riskDisclosure: false,
         mandateAgreement: false,
@@ -1128,9 +1269,7 @@ const ReviewStep = ({ allData, onChange }) => {
             <Alert variant="info">
                 <h6 className="mb-2">Application Summary</h6>
                 <p className="mb-0">
-                    Please review all the information you've provided. 
-                    {/* Once submitted, 
-                    your application will be processed within 2-3 business days. */}
+                    Please review all the information you've provided.
                 </p>
             </Alert>
 
@@ -1143,7 +1282,7 @@ const ReviewStep = ({ allData, onChange }) => {
                             <p><strong>Status:</strong> Ready for submission</p>
                         </Col>
                         <Col md={6}>
-                            <p><strong>Steps Completed:</strong> 4/4</p>
+                            <p><strong>Steps Completed:</strong> 8/8</p>
                             <p><strong>Documents Uploaded:</strong> Ready</p>
                         </Col>
                     </Row>
@@ -1222,6 +1361,29 @@ const ReviewStep = ({ allData, onChange }) => {
                                             className="text-decoration-underline"
                                         >
                                             statement of having experience
+                                        </a>. <span className="text-danger">*</span>
+                                    </span>
+                                }
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Check
+                                type="checkbox"
+                                id="disclosureStatement"
+                                checked={agreements.disclosureStatement}
+                                onChange={(e) => handleAgreementChange('disclosureStatement', e.target.checked)}
+                                label={
+                                    <span>
+                                        I have read, understood and agreed to the{' '}
+                                        <a 
+                                            href="https://drive.google.com/file/d/1dfTD9xjnoz3-blO2bxprhhS1prXHDIKG/view" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-decoration-underline"
+                                        >
+                                            disclosure statement
                                         </a>. <span className="text-danger">*</span>
                                     </span>
                                 }
@@ -1359,4 +1521,4 @@ const ReviewStep = ({ allData, onChange }) => {
     );
 };
 
-export default ForeignPersonForm; 
+export default ForeignPersonForm;

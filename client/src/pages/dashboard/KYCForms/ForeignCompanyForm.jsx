@@ -50,7 +50,8 @@ const ForeignCompanyForm = () => {
         {
             category: "Personal Documents",
             documents: [
-                "Beneficial Owner Passport"
+                "Beneficial Owner Passport",
+                "Authorize Person Passport"
             ]
         },
         {
@@ -292,6 +293,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="SOLE_PROPRIETORSHIP">Sole Proprietorship</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.companyLegalForm === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other legal form"
+                                    value={data.companyLegalFormOther || ''}
+                                    onChange={(e) => onChange({ ...data, companyLegalFormOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -354,6 +365,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="CA">Canada</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.country === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other country"
+                                    value={data.countryOther || ''}
+                                    onChange={(e) => onChange({ ...data, countryOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -470,6 +491,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="LOAN">Loan</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.sourceOfFunds === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other source of funds"
+                                    value={data.sourceOfFundsOther || ''}
+                                    onChange={(e) => onChange({ ...data, sourceOfFundsOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -487,6 +518,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="INVESTMENT">Investment</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.tradingAccountPurpose === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other trading purpose"
+                                    value={data.tradingAccountPurposeOther || ''}
+                                    onChange={(e) => onChange({ ...data, tradingAccountPurposeOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -496,14 +537,14 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
 };
 
 const AuthorizePersonStep = ({ data = {}, onChange }) => {
-    const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', swiftCode: '', accountNo: '', accountName: '' }]);
+    const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', bankCountryOther: '', swiftCode: '', accountNo: '', accountName: '' }]);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
     const addBankAccount = () => {
-        const newAccounts = [...bankAccounts, { bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', swiftCode: '', accountNo: '', accountName: '' }];
+        const newAccounts = [...bankAccounts, { bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', bankCountryOther: '', swiftCode: '', accountNo: '', accountName: '' }];
         setBankAccounts(newAccounts);
         onChange({ ...data, bankAccounts: newAccounts });
     };
@@ -754,6 +795,16 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 <option value="ID">Indonesia</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.authorizePersonCountry === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other country"
+                                    value={data.authorizePersonCountryOther || ''}
+                                    onChange={(e) => onChange({ ...data, authorizePersonCountryOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -784,6 +835,17 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     onChange={(e) => onChange({ ...data, authorizePersonInvestmentExperience: e.target.value })}
                                 />
                             </div>
+                            {data.authorizePersonInvestmentExperience === 'YES' && (
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    placeholder="Please describe your investment experience, including types of investments, duration, and any relevant qualifications or certifications you may have."
+                                    value={data.authorizePersonInvestmentExperienceDetails || ''}
+                                    onChange={(e) => onChange({ ...data, authorizePersonInvestmentExperienceDetails: e.target.value })}
+                                    className="mt-3"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -948,6 +1010,16 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 <option value="ID">Indonesia</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.authorizePersonOfficeCountry === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other country"
+                                    value={data.authorizePersonOfficeCountryOther || ''}
+                                    onChange={(e) => onChange({ ...data, authorizePersonOfficeCountryOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1057,6 +1129,16 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             <option value="ID">Indonesia</option>
                                             <option value="OTHER">Other</option>
                                         </Form.Select>
+                                        {account.bankCountry === 'OTHER' && (
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Please specify other country"
+                                                value={account.bankCountryOther || ''}
+                                                onChange={(e) => updateBankAccount(index, 'bankCountryOther', e.target.value)}
+                                                className="mt-2"
+                                                required
+                                            />
+                                        )}
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
@@ -1125,7 +1207,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     <Card.Body>
                         {category.documents.map((doc, docIndex) => (
                             <Form.Group key={docIndex} className="mb-3">
-                                <Form.Label>{doc} *</Form.Label>
+                                <Form.Label>{doc} <span className="text-danger">*</span></Form.Label>
                                 <Form.Control type="file" accept=".pdf,.jpg,.jpeg,.png" />
                                 <Form.Text className="text-muted">
                                     Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG

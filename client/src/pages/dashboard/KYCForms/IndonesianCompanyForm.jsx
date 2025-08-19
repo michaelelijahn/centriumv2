@@ -123,7 +123,7 @@ const RequirementsStep = ({ requirements }) => {
         <Row>
             {requirements.map((category, index) => (
                 <Col md={6} key={index} className="mb-4">
-                    <Card className="border-0 shadow-sm h-100" style={{ minHeight: '180px', maxHeight: '300px' }}>
+                    <Card className="border-0 shadow-sm h-100" style={{ minHeight: '280px', maxHeight: '320px' }}>
                         <Card.Header className="bg-light border-0 py-2">
                             <h5 className="mb-0 text-primary">
                                 <i className="mdi mdi-folder-outline me-2"></i>

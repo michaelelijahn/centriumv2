@@ -11,9 +11,9 @@ const MENU_ITEMS = [
         icon: 'uil-home-alt',
         children: [
             {
-                key: 'ecommerce',
-                label: 'Ecommerce',
-                url: '/dashboard/ecommerce',
+                key: 'home',
+                label: 'Home',
+                url: '/dashboard/home',
                 parentKey: 'dashboards',
                 allowedRoles: ['admin', 'customer'],
             },
@@ -44,6 +44,13 @@ const MENU_ITEMS = [
                 url: '/dashboard/support',
                 parentKey: 'dashboards',
                 allowedRoles: ['customer'],
+            },
+            {
+                key: 'accounts',
+                label: 'Accounts',
+                url: '/dashboard/accounts',
+                parentKey: 'dashboards',
+                allowedRoles: ['admin', 'customer'],
             },
         ],
     },

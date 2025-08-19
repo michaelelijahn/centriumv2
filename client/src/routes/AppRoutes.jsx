@@ -50,9 +50,9 @@ const RoleGuard = ({ allowedRoles, children }) => {
     const { user } = useAuthContext();
     
     if (!allowedRoles.includes(user?.role)) {
-        // Redirect to appropriate dashboard based on role
-        const defaultRoute = user?.role === 'admin' ? '/dashboard/admin' : '/dashboard/ecommerce';
-        return <Navigate to={defaultRoute} replace />;
+        		// Redirect to appropriate dashboard based on role
+		const defaultRoute = user?.role === 'admin' ? '/dashboard/tickets' : '/dashboard/home';
+		return <Navigate to={defaultRoute} replace />;
     }
     
     return children;
@@ -66,7 +66,7 @@ const RootRedirect = () => {
         return <Navigate to="/account/login" replace />;
     }
 
-    return <Navigate to={'/dashboard/ecommerce'} replace />;
+    return <Navigate to={'/dashboard/home'} replace />;
 };
 
 const AppRoutes = () => (
@@ -80,22 +80,22 @@ const AppRoutes = () => (
                 <Route path="*" element={<Account />} />
             </Route>
 
-            {/* Protected dashboard routes */}
-            <Route path="/dashboard/*" element={
-                <AuthGuard>
-                    <VerticalLayout />
-                </AuthGuard>
-            }>
+            			{/* Protected dashboard routes */}
+			<Route path="/dashboard/*" element={
+				<AuthGuard>
+					<VerticalLayout />
+				</AuthGuard>
+			}>
 
-				<Route path="ecommerce" element={<Ecommerce />} />
-				<Route path="live-account-request" element={<LiveAccountRequest />} />
+				<Route path="home" element={<Ecommerce />} />
+				<Route path="accounts" element={<LiveAccountRequest />} />
 				
-				{/* KYC Form routes */}
-				<Route path="kyc/foreign-company" element={<ForeignCompanyForm />} />
-				<Route path="kyc/foreign-person" element={<ForeignPersonForm />} />
-				<Route path="kyc/indonesian-company" element={<IndonesianCompanyForm />} />
-				<Route path="kyc/indonesian-person" element={<IndonesianPersonForm />} />
-				<Route path="kyc/regulated-company" element={<RegulatedCompanyForm />} />
+				{/* KYC Form routes under accounts */}
+				<Route path="accounts/foreign-company" element={<ForeignCompanyForm />} />
+				<Route path="accounts/foreign-person" element={<ForeignPersonForm />} />
+				<Route path="accounts/indonesian-company" element={<IndonesianCompanyForm />} />
+				<Route path="accounts/indonesian-person" element={<IndonesianPersonForm />} />
+				<Route path="accounts/regulated-company" element={<RegulatedCompanyForm />} />
 				
 				<Route path="tickets/:ticketId" element={
 					<AuthGuard>
