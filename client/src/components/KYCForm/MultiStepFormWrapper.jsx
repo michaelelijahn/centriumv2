@@ -6,6 +6,8 @@ import FormStepper from '../FormStepper';
 const MultiStepFormWrapper = ({ 
     accountType, 
     steps, 
+    actualSteps,
+    getProgressStep,
     children, 
     onStepChange,
     onSubmit,
@@ -18,7 +20,8 @@ const MultiStepFormWrapper = ({
     const navigate = useNavigate();
 
     const handleNext = () => {
-        if (currentStep < steps.length - 1) {
+        const stepsLength = actualSteps ? actualSteps.length : steps.length;
+        if (currentStep < stepsLength - 1) {
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
             if (onStepChange) {
@@ -82,7 +85,7 @@ const MultiStepFormWrapper = ({
                            
                             <FormStepper 
                                 steps={steps} 
-                                currentStep={currentStep} 
+                                currentStep={getProgressStep ? getProgressStep(currentStep) : currentStep} 
                                 accountType={accountType}
                             />
 
@@ -143,7 +146,7 @@ const MultiStepFormWrapper = ({
                                 </div>
                                 
                                 <div>
-                                    {currentStep < steps.length - 1 ? (
+                                    {currentStep < (actualSteps ? actualSteps.length : steps.length) - 1 ? (
                                         <Button 
                                             variant="primary"
                                             onClick={handleNext}

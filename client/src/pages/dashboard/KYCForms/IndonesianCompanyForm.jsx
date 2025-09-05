@@ -258,7 +258,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Nama Calon Nasabah Non-Orang Perseorangan (Nama Perusahaan) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Nama Calon Nasabah Non-Orang Perseorangan (Nama Perusahaan) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company registration number"
@@ -270,7 +270,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>No. Izin Usaha <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>No. Izin Usaha <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company license number"
@@ -387,7 +387,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label>Bentuk Hukum <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.legalForm || ''}
-                                onChange={(e) => onChange({ ...data, legalForm: e.target.value })}
+                                onChange={(e) => onChange({ ...data, legalForm: e.target.value, ...(e.target.value !== 'OTHER' && { legalFormOther: '' }) })}
                                 required
                             >
                                 <option value="">Select legal form</option>
@@ -398,6 +398,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="YAYASAN">Yayasan</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.legalForm === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the legal form"
+                                    value={data.legalFormOther || ''}
+                                    onChange={(e) => onChange({ ...data, legalFormOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -439,7 +449,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Nama Beneficial Owner <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Nama Beneficial Owner <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter beneficial owner name"
@@ -451,7 +461,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>No. KTP / SIM / Paspor Beneficial Owner <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>No. KTP / SIM / Paspor Beneficial Owner <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter ID/Passport number"
@@ -468,10 +478,10 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Sumber Dana <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Sumber Dana <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.sourceOfFunds || ''}
-                                onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value })}
+                                onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value, ...(e.target.value !== 'OTHER' && { sourceOfFundsOther: '' }) })}
                                 required
                             >
                                 <option value="">Select source of funds</option>
@@ -481,14 +491,24 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="LOAN">Loan</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.sourceOfFunds === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the source of funds"
+                                    value={data.sourceOfFundsOther || ''}
+                                    onChange={(e) => onChange({ ...data, sourceOfFundsOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Maksud dan Tujuan Pembukaan Rekening Transaksi yang akan Dilakukan Calon Nasabah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Maksud dan Tujuan Pembukaan Rekening Transaksi yang akan Dilakukan Calon Nasabah <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.accountPurpose || ''}
-                                onChange={(e) => onChange({ ...data, accountPurpose: e.target.value })}
+                                onChange={(e) => onChange({ ...data, accountPurpose: e.target.value, ...(e.target.value !== 'OTHER' && { accountPurposeOther: '' }) })}
                                 required
                             >
                                 <option value="">Select account purpose</option>
@@ -497,6 +517,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <option value="INVESTMENT">Investment</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
+                            {data.accountPurpose === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the account purpose"
+                                    value={data.accountPurposeOther || ''}
+                                    onChange={(e) => onChange({ ...data, accountPurposeOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -506,7 +536,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Nama Penerima Kuasa yang Menjalankan Transaksi <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Nama Penerima Kuasa yang Menjalankan Transaksi <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter authorized person name"
@@ -518,7 +548,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Pihak yang berwenang melakukan Pendebetan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Pihak yang berwenang melakukan Pendebetan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter authorized debit person"
@@ -551,7 +581,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                             <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Bank <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label style={{ minHeight: '24px' }}>Nama Bank <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter bank name"
@@ -563,7 +593,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Cabang <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label style={{ minHeight: '24px' }}>Cabang <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter branch name"
@@ -578,7 +608,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. Rekening <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label style={{ minHeight: '24px' }}>No. Rekening <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter account number"
@@ -590,7 +620,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Account Holder Name <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label style={{ minHeight: '24px' }}>Account Holder Name <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter account holder name"
@@ -605,7 +635,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label style={{ minHeight: '48px' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
                                             <Row>
                                                 <Col md={4}>
                                                     <Form.Select
@@ -637,10 +667,15 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Jenis Rekening Bank (Bank Account Type) <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label style={{ minHeight: '48px' }}>Jenis Rekening Bank (Bank Account Type) <span className="text-danger">*</span></Form.Label>
                                             <Form.Select
                                                 value={account.bankAccountType}
-                                                onChange={(e) => updateBankAccount(index, 'bankAccountType', e.target.value)}
+                                                onChange={(e) => {
+                                                    updateBankAccount(index, 'bankAccountType', e.target.value);
+                                                    if (e.target.value !== 'LAINNYA') {
+                                                        updateBankAccount(index, 'bankAccountTypeOther', '');
+                                                    }
+                                                }}
                                                 required
                                             >
                                                 <option value="">Select account type</option>
@@ -648,6 +683,16 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                 <option value="TABUNGAN">Tabungan (Savings)</option>
                                                 <option value="LAINNYA">Lainnya (Others)</option>
                                             </Form.Select>
+                                            {account.bankAccountType === 'LAINNYA' && (
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="Please specify the bank account type"
+                                                    value={account.bankAccountTypeOther || ''}
+                                                    onChange={(e) => updateBankAccount(index, 'bankAccountTypeOther', e.target.value)}
+                                                    className="mt-2"
+                                                    required
+                                                />
+                                            )}
                                         </Form.Group>
                                     </Col>
                                 </Row>
@@ -797,172 +842,6 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
 
             <Form>
                 {/* Yang mengisi formulir di bawah ini */}
-                <Card className="mb-4 border-0 shadow-sm">
-                    <Card.Header className="bg-light border-0 py-2">
-                        <h6 className="mb-0 text-primary">Yang mengisi formulir di bawah ini:</h6>
-                    </Card.Header>
-                    <Card.Body>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter full name"
-                                        value={data.formFillerName || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerName: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Tempat Lahir <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter place of birth"
-                                        value={data.formFillerPlaceOfBirth || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerPlaceOfBirth: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Tanggal Lahir <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        value={data.formFillerDateOfBirth || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerDateOfBirth: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. KTP / SIM / Paspor <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter ID/Passport number"
-                                        value={data.formFillerIdNo || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerIdNo: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Row>
-                            <Col md={12}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Alamat <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        placeholder="Enter complete address"
-                                        value={data.formFillerAddress || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerAddress: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kota <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter city"
-                                        value={data.formFillerCity || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerCity: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kode Pos <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter postal code"
-                                        value={data.formFillerPostalCode || ''}
-                                        onChange={(e) => onChange({ ...data, formFillerPostalCode: e.target.value })}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. Akun Demo <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter demo account number"
-                                value={data.formFillerDemoAccount || ''}
-                                onChange={(e) => onChange({ ...data, formFillerDemoAccount: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-
-                        {/* Simulation Statement */}
-                        <Card className="mt-4 border-primary">
-                            <Card.Body className="p-3">
-                                <p className="mb-3 text-dark">
-                                    Dengan mengisi kolom, "YA" dibawah ini saya menyatakan bahwa saya telah melakukan simulasi bertransaksi di 
-                                    bidang Perdagangan Berjangka Komoditi pada PT. GENESIS GEMILANG FUTURES, dan telah memahami tata cara 
-                                    bertransaksi di bidang Perdagangan Berjangka komoditi.
-                                </p>
-                                <p className="mb-3 text-dark">
-                                    Demikian Pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, sehat jasmani dan rohani serta tanpa 
-                                    paksaan apapun dari pihak manapun.
-                                </p>
-                                
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="fw-bold">Pernyataan Menerima / Tidak</Form.Label>
-                                    <div className="d-flex gap-4 mt-2">
-                                        <Form.Check
-                                            type="radio"
-                                            name="statementAcceptance"
-                                            id="accept-statement"
-                                            label="Ya"
-                                            value="ya"
-                                            checked={data.statementAcceptance === 'ya'}
-                                            onChange={(e) => onChange({ ...data, statementAcceptance: e.target.value })}
-                                            required
-                                        />
-                                        <Form.Check
-                                            type="radio"
-                                            name="statementAcceptance"
-                                            id="decline-statement"
-                                            label="Tidak"
-                                            value="tidak"
-                                            checked={data.statementAcceptance === 'tidak'}
-                                            onChange={(e) => onChange({ ...data, statementAcceptance: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                </Form.Group>
-
-                                <Form.Group className="mb-0">
-                                    <Form.Label>Menerima Pada Tanggal</Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        value={data.acceptanceDate || ''}
-                                        onChange={(e) => onChange({ ...data, acceptanceDate: e.target.value })}
-                                        className="mt-2"
-                                        style={{ maxWidth: '200px' }}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Card.Body>
-                        </Card>
-                    </Card.Body>
-                </Card>
 
                 {/* PENERIMA KUASA (NON ORANG PERSEORANGAN) */}
                 <h5 className="text-primary mb-3 mt-4">PENERIMA KUASA (NON ORANG PERSEORANGAN)</h5>
@@ -971,7 +850,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter full name"
@@ -983,7 +862,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Tempat Lahir <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Tempat Lahir <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter place of birth"
@@ -998,7 +877,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Tanggal Lahir <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Tanggal Lahir <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="date"
                                 value={data.dateOfBirth || ''}
@@ -1009,7 +888,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. KTP / SIM / Paspor <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. KTP / SIM / Paspor <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter ID/Passport number"
@@ -1024,7 +903,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. NPWP <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. NPWP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter NPWP number"
@@ -1036,7 +915,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Jenis Kelamin <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Jenis Kelamin <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.gender || ''}
                                 onChange={(e) => onChange({ ...data, gender: e.target.value })}
@@ -1053,7 +932,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Ibu Kandung <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nama Ibu Kandung <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter mother's name"
@@ -1065,17 +944,17 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Status Perkawinan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Status Perkawinan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.maritalStatus || ''}
                                 onChange={(e) => onChange({ ...data, maritalStatus: e.target.value })}
                                 required
                             >
                                 <option value="">Select marital status</option>
-                                <option value="BELUM_KAWIN">Belum Kawin (Single)</option>
+                                <option value="BELUM_KAWIN">Lajang (Single)</option>
                                 <option value="KAWIN">Kawin (Married)</option>
-                                <option value="CERAI">Cerai (Divorced)</option>
-                                <option value="JANDA_DUDA">Janda/Duda (Widow/Widower)</option>
+                                <option value="CERAI">Janda (Widow)</option>
+                                <option value="JANDA_DUDA">Duda (Widower)</option>
                             </Form.Select>
                         </Form.Group>
                     </Col>
@@ -1084,7 +963,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kewarganegaraan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kewarganegaraan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter nationality"
@@ -1101,7 +980,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter street address"
@@ -1113,7 +992,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter city"
@@ -1128,7 +1007,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter postal code"
@@ -1145,7 +1024,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>No. Telepon Rumah (Home Telephone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. Telepon Rumah (Home Telephone No.) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter home telephone number"
@@ -1157,7 +1036,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter handphone number"
@@ -1172,7 +1051,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. Faksimili Rumah</Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. Faksimili Rumah</Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter home fax number (optional)"
@@ -1183,7 +1062,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Email <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Email <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter email address"
@@ -1199,10 +1078,10 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Status Kepemilikan Rumah (Home Ownership Status) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Status Kepemilikan Rumah (Home Ownership Status) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.homeOwnershipStatus || ''}
-                                onChange={(e) => onChange({ ...data, homeOwnershipStatus: e.target.value })}
+                                onChange={(e) => onChange({ ...data, homeOwnershipStatus: e.target.value, ...(e.target.value !== 'LAINNYA' && { homeOwnershipStatusOther: '' }) })}
                                 required
                             >
                                 <option value="">Select home ownership status</option>
@@ -1211,14 +1090,24 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 <option value="SEWA_KONTRAK">Sewa/Kontrak (Lease/Contract)</option>
                                 <option value="LAINNYA">Lainnya (Others)</option>
                             </Form.Select>
+                            {data.homeOwnershipStatus === 'LAINNYA' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the home ownership status"
+                                    value={data.homeOwnershipStatusOther || ''}
+                                    onChange={(e) => onChange({ ...data, homeOwnershipStatusOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Tujuan Pembukaan Rekening (Purpose of Account Opening) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '48px' }}>Tujuan Pembukaan Rekening (Purpose of Account Opening) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.accountOpeningPurpose || ''}
-                                onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value })}
+                                onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value, ...(e.target.value !== 'LAINNYA' && { accountOpeningPurposeOther: '' }) })}
                                 required
                             >
                                 <option value="">Select purpose</option>
@@ -1227,6 +1116,16 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 <option value="SPEKULASI">Spekulasi (Speculation)</option>
                                 <option value="LAINNYA">Lainnya (Others)</option>
                             </Form.Select>
+                            {data.accountOpeningPurpose === 'LAINNYA' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the purpose of account opening"
+                                    value={data.accountOpeningPurposeOther || ''}
+                                    onChange={(e) => onChange({ ...data, accountOpeningPurposeOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1245,7 +1144,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="investmentExperience"
                                     value="YA_BIDANG"
                                     checked={data.investmentExperience === 'YA_BIDANG'}
-                                    onChange={(e) => onChange({ ...data, investmentExperience: e.target.value })}
+                                    onChange={(e) => onChange({ ...data, investmentExperience: e.target.value, ...(e.target.value !== 'YA_BIDANG' && { investmentExperienceExplanation: '' }) })}
                                 />
                                 <Form.Check
                                     inline
@@ -1254,9 +1153,19 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="investmentExperience"
                                     value="TIDAK"
                                     checked={data.investmentExperience === 'TIDAK'}
-                                    onChange={(e) => onChange({ ...data, investmentExperience: e.target.value })}
+                                    onChange={(e) => onChange({ ...data, investmentExperience: e.target.value, ...(e.target.value !== 'YA_BIDANG' && { investmentExperienceExplanation: '' }) })}
                                 />
                             </div>
+                            {data.investmentExperience === 'YA_BIDANG' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Explain investment experience"
+                                    value={data.investmentExperienceExplanation || ''}
+                                    onChange={(e) => onChange({ ...data, investmentExperienceExplanation: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1352,7 +1261,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact full name"
@@ -1364,7 +1273,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter emergency contact handphone"
@@ -1380,7 +1289,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Jalan (Street Name) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nama Jalan (Street Name) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact street address"
@@ -1392,7 +1301,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact city"
@@ -1407,7 +1316,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact postal code"
@@ -1419,10 +1328,10 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Hubungan dengan anda (Relationship) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Hubungan dengan anda (Relationship) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.emergencyContactRelationship || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactRelationship: e.target.value })}
+                                onChange={(e) => onChange({ ...data, emergencyContactRelationship: e.target.value, ...(e.target.value !== 'LAINNYA' && { emergencyContactRelationshipOther: '' }) })}
                                 required
                             >
                                 <option value="">Select relationship</option>
@@ -1431,6 +1340,16 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 <option value="ANAK">Anak (Child)</option>
                                 <option value="LAINNYA">Lainnya (Others)</option>
                             </Form.Select>
+                            {data.emergencyContactRelationship === 'LAINNYA' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the relationship"
+                                    value={data.emergencyContactRelationshipOther || ''}
+                                    onChange={(e) => onChange({ ...data, emergencyContactRelationshipOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1441,10 +1360,22 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Pekerjaan Penerima Kuasa (Job of Power of Attorney) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Pekerjaan Penerima Kuasa (Job of Power of Attorney) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jobOfPowerOfAttorney || ''}
-                                onChange={(e) => onChange({ ...data, jobOfPowerOfAttorney: e.target.value })}
+                                onChange={(e) => onChange({ 
+                                    ...data, 
+                                    jobOfPowerOfAttorney: e.target.value, 
+                                    ...(e.target.value !== 'LAINNYA' && { jobOfPowerOfAttorneyOther: '' }),
+                                    // Clear employment fields if job type doesn't require them
+                                    ...(!['SWASTA', 'WIRASWASTA', 'ASN'].includes(e.target.value) && {
+                                        employmentCompanyName: '',
+                                        businessField: '',
+                                        employmentPosition: '',
+                                        lengthOfWork: '',
+                                        previousCompany: ''
+                                    })
+                                })}
                                 required
                             >
                                 <option value="">Select job</option>
@@ -1456,11 +1387,27 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 <option value="MAHASISWA">Mahasiswa (Student)</option>
                                 <option value="LAINNYA">Lainnya (Others)</option>
                             </Form.Select>
+                            {data.jobOfPowerOfAttorney === 'LAINNYA' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify the job of power of attorney"
+                                    value={data.jobOfPowerOfAttorneyOther || ''}
+                                    onChange={(e) => onChange({ ...data, jobOfPowerOfAttorneyOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
+                </Row>
+
+                {/* Show employment details only for specific job types */}
+                {['SWASTA', 'WIRASWASTA', 'ASN'].includes(data.jobOfPowerOfAttorney) && (
+                    <>
+                        <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Nama Perusahaan Tempat Bekerja <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label style={{ minHeight: '24px' }}>Nama Perusahaan Tempat Bekerja <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company name"
@@ -1470,12 +1417,9 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             />
                         </Form.Group>
                     </Col>
-                </Row>
-
-                <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Bidang Usaha <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label style={{ minHeight: '24px' }}>Bidang Usaha <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter business field"
@@ -1485,9 +1429,12 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             />
                         </Form.Group>
                     </Col>
+                        </Row>
+
+                        <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Jabatan (Position) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label style={{ minHeight: '24px' }}>Jabatan (Position) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter position"
@@ -1497,12 +1444,9 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             />
                         </Form.Group>
                     </Col>
-                </Row>
-
-                <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Lama Bekerja (Length of Work) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label style={{ minHeight: '24px' }}>Lama Bekerja (Length of Work) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="e.g. 3 years, 2 months"
@@ -1512,9 +1456,12 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             />
                         </Form.Group>
                     </Col>
+                        </Row>
+
+                        <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kantor Sebelumnya (Previous Company)</Form.Label>
+                                    <Form.Label style={{ minHeight: '24px' }}>Kantor Sebelumnya (Previous Company) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter previous company (optional)"
@@ -1524,13 +1471,15 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                         </Form.Group>
                     </Col>
                 </Row>
+                    </>
+                )}
 
                 {/* Office Address */}
                 <h6 className="text-primary mb-3 mt-4">Alamat Kantor (Office Address)</h6>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter office street address"
@@ -1542,7 +1491,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter office city"
@@ -1557,7 +1506,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter office postal code"
@@ -1569,7 +1518,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px', display: 'flex', alignItems: 'end' }}>No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
                             <Row>
                                 <Col md={4}>
                                     <Form.Select
@@ -1604,7 +1553,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>No. Faksimili (Optional)</Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>No. Faksimili (Optional)</Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter office fax number (optional)"
@@ -1622,7 +1571,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Penghasilan Pertahun (Annual Income) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Penghasilan Pertahun (Annual Income) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.annualIncome || ''}
                                 onChange={(e) => onChange({ ...data, annualIncome: e.target.value })}
@@ -1637,7 +1586,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Lokasi rumah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Lokasi rumah <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter house location"
@@ -1652,7 +1601,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Nilai NJOP <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Nilai NJOP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter NJOP value"
@@ -1664,7 +1613,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Bank Deposit <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Bank Deposit <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter bank deposit amount"
@@ -1679,7 +1628,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Jumlah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Jumlah <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter total amount"
@@ -1691,7 +1640,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px', display: 'flex', alignItems: 'end' }}>Lainnya</Form.Label>
+                            <Form.Label style={{ minHeight: '24px' }}>Lainnya</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter other assets (optional)"
@@ -1801,14 +1750,28 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
     }, []);
 
     // All required fields for validation
-    const allRequiredFields = [
-        'statementRead', 'statementUnderstanding', 'tradingExperience', 'brokerCompany',
+    const baseRequiredFields = [
+        'companyProfileRead', 'companyProfileUnderstanding',
+        'statementRead', 'statementUnderstanding', 'tradingExperience',
         'experienceStatementRead', 'experienceUnderstanding',
         'applicationStatementRead', 'applicationUnderstanding',
+        'riskDisclosureRead', 'riskDisclosureUnderstanding',
         'mandateStatementRead', 'baktiArbitration', 'mandateUnderstanding',
         'tradingRulesRead', 'tradingRulesUnderstanding',
         'personalAccessPasswordRead', 'personalAccessPasswordUnderstanding'
     ];
+
+    // Add conditional fields based on trading experience
+    const conditionalFields = data.tradingExperience === 'ya' ? ['brokerCompany', 'demoAccountNumber'] : [];
+    
+    // Add individual risk statement fields (only required when risk disclosure is read)
+    const riskStatementFields = data.riskDisclosureRead ? [
+        'riskStatement1', 'riskStatement2', 'riskStatement3', 'riskStatement4', 'riskStatement5',
+        'riskStatement6', 'riskStatement7', 'riskStatement8', 'riskStatement9', 'riskStatement10',
+        'riskStatement11', 'riskStatement12', 'riskStatement13', 'riskStatement14'
+    ] : [];
+    
+    const allRequiredFields = [...baseRequiredFields, ...conditionalFields, ...riskStatementFields];
 
     const isFieldMissing = (field) => !data[field];
     const hasValidationErrors = allRequiredFields.some(isFieldMissing);
@@ -1820,10 +1783,61 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                 <p className="text-muted fs-5">Please review all required documents and provide confirmations</p>
             </div>
 
-            {/* 1. Statement Of Having Simulation */}
+            {/* 1. Company Profile */}
             <Card className="border-primary mb-4">
                 <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">1. Pernyataan Simulasi (Statement Of Having Simulation)</h6>
+                    <h6 className="mb-0 text-primary">1. Profil Perusahaan PT.Genesis Gemilang Futures</h6>
+                </Card.Header>
+                <Card.Body>
+                    <Form.Check
+                        type="checkbox"
+                        id="company-profile-read-check"
+                        label="Baca Profil Perusahaan PT. Genesis Gemilang Futures"
+                        checked={data.companyProfileRead || false}
+                        onChange={(e) => onChange({ ...data, companyProfileRead: e.target.checked })}
+                        className="fs-6 fw-bold mb-3"
+                        required
+                    />
+
+                    {data.companyProfileRead && (
+                        <div className="mb-3">
+                            <div style={{ height: '400px', border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden' }}>
+                                <iframe
+                                    src="/documents/kyc/indonesian-company/Company Profile 240705.pdf"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 'none' }}
+                                >
+                                    <a href="/documents/kyc/indonesian-company/Company Profile 240705.pdf" target="_blank" rel="noopener noreferrer">
+                                        Download PDF
+                                    </a>
+                                </iframe>
+                            </div>
+                        </div>
+                    )}
+
+                    <Form.Check
+                        type="checkbox"
+                        id="company-profile-understanding"
+                        checked={data.companyProfileUnderstanding || false}
+                        onChange={(e) => onChange({ ...data, companyProfileUnderstanding: e.target.checked })}
+                        required
+                        label={
+                            <>
+                                Saya menyatakan bahwa saya telah membaca dan menerima informasi, mengerti dan memahami isinya{' '}
+                                <a href="https://drive.google.com/file/d/your-company-profile-link" target="_blank" rel="noopener noreferrer" className="text-primary text-decoration-underline">
+                                    COMPANY PROFILE PT. Genesis Gemilang Futures
+                                </a>. <span className="text-danger">*</span>
+                            </>
+                        }
+                    />
+                </Card.Body>
+            </Card>
+
+            {/* 2. Statement Of Having Simulation */}
+            <Card className="border-primary mb-4">
+                <Card.Header className="bg-light border-0 py-2">
+                    <h6 className="mb-0 text-primary">2. Pernyataan Simulasi (Statement Of Having Simulation)</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Check
@@ -1873,23 +1887,69 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                     <Form.Group className="mb-3">
                         <Form.Label className="fw-bold text-dark mb-2">Pengalaman Transaksi Perdagangan Berjangka <span className="text-danger">*</span></Form.Label>
                         <div className="d-flex gap-4">
-                            <Form.Check type="radio" name="tradingExperience" label="Ya (Yes)" value="ya" checked={data.tradingExperience === 'ya'} onChange={(e) => onChange({ ...data, tradingExperience: e.target.value })} required />
-                            <Form.Check type="radio" name="tradingExperience" label="Tidak (No)" value="tidak" checked={data.tradingExperience === 'tidak'} onChange={(e) => onChange({ ...data, tradingExperience: e.target.value })} required />
+                            <Form.Check 
+                                type="radio" 
+                                name="tradingExperience" 
+                                label="Ya (Yes)" 
+                                value="ya" 
+                                checked={data.tradingExperience === 'ya'} 
+                                onChange={(e) => onChange({ 
+                                    ...data, 
+                                    tradingExperience: e.target.value,
+                                    ...(e.target.value !== 'ya' && { brokerCompany: '', demoAccountNumber: '' })
+                                })} 
+                                required 
+                            />
+                            <Form.Check 
+                                type="radio" 
+                                name="tradingExperience" 
+                                label="Tidak (No)" 
+                                value="tidak" 
+                                checked={data.tradingExperience === 'tidak'} 
+                                onChange={(e) => onChange({ 
+                                    ...data, 
+                                    tradingExperience: e.target.value,
+                                    ...(e.target.value !== 'ya' && { brokerCompany: '', demoAccountNumber: '' })
+                                })} 
+                                required 
+                            />
                         </div>
                     </Form.Group>
 
-                    <Form.Group className="mb-0">
+                    {data.tradingExperience === 'ya' && (
+                        <>
+                            <Form.Group className="mb-3">
                         <Form.Label className="fw-bold text-dark mb-2">Sebutkan Perusahaan Pialang <span className="text-danger">*</span></Form.Label>
-                        <Form.Control type="text" placeholder="Enter broker company name" value={data.brokerCompany || ''} onChange={(e) => onChange({ ...data, brokerCompany: e.target.value })} required />
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Enter broker company name" 
+                                    value={data.brokerCompany || ''} 
+                                    onChange={(e) => onChange({ ...data, brokerCompany: e.target.value })} 
+                                    required 
+                                />
                         <Form.Text className="text-muted">Broker Company</Form.Text>
                     </Form.Group>
+
+                            <Form.Group className="mb-0">
+                                <Form.Label className="fw-bold text-dark mb-2">No Demo Akun (Pengalaman Transaksi) <span className="text-danger">*</span></Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    placeholder="Enter demo account number" 
+                                    value={data.demoAccountNumber || ''} 
+                                    onChange={(e) => onChange({ ...data, demoAccountNumber: e.target.value })} 
+                                    required 
+                                />
+                                <Form.Text className="text-muted">Demo Account Number</Form.Text>
+                            </Form.Group>
+                        </>
+                    )}
                 </Card.Body>
             </Card>
 
-            {/* 2. Statement Of Having Experience */}
+            {/* 3. Statement Of Having Experience */}
             <Card className="border-primary mb-4">
                 <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">2. Pernyataan Pengalaman Transaksi (Statement Of Having Experience)</h6>
+                    <h6 className="mb-0 text-primary">3. Pernyataan Pengalaman Transaksi (Statement Of Having Experience)</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Check
@@ -1937,10 +1997,10 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                 </Card.Body>
             </Card>
 
-            {/* 3. Account Opening Application */}
+            {/* 4. Account Opening Application */}
             <Card className="border-primary mb-4">
                 <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">3. Aplikasi Pembukaan Rekening Transaksi (Account Opening Application)</h6>
+                    <h6 className="mb-0 text-primary">4. Aplikasi Pembukaan Rekening Transaksi (Account Opening Application)</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Check
@@ -1988,10 +2048,244 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                 </Card.Body>
             </Card>
 
-            {/* 4. Mandate Agreement */}
+            {/* 5. Risk Disclosure */}
             <Card className="border-primary mb-4">
                 <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">4. Perjanjian Pemberian Amanat (Mandate Agreement)</h6>
+                    <h6 className="mb-0 text-primary">5. Pemberitahuan Adanya Risiko (Risk Disclosure)</h6>
+                </Card.Header>
+                <Card.Body>
+                    <div className="mb-4">
+                        <p className="text-dark mb-3">
+                            Dokumen Pemberitahuan Adanya Risiko ini disampaikan kepada Anda sesuai dengan Pasal 50 ayat (2) Undang-Undang Nomor 32 Tahun 1997 tentang Perdagangan Berjangka Komoditi sebagaimana diubah dengan Undang-Undang Nomor 10 Tahun 2011 tentang Perubahan Undang-Undang Nomor 32 Tahun 1997 tentang Perdagangan Berjangka Komoditi.
+                        </p>
+                        <p className="text-dark mb-3">
+                            Maksud dokumen ini adalah memberitahukan bahwa kemungkinan kerugian atau keuntungan dalam perdagangan Kontrak Berjangka bisa mencapai jumlah yang sangat besar. Oleh karena itu, Anda harus berhati-hati dalam memutuskan untuk melakukan transaksi, apakah kondisi keuangan Anda mencukupi.
+                        </p>
+                    </div>
+
+                    <Form.Check
+                        type="checkbox"
+                        id="risk-disclosure-read-check"
+                        label="Baca Pemberitahuan Adanya Risiko (Read Risk Disclosure)"
+                        checked={data.riskDisclosureRead || false}
+                        onChange={(e) => onChange({ ...data, riskDisclosureRead: e.target.checked })}
+                        className="fs-6 fw-bold mb-3"
+                        required
+                    />
+
+                    {data.riskDisclosureRead && (
+                        <div className="mb-4 border rounded p-4 bg-light">
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">1. Perdagangan Kontrak Berjangka belum tentu layak bagi semua investor. Anda dapat menderita kerugian dalam jumlah besar dan dalam jangka waktu singkat.</p>
+                                <p className="mb-3">Jumlah kerugian uang dimungkinkan dapat melebihi jumlah uang yang pertama kali Anda setor (Margin awal) ke Pialang Berjangka Anda. Anda mungkin menderita kerugian seluruh Margin dan Margin tambahan yang ditempatkan pada Pialang Berjangka untuk mempertahankan posisi Kontrak Berjangka Anda. Hal ini disebabkan Perdagangan Berjangka sangat dipengaruhi oleh mekanisme leverage, dimana dengan jumlah investasi dalam bentuk yang relatif kecil dapat digunakan untuk membuka posisi dengan aset yang bernilai jauh lebih tinggi. Apabila Anda tidak siap dengan risiko seperti ini, sebaiknya Anda tidak melakukan perdagangan Kontrak Berjangka.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-1"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement1 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement1: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">2. Perdagangan Kontrak Berjangka mempunyai risiko dan mempunyai kemungkinan kerugian yang tidak terbatas yang jauh lebih besar dari jumlah uang yang disetor (Margin) ke Pialang Berjangka.</p>
+                                <p className="mb-3">Kontrak Berjangka sama dengan produk keuangan lainnya yang mempunyai risiko tinggi, Anda sebaiknya tidak menaruh risiko terhadap dana yang Anda tidak siap untuk menderita rugi, seperti tabungan pensiun, dana kesehatan atau dana untuk keadaan darurat, dana yang disediakan untuk pendidikan atau kepemilikan rumah, dana yang diperoleh dari pinjaman pendidikan atau gadai, atau dana yang digunakan untuk memenuhi kebutuhan sehari-hari.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-2"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement2 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement2: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">3. Berhati-hatilah terhadap pernyataan bahwa Anda pasti mendapatkan keuntungan besar dari perdagangan Kontrak Berjangka.</p>
+                                <p className="mb-3">Meskipun perdagangan Kontrak Berjangka dapat memberikan keuntungan yang besar dan cepat, namun hal tersebut tidak pasti, bahkan dapat menimbulkan kerugian yang besar dan cepat juga. Seperti produk keuangan lainnya, tidak ada yang dinamakan "pasti untung".</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-3"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement3 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement3: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">4. Disebabkan adanya mekanisme leverage dan sifat dari transaksi Kontrak Berjangka, Anda dapat merasakan dampak bahwa Anda menderita kerugian dalam waktu cepat.</p>
+                                <p className="mb-3">Keuntungan maupun kerugian dalam transaksi Kontrak Berjangka akan langsung dikredit atau didebet ke rekening Anda, paling lambat secara harian. Apabila pergerakan di pasar terhadap Kontrak Berjangka menurunkan nilai posisi Anda dalam Kontrak Berjangka, Anda diwajibkan untuk menambah dana untuk pemenuhan kewajiban Margin ke Pialang Berjangka. Apabila rekening Anda berada dibawah minimum Margin yang telah ditetapkan Lembaga Kliring Berjangka atau Pialang Berjangka, maka posisi Anda dapat dilikuidasi pada saat rugi, dan Anda wajib menyelesaikan defisit (jika ada) dalam rekening Anda.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-4"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement4 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement4: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">5. Pada saat pasar dalam keadaan tertentu, Anda mungkin akan sulit atau tidak mungkin melikuidasi posisi.</p>
+                                <p className="mb-3">Pada umumnya Anda harus melakukan transaksi offset jika ingin melikuidasi posisi dalam Kontrak Berjangka. Apabila Anda tidak dapat melikuidasi posisi Kontrak Berjangka, Anda tidak dapat merealisasikan keuntungan pada nilai posisi tersebut atau mencegah kerugian yang lebih tinggi. Kemungkinan tidak dapat melikuidasi dapat terjadi, antara lain: jika perdagangan dihentikan dikarenakan aktivitas perdagangan yang tidak lazim pada Kontrak Berjangka atau subjek Kontrak Berjangka, terjadi kerusakan sistem pada Bursa Berjangka atau Pialang Berjangka, atau posisi Anda berada dalam pasar yang tidak likuid. Bahkan apabila Anda dapat melikuidasi posisi tersebut, Anda mungkin terpaksa melakukannya pada harga yang menimbulkan kerugian besar.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-5"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement5 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement5: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">6. Pada saat pasar dalam keadaan tertentu, Anda mungkin akan sulit atau tidak mungkin mengelola risiko atas posisi terbuka Kontrak Berjangka dengan cara membuka posisi dengan nilai yang sama namun dengan posisi yang berlawanan dalam kontrak bulan yang berbeda, dalam pasar yang berbeda atau dalam "subjek Kontrak Berjangka" yang berbeda.</p>
+                                <p className="mb-3">Kemungkinan untuk tidak dapat mengambil posisi dalam rangka membatasi risiko yang timbul, contohnya: jika perdagangan dihentikan pada pasar yang berbeda disebabkan aktivitas perdagangan yang tidak lazim pada Kontrak Berjangka atau "subjek Kontrak Berjangka".</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-6"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement6 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement6: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">7. Anda dapat diwajibkan untuk menyelesaikan Kontrak Berjangka dengan penyerahan fisik dari "subjek Kontrak Berjangka".</p>
+                                <p className="mb-3">Jika Anda mempertahankan posisi penyerahan fisik dalam Kontrak Berjangka sampai hari terakhir perdagangan berdasarkan tanggal jatuh tempo Kontrak Berjangka, Anda akan diwajibkan menyerahkan atau menerima penyerahan "subjek Kontrak Berjangka" yang dapat mengakibatkan adanya penambahan biaya. Pengertian penyerahan dapat berbeda untuk suatu Kontrak Berjangka dengan Kontrak Berjangka lainnya atau suatu Bursa Berjangka dengan Bursa Berjangka lainnya. Anda harus melihat secara teliti mengenai penyerahan dan kondisi penyerahan sebelum membeli atau menjual Kontrak Berjangka.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-7"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement7 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement7: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">8. Anda dapat menderita kerugian yang disebabkan kegagalan sistem informasi.</p>
+                                <p className="mb-3">Sebagaimana yang terjadi pada setiap transaksi keuangan, Anda dapat menderita kerugian jika amanat untuk melaksanakan transaksi Kontrak Berjangka tidak dapat dilakukan karena kegagalan sistem informasi di Bursa Berjangka, penyelenggara maupun sistem informasi di Pialang Berjangka yang mengelola posisi Anda. Kerugian Anda akan semakin besar jika Pialang Berjangka yang mengelola posisi Anda tidak memiliki sistem informasi cadangan atau prosedur yang layak.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-8"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement8 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement8: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">9. Semua Kontrak Berjangka mempunyai risiko, dan tidak ada strategi berdagang yang dapat menjamin untuk menghilangkan risiko tersebut.</p>
+                                <p className="mb-3">Strategi dengan menggunakan kombinasi posisi seperti spread, dapat sama berisiko seperti posisi long atau short. Melakukan Perdagangan Berjangka memerlukan pengetahuan mengenai Kontrak Berjangka dan pasar berjangka.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-9"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement9 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement9: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">10. Strategi perdagangan harian dalam Kontrak Berjangka dan produk lainnya memiliki risiko khusus.</p>
+                                <p className="mb-3">Seperti pada produk keuangan lainnya, pihak yang ingin membeli atau menjual Kontrak Berjangka yang sama dalam satu hari untuk mendapat keuntungan dari perubahan harga pada hari tersebut ("day traders") akan memiliki beberapa risiko tertentu antara lain jumlah komisi yang besar, risiko terkena efek pengungkit ("exposure to leverage"), dan persaingan dengan pedagang profesional. Anda harus mengerti risiko tersebut dan memiliki pengalaman yang memadai sebelum melakukan perdagangan harian ("day trading").</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-10"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement10 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement10: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">11. Menetapkan amanat bersyarat, seperti Kontrak Berjangka dilikuidasi pada keadaan tertentu untuk membatasi rugi (stop loss), mungkin tidak akan dapat membatasi kerugian Anda sampai jumlah tertentu saja.</p>
+                                <p className="mb-3">Amanat bersyarat tersebut mungkin tidak dapat dilaksanakan karena terjadi kondisi pasar yang tidak memungkinkan melikuidasi Kontrak Berjangka.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-11"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement11 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement11: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">12. Anda harus membaca dengan seksama dan memahami Perjanjian Pemberian Amanat dengan Pialang Berjangka Anda sebelum melakukan transaksi Kontrak Berjangka.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-12"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement12 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement12: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">13. Pernyataan singkat ini tidak dapat memuat secara rinci seluruh risiko atau aspek penting lainnya tentang Perdagangan Berjangka.</p>
+                                <p className="mb-3">Oleh karena itu Anda harus mempelajari kegiatan Perdagangan Berjangka secara cermat sebelum memutuskan melakukan transaksi.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-13"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement13 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement13: e.target.checked })}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <p className="fw-bold mb-3">14. Dokumen Pemberitahuan Adanya Risiko (Risk Disclosure) ini dibuat dan ditandatangani dalam Bahasa Indonesia.</p>
+                                <Form.Check
+                                    type="checkbox"
+                                    id="risk-statement-14"
+                                    label="Saya Sudah membaca dan memahami"
+                                    checked={data.riskStatement14 || false}
+                                    onChange={(e) => onChange({ ...data, riskStatement14: e.target.checked })}
+                                    required
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="border rounded p-3 bg-light mb-3">
+                        <h6 className="text-center fw-bold mb-3">PERNYATAAN MENERIMA PEMBERITAHUAN ADANYA RISIKO</h6>
+                        <p className="text-center mb-3">
+                            Dengan mengisi kolom "YA" di bawah, saya menyatakan bahwa saya telah menerima "DOKUMEN PEMBERITAHUAN ADANYA RISIKO" mengerti dan menyetujui isinya.
+                        </p>
+                        <Form.Check
+                            type="checkbox"
+                            id="risk-disclosure-understanding"
+                            checked={data.riskDisclosureUnderstanding || false}
+                            onChange={(e) => onChange({ ...data, riskDisclosureUnderstanding: e.target.checked })}
+                            required
+                            label={
+                                <>
+                                    Ya, Saya menyatakan bahwa saya telah membaca dan menerima informasi, mengerti dan memahami isinya{' '}
+                                    <a href="/documents/kyc/indonesian-company/Risk Disclosure 240705.pdf" target="_blank" rel="noopener noreferrer" className="text-primary text-decoration-underline">
+                                        Risk Disclosure
+                                    </a>.<span className="text-danger">*</span>
+                                </>
+                            }
+                            className="text-center"
+                        />
+                    </div>
+                </Card.Body>
+            </Card>
+
+            {/* 6. Mandate Agreement */}
+            <Card className="border-primary mb-4">
+                <Card.Header className="bg-light border-0 py-2">
+                    <h6 className="mb-0 text-primary">6. Perjanjian Pemberian Amanat (Mandate Agreement)</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Check
@@ -2051,10 +2345,10 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                 </Card.Body>
             </Card>
 
-            {/* 5. Trading Rules */}
+            {/* 7. Trading Rules */}
             <Card className="border-primary mb-4">
                 <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">5. Peraturan Transaksi (Trading Rules)</h6>
+                    <h6 className="mb-0 text-primary">7. Peraturan Transaksi (Trading Rules)</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Check
@@ -2102,10 +2396,10 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                 </Card.Body>
             </Card>
 
-            {/* 6. Personal Access Password */}
+            {/* 8. Personal Access Password */}
             <Card className="border-primary mb-4">
                 <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">6. Kode Akses Transaksi Nasabah (Personal Access Password)</h6>
+                    <h6 className="mb-0 text-primary">8. Kode Akses Transaksi Nasabah (Personal Access Password)</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Check
@@ -2159,14 +2453,22 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                     <i className="mdi mdi-alert-outline me-2"></i>
                     Please complete all required fields before proceeding:
                     <ul className="mb-0 mt-2">
+                        {isFieldMissing('companyProfileRead') && <li>Read Company Profile PT. Genesis Gemilang Futures</li>}
+                        {isFieldMissing('companyProfileUnderstanding') && <li>Confirm understanding of Company Profile PT. Genesis Gemilang Futures</li>}
                         {isFieldMissing('statementRead') && <li>Read Statement Of Having Simulation</li>}
                         {isFieldMissing('statementUnderstanding') && <li>Confirm understanding of Statement Of Having Simulation</li>}
                         {isFieldMissing('tradingExperience') && <li>Select your trading experience</li>}
-                        {isFieldMissing('brokerCompany') && <li>Enter broker company name</li>}
+                        {isFieldMissing('brokerCompany') && data.tradingExperience === 'ya' && <li>Enter broker company name</li>}
+                        {isFieldMissing('demoAccountNumber') && data.tradingExperience === 'ya' && <li>Enter demo account number</li>}
                         {isFieldMissing('experienceStatementRead') && <li>Read Statement Of Having Experience</li>}
                         {isFieldMissing('experienceUnderstanding') && <li>Confirm understanding of Statement Of Having Experience</li>}
                         {isFieldMissing('applicationStatementRead') && <li>Read Account Opening Application</li>}
                         {isFieldMissing('applicationUnderstanding') && <li>Confirm understanding of Account Opening Application</li>}
+                        {isFieldMissing('riskDisclosureRead') && <li>Read Risk Disclosure</li>}
+                        {isFieldMissing('riskDisclosureUnderstanding') && <li>Confirm understanding of Risk Disclosure</li>}
+                        {data.riskDisclosureRead && [1,2,3,4,5,6,7,8,9,10,11,12,13,14].map(num => 
+                            isFieldMissing(`riskStatement${num}`) && <li key={num}>Accept Risk Statement {num}</li>
+                        ).filter(Boolean)}
                         {isFieldMissing('mandateStatementRead') && <li>Read Mandate Agreement</li>}
                         {isFieldMissing('baktiArbitration') && <li>Select dispute resolution method (BAKTI)</li>}
                         {isFieldMissing('mandateUnderstanding') && <li>Confirm understanding of Mandate Agreement</li>}
