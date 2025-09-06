@@ -28,8 +28,12 @@ const RegulatedCompanyForm = () => {
             description: "Authorized person details"
         },
         {
-            title: "Review & Submit",
-            description: "Final review"
+            title: "Authorize Person Document Upload",
+            description: "Required documents"
+        },
+        {
+            title: "Document Agreements",
+            description: "Terms and conditions"
         }
     ];
 
@@ -54,8 +58,7 @@ const RegulatedCompanyForm = () => {
             documents: [
                 "Management Structure",
                 "Ownership Structure",
-                "Beneficial Owner Passport",
-                "Authorize Person Passport"
+                "Beneficial Owner Passport"
             ]
         }
     ];
@@ -73,7 +76,9 @@ const RegulatedCompanyForm = () => {
             case 4:
                 return <AuthorizePersonStep data={stepData} onChange={updateFormData} />;
             case 5:
-                return <ReviewStep allData={allFormData} />;
+                return <PassportUploadStep data={stepData} onChange={updateFormData} />;
+            case 6:
+                return <DocumentAgreementsStep data={stepData} onChange={updateFormData} onSubmit={handleSubmit} allData={allFormData} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
@@ -610,24 +615,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
             </div>
 
             <Form>
-                {/* Authorize Person Title */}
                 <Row>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Authorize Person Title <span className="text-danger">*</span></Form.Label>
-                            <Form.Select
-                                value={data.authorizePersonTitle || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonTitle: e.target.value })}
-                                required
-                            >
-                                <option value="">Select title</option>
-                                <option value="MR">Mr.</option>
-                                <option value="MRS">Mrs.</option>
-                                <option value="MS">Ms.</option>
-                                <option value="DR">Dr.</option>
-                            </Form.Select>
-                        </Form.Group>
-                    </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label>Full Name <span className="text-danger">*</span></Form.Label>
@@ -636,6 +624,18 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 placeholder="Enter full name"
                                 value={data.authorizePersonFullName || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonFullName: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="email"
+                                placeholder="Enter email address"
+                                value={data.authorizePersonEmail || ''}
+                                onChange={(e) => onChange({ ...data, authorizePersonEmail: e.target.value })}
                                 required
                             />
                         </Form.Group>
@@ -683,12 +683,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Citizen <span className="text-danger">*</span></Form.Label>
                             <Form.Control
-                                type="email"
-                                placeholder="Enter email address"
-                                value={data.authorizePersonEmail || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonEmail: e.target.value })}
+                                type="text"
+                                placeholder="Enter citizenship"
+                                value={data.authorizePersonCitizen || ''}
+                                onChange={(e) => onChange({ ...data, authorizePersonCitizen: e.target.value })}
                                 required
                             />
                         </Form.Group>
@@ -729,23 +729,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 </Row>
 
                 <Row>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Citizen <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter citizenship"
-                                value={data.authorizePersonCitizen || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonCitizen: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col md={6}>
+                    <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Phone Number <span className="text-danger">*</span></Form.Label>
                             <Row>
-                                <Col md={4}>
+                                <Col md={3}>
                                     <Form.Select
                                         value={data.authorizePersonCountryCode || ''}
                                         onChange={(e) => onChange({ ...data, authorizePersonCountryCode: e.target.value })}
@@ -761,7 +749,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                         <option value="+91">+91 (IN)</option>
                                     </Form.Select>
                                 </Col>
-                                <Col md={8}>
+                                <Col md={9}>
                                     <Form.Control
                                         type="tel"
                                         placeholder="Enter phone number"
@@ -866,6 +854,19 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 />
                             </div>
                         </Form.Group>
+                        {data.authorizePersonInvestmentExperience === 'YES' && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Please describe your investment experience <span className="text-danger">*</span></Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    placeholder="Please describe your investment experience in detail..."
+                                    value={data.authorizePersonInvestmentDescription || ''}
+                                    onChange={(e) => onChange({ ...data, authorizePersonInvestmentDescription: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                        )}
                     </Col>
                 </Row>
 
@@ -930,7 +931,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Company Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Authorize Person Company Name <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company name"
@@ -970,7 +971,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 </Row>
 
                 {/* Office Address */}
-                <h6 className="text-primary mb-3">Office Address</h6>
+                <h6 className="text-primary mb-3">Authorize Person Office Address</h6>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -1013,7 +1014,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Country <span className="text-danger">*</span></Form.Label>
+                            <Form.Label>Authorize Person Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonOfficeCountry || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonOfficeCountry: e.target.value })}
@@ -1033,25 +1034,9 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                 </Row>
 
-                {/* Document Upload */}
-                <h5 className="text-primary mb-3 mt-4">Upload Documents</h5>
-                <Card className="mb-4 border-0 shadow-sm">
-                    <Card.Header className="bg-light border-0 py-2">
-                        <h6 className="mb-0 text-primary">Authorize Person Passport</h6>
-                    </Card.Header>
-                    <Card.Body>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Authorize Person Passport <span className="text-danger">*</span></Form.Label>
-                            <Form.Control type="file" accept=".pdf,.jpg,.jpeg,.png" required />
-                                <Form.Text className="text-muted">
-                                    Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                                </Form.Text>
-                            </Form.Group>
-                    </Card.Body>
-                </Card>
 
                 {/* Bank Accounts */}
-                <h5 className="text-primary mb-3 mt-4">Bank Accounts</h5>
+                <h5 className="text-primary mb-3 mt-4">Bank Accounts Deposit And Withdrawal</h5>
                 {bankAccounts.map((account, index) => (
                     <Card key={index} className="mb-3 border-0 shadow-sm">
                         <Card.Header className="bg-light border-0 py-2 d-flex justify-content-between align-items-center">
@@ -1186,181 +1171,273 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
     );
 };
 
-const ReviewStep = ({ allData }) => {
-    const step3Data = allData.step_3 || {};
-    const uploadedDocuments = step3Data.uploadedDocuments || {};
-    const totalDocuments = 8; // Total required documents
-    const uploadedCount = Object.keys(uploadedDocuments).length;
+const PassportUploadStep = ({ data = {}, onChange }) => {
+    const [passportFile, setPassportFile] = useState(data.passportFile || null);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    const handleFileUpload = (files) => {
+        if (files && files.length > 0) {
+            const file = files[0];
+            setPassportFile(file);
+            onChange({ ...data, passportFile: file });
+        }
+    };
+
+    const removeFile = () => {
+        setPassportFile(null);
+        onChange({ ...data, passportFile: null });
+    };
 
     return (
         <div>
             <div className="text-center mb-4">
-                <h4 className="text-primary mb-3">Review & Submit</h4>
-                <p className="text-muted fs-5">Please review your information before submitting</p>
+                <h4 className="text-primary mb-3">Passport Document Upload</h4>
+                <p className="text-muted fs-5">Please upload the authorize person's passport document</p>
             </div>
 
             <Alert variant="info" className="mb-4">
                 <h6 className="mb-2">
                     <i className="mdi mdi-information me-2"></i>
-                    Regulatory Review Process
+                    Upload Requirements
                 </h6>
-                <p className="mb-0">
-                    Your application will undergo enhanced due diligence. Processing may take 
-                    5-10 business days for regulatory verification and compliance checks.
-                </p>
+                <ul className="mb-0 small">
+                    <li>Document must be clear and legible</li>
+                    <li>Maximum file size: 10MB</li>
+                    <li>Accepted formats: PDF, JPG, JPEG, PNG</li>
+                    <li>All passport information must be visible</li>
+                </ul>
             </Alert>
 
-            {/* Company Information */}
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h6 className="mb-0 text-primary">
-                        <i className="mdi mdi-domain me-2"></i>
-                        Company Information
-                    </h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Company Name:</strong> {allData.step_2?.companyName || 'Not provided'}</p>
-                            <p><strong>License Number:</strong> {allData.step_2?.licenseNumber || 'Not provided'}</p>
-                            <p><strong>Nature of Business:</strong> {allData.step_2?.natureOfBusiness || 'Not provided'}</p>
-                            <p><strong>Legal Form:</strong> {allData.step_2?.legalForm || 'Not provided'}</p>
-                            <p><strong>Street Address:</strong> {allData.step_2?.streetAddress || 'Not provided'}</p>
-                            <p><strong>City:</strong> {allData.step_2?.city || 'Not provided'}</p>
-                            <p><strong>Zip Code:</strong> {allData.step_2?.zipCode || 'Not provided'}</p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Country:</strong> {allData.step_2?.country || 'Not provided'}</p>
-                            <p><strong>Place of Establishment:</strong> {allData.step_2?.placeOfEstablishment || 'Not provided'}</p>
-                            <p><strong>Date of Establishment:</strong> {allData.step_2?.dateOfEstablishment || 'Not provided'}</p>
-                            <p><strong>Office Phone:</strong> {allData.step_2?.officePhone || 'Not provided'}</p>
-                            <p><strong>Beneficial Owner:</strong> {allData.step_2?.beneficialOwnerName || 'Not provided'}</p>
-                            <p><strong>Owner Passport:</strong> {allData.step_2?.beneficialOwnerPassport || 'Not provided'}</p>
-                            <p><strong>Source of Funds:</strong> {allData.step_2?.sourceOfFunds || 'Not provided'}</p>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={12}>
-                            <p><strong>Account Purpose:</strong> {allData.step_2?.accountPurpose || 'Not provided'}</p>
-                            <p><strong>Company Email:</strong> {allData.step_1?.email || 'Not provided'}</p>
-                            <p><strong>Demo Account:</strong> {allData.step_1?.demoAccountNo || 'Not provided'}</p>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Authorize Person Information */}
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h6 className="mb-0 text-primary">
-                        <i className="mdi mdi-account-tie me-2"></i>
-                        Authorize Person Information
-                    </h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Full Name:</strong> {allData.step_4?.authorizePersonFullName || 'Not provided'}</p>
-                            <p><strong>Passport ID:</strong> {allData.step_4?.authorizePersonPassportId || 'Not provided'}</p>
-                            <p><strong>Email:</strong> {allData.step_4?.authorizePersonEmail || 'Not provided'}</p>
-                            <p><strong>Citizenship:</strong> {allData.step_4?.authorizePersonCitizen || 'Not provided'}</p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Date of Birth:</strong> {allData.step_4?.authorizePersonDateOfBirth || 'Not provided'}</p>
-                            <p><strong>Place of Birth:</strong> {allData.step_4?.authorizePersonPlaceOfBirth || 'Not provided'}</p>
-                            <p><strong>Job Position:</strong> {allData.step_4?.authorizePersonJobPosition || 'Not provided'}</p>
-                            <p><strong>Company Name:</strong> {allData.step_4?.authorizePersonCompanyName || 'Not provided'}</p>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Document Upload Summary */}
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h6 className="mb-0 text-primary">
-                        <i className="mdi mdi-file-document-multiple me-2"></i>
-                        Document Upload Status
-                    </h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Documents Uploaded:</strong> {uploadedCount} of {totalDocuments}</p>
-                            <p><strong>Upload Status:</strong> 
-                                {uploadedCount === totalDocuments ? (
-                                    <span className="text-success ms-2">
-                                        <i className="mdi mdi-check-circle me-1"></i>
-                                        Complete
-                                    </span>
-                                ) : (
-                                    <span className="text-warning ms-2">
-                                        <i className="mdi mdi-alert-circle me-1"></i>
-                                        Incomplete ({totalDocuments - uploadedCount} missing)
-                                    </span>
-                                )}
-                            </p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Account Type:</strong> Regulated Company</p>
-                            <p><strong>Application Status:</strong> 
-                                {uploadedCount === totalDocuments ? (
-                                    <span className="text-success ms-2">Ready for submission</span>
-                                ) : (
-                                    <span className="text-warning ms-2">Pending document upload</span>
-                                )}
-                            </p>
-                        </Col>
-                    </Row>
-
-                    {uploadedCount < totalDocuments && (
-                        <Alert variant="warning" className="mt-3 mb-0">
-                            <small>
-                                <i className="mdi mdi-alert me-1"></i>
-                                Please ensure all {totalDocuments} required documents are uploaded before submitting your application.
-                            </small>
-                        </Alert>
-                    )}
-                </Card.Body>
-            </Card>
-
-            {/* Required Documents List */}
             <Card className="border-0 shadow-sm">
                 <Card.Header className="bg-light border-0">
                     <h6 className="mb-0 text-primary">
-                        <i className="mdi mdi-file-check me-2"></i>
-                        Required Documents Checklist
+                        <i className="mdi mdi-passport me-2"></i>
+                        Authorize Person Passport
                     </h6>
                 </Card.Header>
                 <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <h6 className="text-muted mb-2">Company Registration Documents</h6>
-                            <ul className="list-unstyled">
-                                <li><i className="mdi mdi-check text-success me-2"></i>Certificate of Incorporation</li>
-                                <li><i className="mdi mdi-check text-success me-2"></i>Board of Resolution</li>
-                            </ul>
-                            
-                            <h6 className="text-muted mb-2 mt-3">Financial Documents</h6>
-                            <ul className="list-unstyled">
-                                <li><i className="mdi mdi-check text-success me-2"></i>Bank Statement</li>
-                                <li><i className="mdi mdi-check text-success me-2"></i>Address Proof</li>
-                            </ul>
-                        </Col>
-                        <Col md={6}>
-                            <h6 className="text-muted mb-2">Ownership & Management Documents</h6>
-                            <ul className="list-unstyled">
-                                <li><i className="mdi mdi-check text-success me-2"></i>Management Structure</li>
-                                <li><i className="mdi mdi-check text-success me-2"></i>Ownership Structure</li>
-                                <li><i className="mdi mdi-check text-success me-2"></i>Beneficial Owner Passport</li>
-                                <li><i className="mdi mdi-check text-success me-2"></i>Authorize Person Passport</li>
-                            </ul>
-                        </Col>
-                    </Row>
+                    <div className="mb-3">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h6 className="mb-0">
+                                Passport Document <span className="text-danger">*</span>
+                            </h6>
+                            {passportFile && (
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={removeFile}
+                                >
+                                    <i className="mdi mdi-delete me-1"></i>
+                                    Remove
+                                </Button>
+                            )}
+                        </div>
+                        
+                        {!passportFile ? (
+                            <FileUploader
+                                showPreview={true}
+                                onFileUpload={handleFileUpload}
+                            />
+                        ) : (
+                            <Alert variant="success" className="mb-0">
+                                <i className="mdi mdi-check-circle me-2"></i>
+                                Passport document uploaded successfully: {passportFile.name}
+                                <br />
+                                <small className="text-muted">
+                                    Size: {(passportFile.size / (1024 * 1024)).toFixed(2)} MB
+                                </small>
+                            </Alert>
+                        )}
+                    </div>
                 </Card.Body>
             </Card>
+
+            <Alert variant="warning" className="mt-4">
+                <h6 className="mb-2">
+                    <i className="mdi mdi-alert me-2"></i>
+                    Important Notes
+                </h6>
+                <ul className="mb-0 small">
+                    <li>This document is mandatory for authorize person verification</li>
+                    <li>The passport must belong to the authorize person specified in the previous step</li>
+                    <li>Document will be verified against the authorize person information provided</li>
+                    <li>Ensure all text and details are clearly visible in the uploaded document</li>
+                </ul>
+            </Alert>
         </div>
     );
 };
+
+const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    const handleCheckboxChange = (fieldName, checked) => {
+        onChange({ ...data, [fieldName]: checked });
+    };
+
+    const handleSubmit = () => {
+        // Check if all required agreements are checked
+        const requiredAgreements = agreements.filter(agreement => agreement.required);
+        const uncheckedAgreements = requiredAgreements.filter(agreement => !data[agreement.field]);
+        
+        if (uncheckedAgreements.length > 0) {
+            alert('Please agree to all required documents before submitting.');
+            return;
+        }
+
+        // Submit the form with all data
+        onSubmit(allData);
+    };
+
+    const areAllRequiredAgreementsChecked = () => {
+        const requiredAgreements = agreements.filter(agreement => agreement.required);
+        return requiredAgreements.every(agreement => data[agreement.field]);
+    };
+
+    const agreements = [
+        {
+            field: 'companyProfile',
+            text: 'I have read and understood the ',
+            linkText: 'company profile',
+            additionalText: ' of PT. Genesis Gemilang Futures.',
+            url: 'https://drive.google.com/file/d/1_29Uaed83l9pSudtzJO8oqWh5sD49A77/view',
+            required: true
+        },
+        {
+            field: 'statementSimulation',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'statement of having simulation',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1UlhVYACvANdTruDqe7ZUpUjDkqDheIwB/view',
+            required: true
+        },
+        {
+            field: 'statementExperience',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'statement of having experience',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1DScf7jYgnbUzeK6QfP7eaNlm0hp6wX4E/view',
+            required: true
+        },
+        {
+            field: 'disclosureStatement',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'disclosure statement',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1dfTD9xjnoz3-blO2bxprhhS1prXHDIKG/view',
+            required: true
+        },
+        {
+            field: 'accountOpeningApplication',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'account opening application',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1bxOc9ZtkWymJU_b7PGfKoehl-fAj1g7W/view',
+            required: true
+        },
+        {
+            field: 'riskDisclosure',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'risk disclosure',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1A4cJO0K3ZKV3aZWL6AzzELi42t0CIrIB/view',
+            required: true
+        },
+        {
+            field: 'mandateAgreement',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'mandate agreement',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1o5PmpjMO_vVK55YDeHDJ6QzyNSCRL4MK/view',
+            required: true
+        },
+        {
+            field: 'tradingRules',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'trading rules',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/16kBaWNpbEI7SnKR9le4sOsOBmc9967vn/view',
+            required: true
+        },
+        {
+            field: 'personalAccessPassword',
+            text: 'I have read, understood and agreed to the ',
+            linkText: 'personal access password',
+            additionalText: '.',
+            url: 'https://drive.google.com/file/d/1JVpkMMDikDrYE-R63BXR4ZnkrvLNVZjS/view',
+            required: true
+        }
+    ];
+
+    return (
+        <div>
+            <div className="text-center">
+                <h4 className="text-primary mb-3">Document Agreements</h4>
+                <p className="text-muted fs-5">It's almost done! Time to tick the Document Agreements</p>
+            </div>
+
+            <Card className="border-0 shadow-sm">
+                <Card.Body className="p-4">
+                    {agreements.map((agreement, index) => (
+                        <div key={agreement.field} className="mb-3">
+                            <Form.Check
+                                type="checkbox"
+                                id={agreement.field}
+                                checked={data[agreement.field] || false}
+                                onChange={(e) => handleCheckboxChange(agreement.field, e.target.checked)}
+                                label={
+                                    <span>
+                                        {agreement.text}
+                                        <a 
+                                            href={agreement.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-primary text-decoration-underline"
+                                        >
+                                            {agreement.linkText}
+                                        </a>
+                                        {agreement.additionalText}
+                                        {agreement.required && <span className="text-danger ms-1">*</span>}
+                                    </span>
+                                }
+                                className="agreement-checkbox"
+                            />
+                        </div>
+                    ))}
+                </Card.Body>
+            </Card>
+
+            <Alert variant="info" className="mt-4">
+                <h6 className="mb-2">
+                    <i className="mdi mdi-information me-2"></i>
+                    Important Notice
+                </h6>
+                <p className="mb-0 small">
+                    All agreements marked with <span className="text-danger">*</span> are mandatory and must be accepted 
+                    before proceeding to the final review. Please ensure you have read and understood each document 
+                    thoroughly before agreeing to the terms and conditions.
+                </p>
+            </Alert>
+
+            <Alert variant="warning" className="mt-3">
+                <h6 className="mb-2">
+                    <i className="mdi mdi-alert me-2"></i>
+                    Legal Compliance
+                </h6>
+                <p className="mb-0 small">
+                    By checking these boxes, you acknowledge that you have read, understood, and agree to be bound by 
+                    the terms and conditions outlined in each respective document. These agreements are legally binding 
+                    and form part of your account opening process.
+                </p>
+            </Alert>
+        </div>
+    );
+};
+
 
 export default RegulatedCompanyForm; 
