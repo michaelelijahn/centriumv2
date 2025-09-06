@@ -193,7 +193,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                 <Col lg={8}>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Register Company Email</Form.Label>
+                            <Form.Label className="text-muted">Register Company Email</Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter company email address"
@@ -204,7 +204,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Select Demo Account No.</Form.Label>
+                            <Form.Label className="text-muted">Select Demo Account No.</Form.Label>
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
@@ -242,7 +242,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Company Registration Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Company Registration Name <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company registration name"
@@ -254,7 +254,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Company License Number <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Company License Number <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company license number"
@@ -269,7 +269,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Nature of Business <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Nature of Business <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter nature of business"
@@ -281,7 +281,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Company Legal Form <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Company Legal Form <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.legalForm || ''}
                                 onChange={(e) => onChange({ ...data, legalForm: e.target.value })}
@@ -303,7 +303,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Street Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter street address"
@@ -315,7 +315,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">City <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter city"
@@ -330,7 +330,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                 <Form.Group className="mb-3">
-                            <Form.Label>Postal / Zip Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Postal / Zip Code <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter postal/zip code"
@@ -342,20 +342,20 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Country <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.country || ''}
                                 onChange={(e) => onChange({ ...data, country: e.target.value })}
                                 required
                             >
                                 <option value="">Select country</option>
-                                <option value="ID">Indonesia</option>
                                 <option value="US">United States</option>
                                 <option value="UK">United Kingdom</option>
                                 <option value="SG">Singapore</option>
                                 <option value="MY">Malaysia</option>
                                 <option value="AU">Australia</option>
                                 <option value="CA">Canada</option>
+                                <option value="ID">Indonesia</option>
                                 <option value="OTHER">Other</option>
                             </Form.Select>
                         </Form.Group>
@@ -366,7 +366,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Place of Establishment <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Place of Establishment <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter place of establishment"
@@ -378,7 +378,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Date of Establishment <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Date of Establishment <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="date"
                                 value={data.dateOfEstablishment || ''}
@@ -390,7 +390,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 </Row>
 
                 <Form.Group className="mb-3">
-                    <Form.Label>Office Telephone Number <span className="text-danger">*</span></Form.Label>
+                    <Form.Label className="text-muted">Office Telephone Number <span className="text-danger">*</span></Form.Label>
                     <Form.Control
                         type="tel"
                         placeholder="Enter office phone number with country code"
@@ -404,7 +404,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Beneficial Owner Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Beneficial Owner Name <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter beneficial owner name"
@@ -416,7 +416,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Beneficial Owner Passport No <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Beneficial Owner Passport No <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter beneficial owner passport number"
@@ -432,7 +432,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Source of Funds <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Source of Funds <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.sourceOfFunds || ''}
                                 onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value })}
@@ -450,7 +450,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Opening Trading Account Purpose <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Opening Trading Account Purpose <span className="text-danger">*</span></Form.Label>
                     <Form.Control
                         as="textarea"
                                 rows={2}
@@ -464,7 +464,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                 </Row>
 
                 <Form.Group className="mb-3">
-                    <Form.Label>Demo Account Number</Form.Label>
+                    <Form.Label className="text-muted">Demo Account Number</Form.Label>
                     <Form.Control
                         type="text"
                         value={demoAccountNo || 'Not selected'}
@@ -618,7 +618,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Full Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Full Name <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter full name"
@@ -630,7 +630,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Email <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter email address"
@@ -645,7 +645,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Place of Birth <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Place of Birth <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter place of birth"
@@ -657,7 +657,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Date of Birth <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Date of Birth <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="date"
                                 value={data.authorizePersonDateOfBirth || ''}
@@ -671,7 +671,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Passport ID No <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Passport ID No <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter passport ID number"
@@ -683,14 +683,32 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Citizen <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter citizenship"
+                            <Form.Label className="text-muted">Citizen <span className="text-danger">*</span></Form.Label>
+                            <Form.Select
                                 value={data.authorizePersonCitizen || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonCitizen: e.target.value })}
                                 required
-                            />
+                            >
+                                <option value="">Select citizenship</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="SG">Singapore</option>
+                                <option value="MY">Malaysia</option>
+                                <option value="AU">Australia</option>
+                                <option value="CA">Canada</option>
+                                <option value="ID">Indonesia</option>
+                                <option value="OTHER">Other</option>
+                            </Form.Select>
+                            {data.authorizePersonCitizen === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other citizenship"
+                                    value={data.authorizePersonCitizenOther || ''}
+                                    onChange={(e) => onChange({ ...data, authorizePersonCitizenOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -698,7 +716,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Gender <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Gender <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonGender || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonGender: e.target.value })}
@@ -712,7 +730,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Marital Status <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Marital Status <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonMaritalStatus || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonMaritalStatus: e.target.value })}
@@ -731,7 +749,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Phone Number <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Phone Number <span className="text-danger">*</span></Form.Label>
                             <Row>
                                 <Col md={3}>
                                     <Form.Select
@@ -768,7 +786,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Street Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter street address"
@@ -780,7 +798,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">City <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter city"
@@ -795,7 +813,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Postal / Zip Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Postal / Zip Code <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter postal/zip code"
@@ -807,7 +825,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Country <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonCountry || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonCountry: e.target.value })}
@@ -832,7 +850,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Do you have investment experience? <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Do you have investment experience? <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -856,7 +874,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                         </Form.Group>
                         {data.authorizePersonInvestmentExperience === 'YES' && (
                             <Form.Group className="mb-3">
-                                <Form.Label>Please describe your investment experience <span className="text-danger">*</span></Form.Label>
+                                <Form.Label className="text-muted">Please describe your investment experience <span className="text-danger">*</span></Form.Label>
                                 <Form.Control
                                     as="textarea"
                                     rows={3}
@@ -873,7 +891,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Do you have any family who working in BAPPEBTI / Bursa Berjangka / Kliring Berjangka? <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Do you have any family who working in BAPPEBTI / Bursa Berjangka / Kliring Berjangka? <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -901,7 +919,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Have you declared bankrupt by the Court? <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Have you declared bankrupt by the Court? <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -931,7 +949,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Authorize Person Company Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Authorize Person Company Name <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company name"
@@ -943,7 +961,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Nature of Business <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Nature of Business <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter nature of business"
@@ -958,7 +976,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Job / Position <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Job / Position <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter job/position"
@@ -975,7 +993,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Street Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter office street address"
@@ -987,7 +1005,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">City <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter office city"
@@ -1002,7 +1020,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Postal / Zip Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Postal / Zip Code <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter office postal/zip code"
@@ -1014,7 +1032,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Authorize Person Country <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Authorize Person Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonOfficeCountry || ''}
                                 onChange={(e) => onChange({ ...data, authorizePersonOfficeCountry: e.target.value })}
@@ -1055,7 +1073,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Bank Name <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Bank Name <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter bank name"
@@ -1067,7 +1085,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Account Name <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Account Name <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter account holder name"
@@ -1081,7 +1099,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Bank Address (Street) <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Bank Address (Street) <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter bank street address"
@@ -1093,7 +1111,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Bank City <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Bank City <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter bank city"
@@ -1107,7 +1125,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Bank Country <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Bank Country <span className="text-danger">*</span></Form.Label>
                                         <Form.Select
                                             value={account.bankCountry}
                                             onChange={(e) => updateBankAccount(index, 'bankCountry', e.target.value)}
@@ -1127,7 +1145,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>SWIFT Code <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">SWIFT Code <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter SWIFT code"
@@ -1141,7 +1159,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>IBAN / Account No <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">IBAN / Account No <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter IBAN/Account number"

@@ -6,3 +6,8 @@
 .border-dashed {
     border-style: dashed !important;
 }
+
+// Custom text-muted override - loads after Bootstrap
+.text-muted {
+    color: #313a46 !important; // Same color as text-dark ($gray-900)
+}

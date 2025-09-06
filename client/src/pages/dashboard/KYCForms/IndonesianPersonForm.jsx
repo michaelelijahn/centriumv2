@@ -312,7 +312,7 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
                 <Col lg={8}>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Email Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Email Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter your email address"
@@ -323,7 +323,7 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Select Demo Account No. <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Select Demo Account No. <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleChange('demoAccountNo', e.target.value)}
@@ -357,7 +357,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Nama Lengkap <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter your full name"
@@ -369,7 +369,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tempat Lahir <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Tempat Lahir <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Place of birth"
@@ -384,7 +384,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tanggal Lahir <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Tanggal Lahir <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="date"
                                 value={data.tanggalLahir || ''}
@@ -395,7 +395,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. KTP <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">No. KTP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter your KTP number"
@@ -410,7 +410,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. NPWP <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">No. NPWP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter your NPWP number"
@@ -422,7 +422,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Jenis Kelamin <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Jenis Kelamin <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jenisKelamin || ''}
                                 onChange={(e) => onChange({ ...data, jenisKelamin: e.target.value })}
@@ -439,7 +439,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Nama Ibu Kandung <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Nama Ibu Kandung <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Mother's full name"
@@ -451,7 +451,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Status Perkawinan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Status Perkawinan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.statusPerkawinan || ''}
                                 onChange={(e) => onChange({ ...data, statusPerkawinan: e.target.value })}
@@ -471,7 +471,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={8}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Street Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Street address"
@@ -483,7 +483,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={4}>
                         <Form.Group className="mb-3">
-                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">City <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="City"
@@ -498,7 +498,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={4}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Postal/Zip Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Postal/Zip Code <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Postal code"
@@ -514,7 +514,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. Telephone Rumah (Optional)</Form.Label>
+                            <Form.Label className="text-muted">No. Telephone Rumah (Optional)</Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Home phone number"
@@ -525,7 +525,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. Handphone <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">No. Handphone <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Mobile phone number"
@@ -540,7 +540,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. Faksimili Rumah (Optional)</Form.Label>
+                            <Form.Label className="text-muted">No. Faksimili Rumah (Optional)</Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Home fax number"
@@ -551,7 +551,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Status Kepemilikan Rumah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Status Kepemilikan Rumah <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.statusKepemilikanRumah || ''}
                                 onChange={(e) => onChange({ ...data, statusKepemilikanRumah: e.target.value })}
@@ -581,7 +581,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tujuan Pembukaan Rekening <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Tujuan Pembukaan Rekening <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.tujuanPembukaanRekening || ''}
                                 onChange={(e) => onChange({ ...data, tujuanPembukaanRekening: e.target.value })}
@@ -607,7 +607,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Pengalaman Investasi <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Pengalaman Investasi <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.pengalamanInvestasi || ''}
                                 onChange={(e) => onChange({ ...data, pengalamanInvestasi: e.target.value })}
@@ -619,7 +619,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             </Form.Select>
                             {data.pengalamanInvestasi === 'Yes' && (
                                 <div className="mt-2">
-                                    <Form.Label >Pengalaman Investasi Bidang <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Pengalaman Investasi Bidang <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Explain Investment Experience"
@@ -637,7 +637,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Apakah Anda memiliki anggota keluarga yang bekerja di BAPPEBTI / Bursa Berjangka / Kliring Berjangka? <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Apakah Anda memiliki anggota keluarga yang bekerja di BAPPEBTI / Bursa Berjangka / Kliring Berjangka? <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.anggotaKeluargaBAPPEBTI || ''}
                                 onChange={(e) => onChange({ ...data, anggotaKeluargaBAPPEBTI: e.target.value })}
@@ -656,7 +656,7 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Apakah Anda telah dinyatakan pailit oleh Pengadilan? <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Apakah Anda telah dinyatakan pailit oleh Pengadilan? <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.pernahPailit || ''}
                                 onChange={(e) => onChange({ ...data, pernahPailit: e.target.value })}
@@ -691,7 +691,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Nama Lengkap <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Emergency contact full name"
@@ -703,7 +703,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. Handphone <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">No. Handphone <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Emergency contact phone number"
@@ -718,7 +718,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={8}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Street Address <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Street Address <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Emergency contact street address"
@@ -730,7 +730,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={4}>
                         <Form.Group className="mb-3">
-                            <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">City <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="City"
@@ -745,7 +745,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={4}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Postal/Zip Code <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Postal/Zip Code <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Postal code"
@@ -757,7 +757,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={8}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Hubungan dengan Anda <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Hubungan dengan Anda <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.emergencyContactRelationship || ''}
                                 onChange={(e) => onChange({ ...data, emergencyContactRelationship: e.target.value })}
@@ -799,7 +799,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                 <Row className="justify-content-center">
                     <Col md={8}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Jenis Pekerjaan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Jenis Pekerjaan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jenisPekerjaan || ''}
                                 onChange={(e) => onChange({ ...data, jenisPekerjaan: e.target.value })}
@@ -834,7 +834,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Nama Perusahaan <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Nama Perusahaan <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter Company Name"
@@ -846,7 +846,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Bidang Usaha <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Bidang Usaha <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Nature of Business"
@@ -861,7 +861,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Jabatan <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Jabatan <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Position"
@@ -873,7 +873,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Lama Bekerja <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Lama Bekerja <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Length of Work"
@@ -888,7 +888,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Kantor Sebelumnya <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Kantor Sebelumnya <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter Previous Company"
@@ -904,7 +904,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={8}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Alamat (Address) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Alamat (Address) <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Office street address"
@@ -916,7 +916,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                             </Col>
                             <Col md={4}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>City <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">City <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="City"
@@ -931,7 +931,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={4}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Postal/Zip Code <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">Postal/Zip Code <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Postal code"
@@ -947,7 +947,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>No. Telepon Kantor <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted">No. Telepon Kantor <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
                                         type="tel"
                                         placeholder="Office Phone No"
@@ -959,7 +959,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label>No. Faksimili Kantor (Optional)</Form.Label>
+                                    <Form.Label className="text-muted">No. Faksimili Kantor (Optional)</Form.Label>
                                     <Form.Control
                                         type="tel"
                                         placeholder="Office Fax No"
@@ -988,7 +988,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Penghasilan Pertahun <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Penghasilan Pertahun <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.penghasilanPertahun || ''}
                                 onChange={(e) => onChange({ ...data, penghasilanPertahun: e.target.value })}
@@ -1003,7 +1003,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Lokasi Rumah</Form.Label>
+                            <Form.Label className="text-muted">Lokasi Rumah</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Home location"
@@ -1017,7 +1017,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Nilai NJOP</Form.Label>
+                            <Form.Label className="text-muted">Nilai NJOP</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Sales Value of Taxable Object"
@@ -1028,7 +1028,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Bank Deposit</Form.Label>
+                            <Form.Label className="text-muted">Bank Deposit</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Deposit Bank"
@@ -1042,7 +1042,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Jumlah</Form.Label>
+                            <Form.Label className="text-muted">Jumlah</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Total amount"
@@ -1053,7 +1053,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Lainnya</Form.Label>
+                            <Form.Label className="text-muted">Lainnya</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Other assets"
@@ -1133,7 +1133,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Nama Bank <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Nama Bank <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Bank name"
@@ -1145,7 +1145,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Cabang <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Cabang <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Bank branch"
@@ -1160,7 +1160,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>No. Rekening <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">No. Rekening <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="IBAN / Account number"
@@ -1172,7 +1172,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Nama Pemilik Rekening <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Nama Pemilik Rekening <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder="Account name"
@@ -1187,7 +1187,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>No. Telepon Bank</Form.Label>
+                                        <Form.Label className="text-muted">No. Telepon Bank</Form.Label>
                                         <Form.Control
                                             type="tel"
                                             placeholder="Bank phone number"
@@ -1198,7 +1198,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                 </Col>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Jenis Rekening Bank <span className="text-danger">*</span></Form.Label>
+                                        <Form.Label className="text-muted">Jenis Rekening Bank <span className="text-danger">*</span></Form.Label>
                                         <Form.Select
                                             value={account.bankAccountType}
                                             onChange={(e) => {
@@ -1500,7 +1500,7 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
                     </p>
                     
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -1531,7 +1531,7 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
                         <Form.Control
                             type="datetime-local"
                             value={data.declarationDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -1599,7 +1599,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                     </div>
                     
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -1630,7 +1630,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Menerima Pada Tanggal:</strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Menerima Pada Tanggal:</strong></Form.Label>
                         <Form.Control
                             type="datetime-local"
                             value={data.tradingSimulationDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -1640,7 +1640,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pengalaman Transaksi Perdagangan Berjangka <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pengalaman Transaksi Perdagangan Berjangka <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -1668,7 +1668,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                     {data.tradingExperience === 'ya' && (
                         <>
                             <Form.Group className="mb-3">
-                                <Form.Label><strong>Sebutkan Perusahaan Pialang <span className="text-danger">*</span></strong></Form.Label>
+                                <Form.Label className="text-muted"><strong>Sebutkan Perusahaan Pialang <span className="text-danger">*</span></strong></Form.Label>
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter Broker Company Name"
@@ -1679,7 +1679,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                             </Form.Group>
 
                             <Form.Group className="mb-3">
-                                <Form.Label><strong>No Demo Akun (Pengalaman Transaksi) <span className="text-danger">*</span></strong></Form.Label>
+                                <Form.Label className="text-muted"><strong>No Demo Akun (Pengalaman Transaksi) <span className="text-danger">*</span></strong></Form.Label>
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter Demo Account Number"
@@ -1762,7 +1762,7 @@ const ExperienceStatementStep = ({ data = {}, onChange, allData = {} }) => {
                     </div>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -1793,7 +1793,7 @@ const ExperienceStatementStep = ({ data = {}, onChange, allData = {} }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Menerima Pada Tanggal:</strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Menerima Pada Tanggal:</strong></Form.Label>
                         <Form.Control
                             type="datetime-local"
                             value={data.experienceStatementDate || '2025-04-09T14:15:39'}
@@ -1849,7 +1849,7 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
                     </div>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -1880,7 +1880,7 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
                         <Form.Control
                             type="datetime-local"
                             value={data.disclosureDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -1921,7 +1921,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     <Card.Body>
                         {category.documents.map((doc, docIndex) => (
                             <Form.Group key={docIndex} className="mb-3">
-                                <Form.Label>{doc} <span className="text-danger">*</span></Form.Label>
+                                <Form.Label className="text-muted">{doc} <span className="text-danger">*</span></Form.Label>
                                 <Form.Control 
                                     type="file" 
                                     accept=".pdf,.jpg,.jpeg,.png"
@@ -2277,7 +2277,7 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                                 </p>
                             </div>
                             <div className="mb-2">
-                                <Form.Label className="mb-1"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                                <Form.Label className="text-muted mb-1"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                                 <Form.Check
                                     type="checkbox"
                                     id={`${point.id}-checkbox`}
@@ -2303,7 +2303,7 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Pernyataan Menerima / Tidak (Statement to Accept / Not) <span className="text-danger">*</span></strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak (Statement to Accept / Not) <span className="text-danger">*</span></strong></Form.Label>
                             <div className="d-flex gap-4">
                                 <Form.Check
                                     type="radio"
@@ -2334,7 +2334,7 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Menerima Pada Tanggal:</strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Menerima Pada Tanggal:</strong></Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.riskDisclosureDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -2685,7 +2685,7 @@ const AccountApplicationSummaryStep = ({ data = {}, onChange, allData = {} }) =>
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Pernyataan Kebenaran dan Tanggung Jawab <span className="text-danger">*</span></strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Pernyataan Kebenaran dan Tanggung Jawab <span className="text-danger">*</span></strong></Form.Label>
                             <div className="d-flex gap-4">
                                 <Form.Check
                                     type="radio"
@@ -2716,7 +2716,7 @@ const AccountApplicationSummaryStep = ({ data = {}, onChange, allData = {} }) =>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Menyatakan Pada Tanggal:</strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Menyatakan Pada Tanggal:</strong></Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.applicationSummaryDate || '2025-04-09T20:12:56'}
@@ -2779,7 +2779,7 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
                     </div>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -2810,7 +2810,7 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
                         <Form.Control
                             type="datetime-local"
                             value={data.additionalDisclosureDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -3082,7 +3082,7 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                             <div className="d-flex gap-4">
                                 <Form.Check
                                     type="radio"
@@ -3113,7 +3113,7 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Menerima Pada Tanggal:</strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Menerima Pada Tanggal:</strong></Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.electronicAgreementDate || '2025-08-30T16:15'}
@@ -3177,7 +3177,7 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
                         </div>
                         
                         <Form.Group className="mb-3">
-                            <Form.Label className="fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
                             <div className="d-flex gap-3">
                                 <Form.Check
                                     type="radio"
@@ -3199,7 +3199,7 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="fw-bold">Menerima Pada Tanggal:</Form.Label>
+                            <Form.Label className="text-muted fw-bold">Menerima Pada Tanggal:</Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.tradingRulesAcceptanceDate || new Date().toISOString().slice(0, 16)}
@@ -3286,7 +3286,7 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
                             <div className="d-flex gap-3">
                                 <Form.Check
                                     type="radio"
@@ -3308,7 +3308,7 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="fw-bold">Pernyataan Pada Tanggal:</Form.Label>
+                            <Form.Label className="text-muted fw-bold">Pernyataan Pada Tanggal:</Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.fundDeclarationDate || new Date().toISOString().slice(0, 16)}
@@ -3462,7 +3462,7 @@ const PersonalInformationSummaryStep = ({ data = {}, onChange, allData = {} }) =
                         </div>
 
                                                <Form.Group className="mb-3">
-                            <Form.Label><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.statementDateTime || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -3629,7 +3629,7 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {} }) => {
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.verificationDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
@@ -3692,7 +3692,7 @@ const RiskDisclosureAcknowledgmentStep = ({ data = {}, onChange }) => {
                     </div>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check
                                 type="radio"
@@ -3723,7 +3723,7 @@ const RiskDisclosureAcknowledgmentStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                        <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
                         <Form.Control
                             type="datetime-local"
                             value={data.riskDisclosureAcknowledgmentDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}

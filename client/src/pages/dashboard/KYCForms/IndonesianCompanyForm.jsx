@@ -187,7 +187,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                 <Col lg={8}>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Register Company Email</Form.Label>
+                            <Form.Label className="text-muted">Register Company Email</Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter company email address"
@@ -198,7 +198,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label>Select Demo Account No.</Form.Label>
+                            <Form.Label className="text-muted">Select Demo Account No.</Form.Label>
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
@@ -258,7 +258,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Nama Calon Nasabah Non-Orang Perseorangan (Nama Perusahaan) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Nama Calon Nasabah Non-Orang Perseorangan (Nama Perusahaan) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company registration number"
@@ -270,7 +270,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>No. Izin Usaha <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>No. Izin Usaha <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company license number"
@@ -285,7 +285,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Badan Usaha / Kegiatan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Badan Usaha / Kegiatan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter nature of business"
@@ -297,7 +297,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>NPWP Perusahaan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">NPWP Perusahaan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter tax identification number"
@@ -314,7 +314,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Alamat Perusahaan (Company Address) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Alamat Perusahaan (Company Address) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter street name"
@@ -326,7 +326,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Kota (City) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Kota (City) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter city"
@@ -341,7 +341,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter postal code"
@@ -358,7 +358,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tempat Pendirian Perusahaan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Tempat Pendirian Perusahaan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter place of establishment"
@@ -370,7 +370,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tanggal Pendirian Perusahaan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Tanggal Pendirian Perusahaan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="date"
                                 value={data.establishmentDate || ''}
@@ -384,7 +384,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Bentuk Hukum <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Bentuk Hukum <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.legalForm || ''}
                                 onChange={(e) => onChange({ ...data, legalForm: e.target.value, ...(e.target.value !== 'OTHER' && { legalFormOther: '' }) })}
@@ -412,7 +412,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label>No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
                             <Row>
                                 <Col md={4}>
                                     <Form.Select
@@ -449,7 +449,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Nama Beneficial Owner <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Nama Beneficial Owner <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter beneficial owner name"
@@ -461,7 +461,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>No. KTP / SIM / Paspor Beneficial Owner <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>No. KTP / SIM / Paspor Beneficial Owner <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter ID/Passport number"
@@ -478,7 +478,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Sumber Dana <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Sumber Dana <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.sourceOfFunds || ''}
                                 onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value, ...(e.target.value !== 'OTHER' && { sourceOfFundsOther: '' }) })}
@@ -505,7 +505,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Maksud dan Tujuan Pembukaan Rekening Transaksi yang akan Dilakukan Calon Nasabah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Maksud dan Tujuan Pembukaan Rekening Transaksi yang akan Dilakukan Calon Nasabah <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.accountPurpose || ''}
                                 onChange={(e) => onChange({ ...data, accountPurpose: e.target.value, ...(e.target.value !== 'OTHER' && { accountPurposeOther: '' }) })}
@@ -536,7 +536,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Nama Penerima Kuasa yang Menjalankan Transaksi <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Nama Penerima Kuasa yang Menjalankan Transaksi <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter authorized person name"
@@ -548,7 +548,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Pihak yang berwenang melakukan Pendebetan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Pihak yang berwenang melakukan Pendebetan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter authorized debit person"
@@ -581,7 +581,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                             <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px' }}>Nama Bank <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Bank <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter bank name"
@@ -593,7 +593,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px' }}>Cabang <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Cabang <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter branch name"
@@ -608,7 +608,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px' }}>No. Rekening <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Rekening <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter account number"
@@ -620,7 +620,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '24px' }}>Account Holder Name <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Account Holder Name <span className="text-danger">*</span></Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Enter account holder name"
@@ -635,7 +635,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '48px' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
                                             <Row>
                                                 <Col md={4}>
                                                     <Form.Select
@@ -667,7 +667,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label style={{ minHeight: '48px' }}>Jenis Rekening Bank (Bank Account Type) <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Jenis Rekening Bank (Bank Account Type) <span className="text-danger">*</span></Form.Label>
                                             <Form.Select
                                                 value={account.bankAccountType}
                                                 onChange={(e) => {
@@ -733,7 +733,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 </Card.Header>
                 <Card.Body>
                     <Form.Group className="mb-3">
-                        <Form.Label>Scan Anggaran Dasar Perusahaan (Scan Company's Articles of Association) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Scan Anggaran Dasar Perusahaan (Scan Company's Articles of Association) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -746,7 +746,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Scan Nomor Izin Usaha (Scan Certificate of Incorporation) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Scan Nomor Izin Usaha (Scan Certificate of Incorporation) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -759,7 +759,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -772,7 +772,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Struktur Manajemen (Management Structure) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Struktur Manajemen (Management Structure) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -785,7 +785,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Struktur Kepemilikan (Ownership Structure) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Struktur Kepemilikan (Ownership Structure) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -798,7 +798,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -811,7 +811,7 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Surat Kuasa (Power of Attorney) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Surat Kuasa (Power of Attorney) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -850,7 +850,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter full name"
@@ -862,7 +862,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Tempat Lahir <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Tempat Lahir <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter place of birth"
@@ -877,7 +877,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Tanggal Lahir <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Tanggal Lahir <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="date"
                                 value={data.dateOfBirth || ''}
@@ -888,7 +888,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. KTP / SIM / Paspor <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. KTP / SIM / Paspor <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter ID/Passport number"
@@ -903,7 +903,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. NPWP <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. NPWP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter NPWP number"
@@ -915,7 +915,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Jenis Kelamin <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Jenis Kelamin <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.gender || ''}
                                 onChange={(e) => onChange({ ...data, gender: e.target.value })}
@@ -932,7 +932,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nama Ibu Kandung <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Ibu Kandung <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter mother's name"
@@ -944,7 +944,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Status Perkawinan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Status Perkawinan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.maritalStatus || ''}
                                 onChange={(e) => onChange({ ...data, maritalStatus: e.target.value })}
@@ -963,14 +963,32 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kewarganegaraan <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter nationality"
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kewarganegaraan <span className="text-danger">*</span></Form.Label>
+                            <Form.Select
                                 value={data.nationality || ''}
                                 onChange={(e) => onChange({ ...data, nationality: e.target.value })}
                                 required
-                            />
+                            >
+                                <option value="">Select nationality</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="SG">Singapore</option>
+                                <option value="MY">Malaysia</option>
+                                <option value="AU">Australia</option>
+                                <option value="CA">Canada</option>
+                                <option value="ID">Indonesia</option>
+                                <option value="OTHER">Other</option>
+                            </Form.Select>
+                            {data.nationality === 'OTHER' && (
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Please specify other nationality"
+                                    value={data.nationalityOther || ''}
+                                    onChange={(e) => onChange({ ...data, nationalityOther: e.target.value })}
+                                    className="mt-2"
+                                    required
+                                />
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -980,7 +998,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter street address"
@@ -992,7 +1010,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter city"
@@ -1007,7 +1025,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter postal code"
@@ -1024,7 +1042,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. Telepon Rumah (Home Telephone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Telepon Rumah (Home Telephone No.) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter home telephone number"
@@ -1036,7 +1054,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter handphone number"
@@ -1051,7 +1069,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. Faksimili Rumah</Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Faksimili Rumah</Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter home fax number (optional)"
@@ -1062,7 +1080,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Email <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Email <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter email address"
@@ -1078,7 +1096,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Status Kepemilikan Rumah (Home Ownership Status) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Status Kepemilikan Rumah (Home Ownership Status) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.homeOwnershipStatus || ''}
                                 onChange={(e) => onChange({ ...data, homeOwnershipStatus: e.target.value, ...(e.target.value !== 'LAINNYA' && { homeOwnershipStatusOther: '' }) })}
@@ -1104,7 +1122,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '48px' }}>Tujuan Pembukaan Rekening (Purpose of Account Opening) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Tujuan Pembukaan Rekening (Purpose of Account Opening) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.accountOpeningPurpose || ''}
                                 onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value, ...(e.target.value !== 'LAINNYA' && { accountOpeningPurposeOther: '' }) })}
@@ -1135,7 +1153,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Pengalaman Investasi (Investment Experience) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Pengalaman Investasi (Investment Experience) <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -1173,7 +1191,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Pengalaman Transaksi Perdagangan Berjangka (Futures Trading Transaction Experience) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Pengalaman Transaksi Perdagangan Berjangka (Futures Trading Transaction Experience) <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -1201,7 +1219,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Apakah Anda memiliki anggota keluarga yang bekerja di BAPPEBTI/Bursa/Berjangka/Kliring Berjangka? (Do you have any family working in BAPPEBTI / Bursa Berjangka / Kliring Berjangka?) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Apakah Anda memiliki anggota keluarga yang bekerja di BAPPEBTI/Bursa/Berjangka/Kliring Berjangka? (Do you have any family working in BAPPEBTI / Bursa Berjangka / Kliring Berjangka?) <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -1229,7 +1247,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={12}>
                         <Form.Group className="mb-3">
-                            <Form.Label>Apakah Anda telah dinyatakan pailit oleh Pengadilan? (Have you been declared bankrupt by the Court?) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Apakah Anda telah dinyatakan pailit oleh Pengadilan? (Have you been declared bankrupt by the Court?) <span className="text-danger">*</span></Form.Label>
                             <div>
                                 <Form.Check
                                     inline
@@ -1261,7 +1279,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Lengkap <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact full name"
@@ -1273,7 +1291,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter emergency contact handphone"
@@ -1289,7 +1307,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nama Jalan (Street Name) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Jalan (Street Name) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact street address"
@@ -1301,7 +1319,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact city"
@@ -1316,7 +1334,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact postal code"
@@ -1328,7 +1346,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Hubungan dengan anda (Relationship) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Hubungan dengan anda (Relationship) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.emergencyContactRelationship || ''}
                                 onChange={(e) => onChange({ ...data, emergencyContactRelationship: e.target.value, ...(e.target.value !== 'LAINNYA' && { emergencyContactRelationshipOther: '' }) })}
@@ -1360,7 +1378,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Pekerjaan Penerima Kuasa (Job of Power of Attorney) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Pekerjaan Penerima Kuasa (Job of Power of Attorney) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jobOfPowerOfAttorney || ''}
                                 onChange={(e) => onChange({ 
@@ -1407,7 +1425,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                         <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px' }}>Nama Perusahaan Tempat Bekerja <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Perusahaan Tempat Bekerja <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company name"
@@ -1419,7 +1437,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px' }}>Bidang Usaha <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Bidang Usaha <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter business field"
@@ -1434,7 +1452,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                         <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px' }}>Jabatan (Position) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Jabatan (Position) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter position"
@@ -1446,7 +1464,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px' }}>Lama Bekerja (Length of Work) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Lama Bekerja (Length of Work) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="e.g. 3 years, 2 months"
@@ -1461,7 +1479,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                         <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                                    <Form.Label style={{ minHeight: '24px' }}>Kantor Sebelumnya (Previous Company) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kantor Sebelumnya (Previous Company) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter previous company (optional)"
@@ -1471,98 +1489,98 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                         </Form.Group>
                     </Col>
                 </Row>
-                    </>
-                )}
 
-                {/* Office Address */}
-                <h6 className="text-primary mb-3 mt-4">Alamat Kantor (Office Address)</h6>
-                <Row>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter office street address"
-                                value={data.officeStreetAddress || ''}
-                                onChange={(e) => onChange({ ...data, officeStreetAddress: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter office city"
-                                value={data.officeCity || ''}
-                                onChange={(e) => onChange({ ...data, officeCity: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                </Row>
-
-                <Row>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter office postal code"
-                                value={data.officePostalCode || ''}
-                                onChange={(e) => onChange({ ...data, officePostalCode: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
-                            <Row>
-                                <Col md={4}>
-                                    <Form.Select
-                                        value={data.officePhoneCountryCode || ''}
-                                        onChange={(e) => onChange({ ...data, officePhoneCountryCode: e.target.value })}
-                                        required
-                                    >
-                                        <option value="">Code</option>
-                                        <option value="+62">+62 (ID)</option>
-                                        <option value="+65">+65 (SG)</option>
-                                        <option value="+60">+60 (MY)</option>
-                                        <option value="+1">+1 (US/CA)</option>
-                                        <option value="+44">+44 (UK)</option>
-                                        <option value="+61">+61 (AU)</option>
-                                        <option value="+91">+91 (IN)</option>
-                                    </Form.Select>
-                                </Col>
-                                <Col md={8}>
+                        {/* Office Address */}
+                        <h6 className="text-primary mt-4">Alamat Kantor (Office Address)</h6>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Jalan (Street Address) <span className="text-danger">*</span></Form.Label>
                                     <Form.Control
-                                        type="tel"
-                                        placeholder="Enter office phone number"
-                                        value={data.officePhoneNo || ''}
-                                        onChange={(e) => onChange({ ...data, officePhoneNo: e.target.value })}
+                                        type="text"
+                                        placeholder="Enter office street address"
+                                        value={data.officeStreetAddress || ''}
+                                        onChange={(e) => onChange({ ...data, officeStreetAddress: e.target.value })}
                                         required
                                     />
-                                </Col>
-                            </Row>
-                        </Form.Group>
-                    </Col>
-                </Row>
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kota (City) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter office city"
+                                        value={data.officeCity || ''}
+                                        onChange={(e) => onChange({ ...data, officeCity: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
 
-                <Row>
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>No. Faksimili (Optional)</Form.Label>
-                            <Form.Control
-                                type="tel"
-                                placeholder="Enter office fax number (optional)"
-                                value={data.officeFaxNo || ''}
-                                onChange={(e) => onChange({ ...data, officeFaxNo: e.target.value })}
-                            />
-                        </Form.Group>
-                    </Col>
-                </Row>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kode Pos (Postal / Zip Code) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter office postal code"
+                                        value={data.officePostalCode || ''}
+                                        onChange={(e) => onChange({ ...data, officePostalCode: e.target.value })}
+                                        required
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
+                                    <Row>
+                                        <Col md={4}>
+                                            <Form.Select
+                                                value={data.officePhoneCountryCode || ''}
+                                                onChange={(e) => onChange({ ...data, officePhoneCountryCode: e.target.value })}
+                                                required
+                                            >
+                                                <option value="">Code</option>
+                                                <option value="+62">+62 (ID)</option>
+                                                <option value="+65">+65 (SG)</option>
+                                                <option value="+60">+60 (MY)</option>
+                                                <option value="+1">+1 (US/CA)</option>
+                                                <option value="+44">+44 (UK)</option>
+                                                <option value="+61">+61 (AU)</option>
+                                                <option value="+91">+91 (IN)</option>
+                                            </Form.Select>
+                                        </Col>
+                                        <Col md={8}>
+                                            <Form.Control
+                                                type="tel"
+                                                placeholder="Enter office phone number"
+                                                value={data.officePhoneNo || ''}
+                                                onChange={(e) => onChange({ ...data, officePhoneNo: e.target.value })}
+                                                required
+                                            />
+                                        </Col>
+                                    </Row>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Faksimili (Optional)</Form.Label>
+                                    <Form.Control
+                                        type="tel"
+                                        placeholder="Enter office fax number (optional)"
+                                        value={data.officeFaxNo || ''}
+                                        onChange={(e) => onChange({ ...data, officeFaxNo: e.target.value })}
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </>
+                )}
 
                 {/* DAFTAR KEKAYAAN PENERIMA KUASA */}
                 <h5 className="text-primary mb-3 mt-5">DAFTAR KEKAYAAN PENERIMA KUASA (NON ORANG PERSEORANGAN)</h5>
@@ -1571,7 +1589,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Penghasilan Pertahun (Annual Income) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Penghasilan Pertahun (Annual Income) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.annualIncome || ''}
                                 onChange={(e) => onChange({ ...data, annualIncome: e.target.value })}
@@ -1586,7 +1604,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Lokasi rumah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Lokasi rumah <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter house location"
@@ -1601,7 +1619,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Nilai NJOP <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nilai NJOP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter NJOP value"
@@ -1613,7 +1631,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Bank Deposit <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Bank Deposit <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter bank deposit amount"
@@ -1628,7 +1646,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Jumlah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Jumlah <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter total amount"
@@ -1640,7 +1658,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label style={{ minHeight: '24px' }}>Lainnya</Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Lainnya</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter other assets (optional)"
@@ -1675,7 +1693,7 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                 </Card.Header>
                 <Card.Body>
                     <Form.Group className="mb-3">
-                        <Form.Label>Rekening Koran / Tagihan Kartu Kredit (Current Account / Credit Card Statement) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Rekening Koran / Tagihan Kartu Kredit (Current Account / Credit Card Statement) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -1688,7 +1706,7 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Rekening Listrik / Telepon (Electricity / Phone Account) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Rekening Listrik / Telepon (Electricity / Phone Account) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -1701,7 +1719,7 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Foto Terkini (Photo Selfie) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">Foto Terkini (Photo Selfie) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".jpg,.jpeg,.png" 
@@ -1714,7 +1732,7 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>KTP / SIM / Paspor (Identity No. / SIM / Passport) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">KTP / SIM / Paspor (Identity No. / SIM / Passport) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -1727,7 +1745,7 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>NPWP (Tax Identification No.) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">NPWP (Tax Identification No.) <span className="text-danger">*</span></Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
@@ -1885,7 +1903,7 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                     />
 
                     <Form.Group className="mb-3">
-                        <Form.Label className="fw-bold text-dark mb-2">Pengalaman Transaksi Perdagangan Berjangka <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted fw-bold mb-2">Pengalaman Transaksi Perdagangan Berjangka <span className="text-danger">*</span></Form.Label>
                         <div className="d-flex gap-4">
                             <Form.Check 
                                 type="radio" 
@@ -1919,7 +1937,7 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                     {data.tradingExperience === 'ya' && (
                         <>
                             <Form.Group className="mb-3">
-                        <Form.Label className="fw-bold text-dark mb-2">Sebutkan Perusahaan Pialang <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted fw-bold mb-2">Sebutkan Perusahaan Pialang <span className="text-danger">*</span></Form.Label>
                                 <Form.Control 
                                     type="text" 
                                     placeholder="Enter broker company name" 
@@ -1931,7 +1949,7 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                     </Form.Group>
 
                             <Form.Group className="mb-0">
-                                <Form.Label className="fw-bold text-dark mb-2">No Demo Akun (Pengalaman Transaksi) <span className="text-danger">*</span></Form.Label>
+                                <Form.Label className="text-muted fw-bold mb-2">No Demo Akun (Pengalaman Transaksi) <span className="text-danger">*</span></Form.Label>
                                 <Form.Control 
                                     type="text" 
                                     placeholder="Enter demo account number" 
@@ -2316,7 +2334,7 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                     )}
 
                     <Form.Group className="mb-3">
-                        <Form.Label className="fw-bold text-dark mb-2">Penyelesaian Perselisihan Melalui <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted fw-bold mb-2">Penyelesaian Perselisihan Melalui <span className="text-danger">*</span></Form.Label>
                         <Form.Check
                             type="checkbox"
                             id="bakti-arbitration"
