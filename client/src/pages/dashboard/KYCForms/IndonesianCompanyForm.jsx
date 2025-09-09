@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
+import { useNotificationContext } from '../../../common/context/useNotificationContext';
 
 const IndonesianCompanyForm = () => {
     const [formData, setFormData] = useState({});
+    const { showNotification } = useNotificationContext();
 
     const steps = [
         {
@@ -86,13 +88,255 @@ const IndonesianCompanyForm = () => {
         }
     };
 
+    // Validation functions for each step
+    const validateStep = (stepIndex, stepData, allData) => {
+        switch (stepIndex) {
+            case 0: // Requirements step - always valid (just informational)
+                return { isValid: true, errors: [] };
+            
+            case 1: // Company Email Registration step
+                return validateEmailStep(stepData);
+            
+            case 2: // Company Details step
+                return validateCompanyDetailsStep(stepData);
+            
+            case 3: // Company Documents step
+                return validateCompanyDocumentsStep(stepData);
+            
+            case 4: // Power of Attorney step
+                return validatePowerOfAttorneyStep(stepData);
+            
+            case 5: // Personal Documents step
+                return validatePersonalDocumentsStep(stepData);
+            
+            case 6: // Read Statements step
+                return validateReadStatementsStep(stepData);
+            
+            case 7: // Review step
+                return validateReviewStep(stepData);
+            
+            default:
+                return { isValid: true, errors: [] };
+        }
+    };
+
+    const validateEmailStep = (data) => {
+        const errors = [];
+        
+        if (!data.email?.trim()) {
+            errors.push('Company email address is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        if (!data.demoAccountNo?.trim()) {
+            errors.push('Demo account selection is required');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateCompanyDetailsStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'companyRegistrationName', label: 'Company Registration Name' },
+            { field: 'companyLicenseNo', label: 'Company License Number' },
+            { field: 'natureOfBusiness', label: 'Nature of Business' },
+            { field: 'companyLegalForm', label: 'Company Legal Form' },
+            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'city', label: 'City' },
+            { field: 'postalCode', label: 'Postal/Zip Code' },
+            { field: 'country', label: 'Country' },
+            { field: 'placeOfEstablishment', label: 'Place of Establishment' },
+            { field: 'dateOfEstablishment', label: 'Date of Establishment' },
+            { field: 'countryCode', label: 'Country Code' },
+            { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
+            { field: 'sourceOfFunds', label: 'Source of Funds' },
+            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
+            errors.push('Please specify the other legal form');
+        }
+        
+        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
+            errors.push('Please specify the other country');
+        }
+        
+        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
+            errors.push('Please specify the other source of funds');
+        }
+        
+        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
+            errors.push('Please specify the other trading account purpose');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateCompanyDocumentsStep = (data) => {
+        const errors = [];
+        
+        // Check if documents are uploaded for company documents
+        if (!data.companyDocumentsUploaded) {
+            errors.push('Please upload all required company documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validatePowerOfAttorneyStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'powerOfAttorneyTitle', label: 'Power of Attorney Title' },
+            { field: 'powerOfAttorneyFullName', label: 'Power of Attorney Full Name' },
+            { field: 'powerOfAttorneyPlaceOfBirth', label: 'Place of Birth' },
+            { field: 'powerOfAttorneyDateOfBirth', label: 'Date of Birth' },
+            { field: 'powerOfAttorneyIdNo', label: 'ID Number' },
+            { field: 'powerOfAttorneyEmail', label: 'Email' },
+            { field: 'powerOfAttorneyGender', label: 'Gender' },
+            { field: 'powerOfAttorneyMaritalStatus', label: 'Marital Status' },
+            { field: 'powerOfAttorneyCitizen', label: 'Citizenship' },
+            { field: 'powerOfAttorneyCountryCode', label: 'Country Code' },
+            { field: 'powerOfAttorneyPhoneNumber', label: 'Phone Number' },
+            { field: 'powerOfAttorneyStreetAddress', label: 'Street Address' },
+            { field: 'powerOfAttorneyCity', label: 'City' },
+            { field: 'powerOfAttorneyPostalCode', label: 'Postal Code' },
+            { field: 'powerOfAttorneyCountry', label: 'Country' },
+            { field: 'powerOfAttorneyInvestmentExperience', label: 'Investment Experience' },
+            { field: 'powerOfAttorneyFamilyInBappebti', label: 'Family in BAPPEBTI' },
+            { field: 'powerOfAttorneyDeclaredBankrupt', label: 'Bankruptcy Declaration' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.powerOfAttorneyCitizen === 'OTHER' && !data.powerOfAttorneyCitizenOther?.trim()) {
+            errors.push('Please specify other citizenship');
+        }
+        
+        if (data.powerOfAttorneyCountry === 'OTHER' && !data.powerOfAttorneyCountryOther?.trim()) {
+            errors.push('Please specify other country');
+        }
+        
+        if (data.powerOfAttorneyInvestmentExperience === 'YES' && !data.powerOfAttorneyInvestmentExperienceDetails?.trim()) {
+            errors.push('Please provide details about investment experience');
+        }
+        
+        // Validate email format
+        if (data.powerOfAttorneyEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.powerOfAttorneyEmail)) {
+            errors.push('Please enter a valid email address for Power of Attorney');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validatePersonalDocumentsStep = (data) => {
+        const errors = [];
+        
+        // Check if personal documents are uploaded
+        if (!data.personalDocumentsUploaded) {
+            errors.push('Please upload all required personal documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateReadStatementsStep = (data) => {
+        const errors = [];
+        
+        const requiredStatements = [
+            'statementSimulation',
+            'statementExperience',
+            'disclosureStatement',
+            'accountOpening',
+            'riskDisclosure',
+            'mandateAgreement',
+            'tradingRules'
+        ];
+        
+        const statementLabels = {
+            statementSimulation: 'Statement of Having Simulation',
+            statementExperience: 'Statement of Having Experience',
+            disclosureStatement: 'Disclosure Statement',
+            accountOpening: 'Account Opening Application',
+            riskDisclosure: 'Risk Disclosure',
+            mandateAgreement: 'Mandate Agreement',
+            tradingRules: 'Trading Rules'
+        };
+        
+        requiredStatements.forEach(statement => {
+            if (!data[statement]) {
+                errors.push(`Please read and acknowledge ${statementLabels[statement]}`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateReviewStep = (data) => {
+        const errors = [];
+        
+        const requiredAgreements = [
+            'companyProfile',
+            'finalAgreement'
+        ];
+        
+        const agreementLabels = {
+            companyProfile: 'Company Profile',
+            finalAgreement: 'Final Agreement and Terms'
+        };
+        
+        requiredAgreements.forEach(agreement => {
+            if (!data[agreement]) {
+                errors.push(`Please agree to ${agreementLabels[agreement]}`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const handleStepValidation = (stepIndex, stepData, allData) => {
+        const validation = validateStep(stepIndex, stepData, allData);
+        
+        if (!validation.isValid) {
+            // Show notification with all validation errors
+            const errorMessage = validation.errors.length === 1 
+                ? validation.errors[0]
+                : `Please fix the following issues: ${validation.errors.join(', ')}`;
+                
+            showNotification({
+                title: 'Validation Error',
+                message: errorMessage,
+                type: 'error'
+            });
+        }
+        
+        return validation.isValid;
+    };
+
     const handleStepChange = (step, data) => {
         console.log(`Moving to step ${step}`, data);
     };
 
     const handleSubmit = (data) => {
         console.log('Submitting Indonesian Company KYC:', data);
-        alert('Indonesian Company KYC submitted successfully!');
+        showNotification({
+            title: 'Success',
+            message: 'Indonesian Company KYC submitted successfully!',
+            type: 'success'
+        });
     };
 
     return (
@@ -101,6 +345,7 @@ const IndonesianCompanyForm = () => {
             steps={steps}
             onStepChange={handleStepChange}
             onSubmit={handleSubmit}
+            onStepValidation={handleStepValidation}
         >
             {renderStep}
         </MultiStepFormWrapper>
@@ -716,9 +961,38 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
 };
 
 const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+    const [uploadedDocs, setUploadedDocs] = useState(data.uploadedCompanyDocuments || {});
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleFileUpload = (docKey, file) => {
+        const newUploadedDocs = {
+            ...uploadedDocs,
+            [docKey]: file ? file.name : null
+        };
+        
+        setUploadedDocs(newUploadedDocs);
+        
+        // Check if all required documents are uploaded
+        const requiredDocs = [
+            'articlesOfAssociation',
+            'certificateOfIncorporation',
+            'financialStatements',
+            'managementStructure',
+            'ownershipStructure'
+        ];
+        
+        const allDocsUploaded = requiredDocs.every(doc => newUploadedDocs[doc]);
+        
+        // Update parent component with uploaded documents info
+        onChange({
+            ...data,
+            uploadedCompanyDocuments: newUploadedDocs,
+            companyDocumentsUploaded: allDocsUploaded
+        });
+    };
 
     return (
         <div>
@@ -733,68 +1007,128 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 </Card.Header>
                 <Card.Body>
                     <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Scan Anggaran Dasar Perusahaan (Scan Company's Articles of Association) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">
+                            Scan Anggaran Dasar Perusahaan (Scan Company's Articles of Association) <span className="text-danger">*</span>
+                            {uploadedDocs.articlesOfAssociation && (
+                                <span className="text-success ms-2">
+                                    <i className="mdi mdi-check-circle"></i> Uploaded
+                                </span>
+                            )}
+                        </Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, articlesOfAssociationFile: e.target.files[0] })}
+                            onChange={(e) => handleFileUpload('articlesOfAssociation', e.target.files[0])}
                             required 
                         />
                         <Form.Text className="text-muted">
                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                         </Form.Text>
+                        {uploadedDocs.articlesOfAssociation && (
+                            <Form.Text className="text-success">
+                                File uploaded: {uploadedDocs.articlesOfAssociation}
+                            </Form.Text>
+                        )}
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Scan Nomor Izin Usaha (Scan Certificate of Incorporation) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">
+                            Scan Nomor Izin Usaha (Scan Certificate of Incorporation) <span className="text-danger">*</span>
+                            {uploadedDocs.certificateOfIncorporation && (
+                                <span className="text-success ms-2">
+                                    <i className="mdi mdi-check-circle"></i> Uploaded
+                                </span>
+                            )}
+                        </Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, certificateOfIncorporationFile: e.target.files[0] })}
+                            onChange={(e) => handleFileUpload('certificateOfIncorporation', e.target.files[0])}
                             required 
                         />
                         <Form.Text className="text-muted">
                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                         </Form.Text>
+                        {uploadedDocs.certificateOfIncorporation && (
+                            <Form.Text className="text-success">
+                                File uploaded: {uploadedDocs.certificateOfIncorporation}
+                            </Form.Text>
+                        )}
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">
+                            Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities) <span className="text-danger">*</span>
+                            {uploadedDocs.financialStatements && (
+                                <span className="text-success ms-2">
+                                    <i className="mdi mdi-check-circle"></i> Uploaded
+                                </span>
+                            )}
+                        </Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, financialStatementsFile: e.target.files[0] })}
+                            onChange={(e) => handleFileUpload('financialStatements', e.target.files[0])}
                             required 
                         />
                         <Form.Text className="text-muted">
                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                         </Form.Text>
+                        {uploadedDocs.financialStatements && (
+                            <Form.Text className="text-success">
+                                File uploaded: {uploadedDocs.financialStatements}
+                            </Form.Text>
+                        )}
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Struktur Manajemen (Management Structure) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">
+                            Struktur Manajemen (Management Structure) <span className="text-danger">*</span>
+                            {uploadedDocs.managementStructure && (
+                                <span className="text-success ms-2">
+                                    <i className="mdi mdi-check-circle"></i> Uploaded
+                                </span>
+                            )}
+                        </Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, managementStructureFile: e.target.files[0] })}
+                            onChange={(e) => handleFileUpload('managementStructure', e.target.files[0])}
                             required 
                         />
                         <Form.Text className="text-muted">
                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                         </Form.Text>
+                        {uploadedDocs.managementStructure && (
+                            <Form.Text className="text-success">
+                                File uploaded: {uploadedDocs.managementStructure}
+                            </Form.Text>
+                        )}
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Struktur Kepemilikan (Ownership Structure) <span className="text-danger">*</span></Form.Label>
+                        <Form.Label className="text-muted">
+                            Struktur Kepemilikan (Ownership Structure) <span className="text-danger">*</span>
+                            {uploadedDocs.ownershipStructure && (
+                                <span className="text-success ms-2">
+                                    <i className="mdi mdi-check-circle"></i> Uploaded
+                                </span>
+                            )}
+                        </Form.Label>
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, ownershipStructureFile: e.target.files[0] })}
+                            onChange={(e) => handleFileUpload('ownershipStructure', e.target.files[0])}
                             required 
                         />
                         <Form.Text className="text-muted">
                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                         </Form.Text>
+                        {uploadedDocs.ownershipStructure && (
+                            <Form.Text className="text-success">
+                                File uploaded: {uploadedDocs.ownershipStructure}
+                            </Form.Text>
+                        )}
                     </Form.Group>
 
                     <Form.Group className="mb-3">
@@ -1676,9 +2010,38 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
 };
 
 const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
+    const [uploadedPersonalDocs, setUploadedPersonalDocs] = useState(data.uploadedPersonalDocuments || {});
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handlePersonalFileUpload = (docKey, file) => {
+        const newUploadedDocs = {
+            ...uploadedPersonalDocs,
+            [docKey]: file ? file.name : null
+        };
+        
+        setUploadedPersonalDocs(newUploadedDocs);
+        
+        // Check if all required personal documents are uploaded
+        const requiredPersonalDocs = [
+            'currentAccount',
+            'electricityPhone',
+            'photoSelfie',
+            'identityPassport',
+            'npwp'
+        ];
+        
+        const allPersonalDocsUploaded = requiredPersonalDocs.every(doc => newUploadedDocs[doc]);
+        
+        // Update parent component with uploaded documents info
+        onChange({
+            ...data,
+            uploadedPersonalDocuments: newUploadedDocs,
+            personalDocumentsUploaded: allPersonalDocsUploaded
+        });
+    };
 
     return (
         <div>
@@ -1773,7 +2136,7 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
         'statementRead', 'statementUnderstanding', 'tradingExperience',
         'experienceStatementRead', 'experienceUnderstanding',
         'applicationStatementRead', 'applicationUnderstanding',
-        'riskDisclosureRead', 'riskDisclosureUnderstanding',
+        'riskDisclosureUnderstanding',
         'mandateStatementRead', 'baktiArbitration', 'mandateUnderstanding',
         'tradingRulesRead', 'tradingRulesUnderstanding',
         'personalAccessPasswordRead', 'personalAccessPasswordUnderstanding'
@@ -1782,12 +2145,12 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
     // Add conditional fields based on trading experience
     const conditionalFields = data.tradingExperience === 'ya' ? ['brokerCompany', 'demoAccountNumber'] : [];
     
-    // Add individual risk statement fields (only required when risk disclosure is read)
-    const riskStatementFields = data.riskDisclosureRead ? [
+    // Add individual risk statement fields (always required since disclosure is always shown)
+    const riskStatementFields = [
         'riskStatement1', 'riskStatement2', 'riskStatement3', 'riskStatement4', 'riskStatement5',
         'riskStatement6', 'riskStatement7', 'riskStatement8', 'riskStatement9', 'riskStatement10',
         'riskStatement11', 'riskStatement12', 'riskStatement13', 'riskStatement14'
-    ] : [];
+    ];
     
     const allRequiredFields = [...baseRequiredFields, ...conditionalFields, ...riskStatementFields];
 
@@ -2081,18 +2444,7 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         </p>
                     </div>
 
-                    <Form.Check
-                        type="checkbox"
-                        id="risk-disclosure-read-check"
-                        label="Baca Pemberitahuan Adanya Risiko (Read Risk Disclosure)"
-                        checked={data.riskDisclosureRead || false}
-                        onChange={(e) => onChange({ ...data, riskDisclosureRead: e.target.checked })}
-                        className="fs-6 fw-bold mb-3"
-                        required
-                    />
-
-                    {data.riskDisclosureRead && (
-                        <div className="mb-4 border rounded p-4 bg-light">
+                    <div className="mb-4 border rounded p-4 bg-light">
                             <div className="mb-4">
                                 <p className="fw-bold mb-3">1. Perdagangan Kontrak Berjangka belum tentu layak bagi semua investor. Anda dapat menderita kerugian dalam jumlah besar dan dalam jangka waktu singkat.</p>
                                 <p className="mb-3">Jumlah kerugian uang dimungkinkan dapat melebihi jumlah uang yang pertama kali Anda setor (Margin awal) ke Pialang Berjangka Anda. Anda mungkin menderita kerugian seluruh Margin dan Margin tambahan yang ditempatkan pada Pialang Berjangka untuk mempertahankan posisi Kontrak Berjangka Anda. Hal ini disebabkan Perdagangan Berjangka sangat dipengaruhi oleh mekanisme leverage, dimana dengan jumlah investasi dalam bentuk yang relatif kecil dapat digunakan untuk membuka posisi dengan aset yang bernilai jauh lebih tinggi. Apabila Anda tidak siap dengan risiko seperti ini, sebaiknya Anda tidak melakukan perdagangan Kontrak Berjangka.</p>
@@ -2273,7 +2625,6 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                 />
                             </div>
                         </div>
-                    )}
 
                     <div className="border rounded p-3 bg-light mb-3">
                         <h6 className="text-center fw-bold mb-3">PERNYATAAN MENERIMA PEMBERITAHUAN ADANYA RISIKO</h6>
@@ -2469,32 +2820,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
             {hasValidationErrors && (
                 <Alert variant="warning" className="mt-3">
                     <i className="mdi mdi-alert-outline me-2"></i>
-                    Please complete all required fields before proceeding:
-                    <ul className="mb-0 mt-2">
-                        {isFieldMissing('companyProfileRead') && <li>Read Company Profile PT. Genesis Gemilang Futures</li>}
-                        {isFieldMissing('companyProfileUnderstanding') && <li>Confirm understanding of Company Profile PT. Genesis Gemilang Futures</li>}
-                        {isFieldMissing('statementRead') && <li>Read Statement Of Having Simulation</li>}
-                        {isFieldMissing('statementUnderstanding') && <li>Confirm understanding of Statement Of Having Simulation</li>}
-                        {isFieldMissing('tradingExperience') && <li>Select your trading experience</li>}
-                        {isFieldMissing('brokerCompany') && data.tradingExperience === 'ya' && <li>Enter broker company name</li>}
-                        {isFieldMissing('demoAccountNumber') && data.tradingExperience === 'ya' && <li>Enter demo account number</li>}
-                        {isFieldMissing('experienceStatementRead') && <li>Read Statement Of Having Experience</li>}
-                        {isFieldMissing('experienceUnderstanding') && <li>Confirm understanding of Statement Of Having Experience</li>}
-                        {isFieldMissing('applicationStatementRead') && <li>Read Account Opening Application</li>}
-                        {isFieldMissing('applicationUnderstanding') && <li>Confirm understanding of Account Opening Application</li>}
-                        {isFieldMissing('riskDisclosureRead') && <li>Read Risk Disclosure</li>}
-                        {isFieldMissing('riskDisclosureUnderstanding') && <li>Confirm understanding of Risk Disclosure</li>}
-                        {data.riskDisclosureRead && [1,2,3,4,5,6,7,8,9,10,11,12,13,14].map(num => 
-                            isFieldMissing(`riskStatement${num}`) && <li key={num}>Accept Risk Statement {num}</li>
-                        ).filter(Boolean)}
-                        {isFieldMissing('mandateStatementRead') && <li>Read Mandate Agreement</li>}
-                        {isFieldMissing('baktiArbitration') && <li>Select dispute resolution method (BAKTI)</li>}
-                        {isFieldMissing('mandateUnderstanding') && <li>Confirm understanding of Mandate Agreement</li>}
-                        {isFieldMissing('tradingRulesRead') && <li>Read Trading Rules</li>}
-                        {isFieldMissing('tradingRulesUnderstanding') && <li>Confirm understanding of Trading Rules</li>}
-                        {isFieldMissing('personalAccessPasswordRead') && <li>Read Personal Access Password</li>}
-                        {isFieldMissing('personalAccessPasswordUnderstanding') && <li>Confirm understanding of Personal Access Password</li>}
-                    </ul>
+                    Please complete all required fields before proceeding.
+                   
                 </Alert>
             )}
         </div>

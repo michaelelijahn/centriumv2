@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup, Button } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { FileUploader } from '../../../components/FileUploader/FileUploader';
+import { useNotificationContext } from '../../../common/context/useNotificationContext';
 
 const RegulatedCompanyForm = () => {
     const [formData, setFormData] = useState({});
+    const { showNotification } = useNotificationContext();
 
     const steps = [
         {
@@ -84,13 +86,274 @@ const RegulatedCompanyForm = () => {
         }
     };
 
+    // Validation functions for each step
+    const validateStep = (stepIndex, stepData, allData) => {
+        switch (stepIndex) {
+            case 0: // Requirements step - always valid (just informational)
+                return { isValid: true, errors: [] };
+            
+            case 1: // Company Email Registration step
+                return validateEmailStep(stepData);
+            
+            case 2: // Company Details step
+                return validateCompanyDetailsStep(stepData);
+            
+            case 3: // Document Upload step
+                return validateDocumentUploadStep(stepData);
+            
+            case 4: // Authorize Person step
+                return validateAuthorizePersonStep(stepData);
+            
+            case 5: // Passport Upload step
+                return validatePassportUploadStep(stepData);
+            
+            case 6: // Document Agreements step
+                return validateDocumentAgreementsStep(stepData);
+            
+            default:
+                return { isValid: true, errors: [] };
+        }
+    };
+
+    const validateEmailStep = (data) => {
+        const errors = [];
+        
+        if (!data.email?.trim()) {
+            errors.push('Company email address is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        if (!data.demoAccountNo?.trim()) {
+            errors.push('Demo account selection is required');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateCompanyDetailsStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'companyRegistrationName', label: 'Company Registration Name' },
+            { field: 'companyLicenseNo', label: 'Company License Number' },
+            { field: 'natureOfBusiness', label: 'Nature of Business' },
+            { field: 'companyLegalForm', label: 'Company Legal Form' },
+            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'city', label: 'City' },
+            { field: 'postalCode', label: 'Postal/Zip Code' },
+            { field: 'country', label: 'Country' },
+            { field: 'placeOfEstablishment', label: 'Place of Establishment' },
+            { field: 'dateOfEstablishment', label: 'Date of Establishment' },
+            { field: 'countryCode', label: 'Country Code' },
+            { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
+            { field: 'beneficialOwnerName', label: 'Beneficial Owner Name' },
+            { field: 'beneficialOwnerPassportNo', label: 'Beneficial Owner Passport Number' },
+            { field: 'sourceOfFunds', label: 'Source of Funds' },
+            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
+            errors.push('Please specify the other legal form');
+        }
+        
+        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
+            errors.push('Please specify the other country');
+        }
+        
+        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
+            errors.push('Please specify the other source of funds');
+        }
+        
+        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
+            errors.push('Please specify the other trading account purpose');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDocumentUploadStep = (data) => {
+        const errors = [];
+        
+        // Check if documents are uploaded
+        if (!data.documentsUploaded) {
+            errors.push('Please upload all required company documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateAuthorizePersonStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'authorizePersonTitle', label: 'Authorize Person Title' },
+            { field: 'authorizePersonFullName', label: 'Authorize Person Full Name' },
+            { field: 'authorizePersonPlaceOfBirth', label: 'Place of Birth' },
+            { field: 'authorizePersonDateOfBirth', label: 'Date of Birth' },
+            { field: 'authorizePersonPassportId', label: 'Passport ID Number' },
+            { field: 'authorizePersonEmail', label: 'Email' },
+            { field: 'authorizePersonGender', label: 'Gender' },
+            { field: 'authorizePersonMaritalStatus', label: 'Marital Status' },
+            { field: 'authorizePersonCitizen', label: 'Citizenship' },
+            { field: 'authorizePersonCountryCode', label: 'Country Code' },
+            { field: 'authorizePersonPhoneNumber', label: 'Phone Number' },
+            { field: 'authorizePersonStreetAddress', label: 'Street Address' },
+            { field: 'authorizePersonCity', label: 'City' },
+            { field: 'authorizePersonPostalCode', label: 'Postal Code' },
+            { field: 'authorizePersonCountry', label: 'Country' },
+            { field: 'authorizePersonInvestmentExperience', label: 'Investment Experience' },
+            { field: 'authorizePersonFamilyInBappebti', label: 'Family in BAPPEBTI' },
+            { field: 'authorizePersonDeclaredBankrupt', label: 'Bankruptcy Declaration' },
+            { field: 'authorizePersonCompanyName', label: 'Company Name' },
+            { field: 'authorizePersonBusinessNature', label: 'Nature of Business' },
+            { field: 'authorizePersonJobPosition', label: 'Job Position' },
+            { field: 'authorizePersonOfficeAddress', label: 'Office Address' },
+            { field: 'authorizePersonOfficeCity', label: 'Office City' },
+            { field: 'authorizePersonOfficePostalCode', label: 'Office Postal Code' },
+            { field: 'authorizePersonOfficeCountry', label: 'Office Country' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.authorizePersonCitizen === 'OTHER' && !data.authorizePersonCitizenOther?.trim()) {
+            errors.push('Please specify other citizenship');
+        }
+        
+        if (data.authorizePersonCountry === 'OTHER' && !data.authorizePersonCountryOther?.trim()) {
+            errors.push('Please specify other country');
+        }
+        
+        if (data.authorizePersonOfficeCountry === 'OTHER' && !data.authorizePersonOfficeCountryOther?.trim()) {
+            errors.push('Please specify other office country');
+        }
+        
+        if (data.authorizePersonInvestmentExperience === 'YES' && !data.authorizePersonInvestmentExperienceDetails?.trim()) {
+            errors.push('Please provide details about investment experience');
+        }
+        
+        // Validate email format
+        if (data.authorizePersonEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.authorizePersonEmail)) {
+            errors.push('Please enter a valid email address for Authorize Person');
+        }
+        
+        // Validate bank accounts
+        if (!data.bankAccounts || data.bankAccounts.length === 0) {
+            errors.push('At least one bank account is required');
+        } else {
+            data.bankAccounts.forEach((account, index) => {
+                const bankRequiredFields = [
+                    { field: 'bankName', label: `Bank ${index + 1} - Bank Name` },
+                    { field: 'accountName', label: `Bank ${index + 1} - Account Name` },
+                    { field: 'bankAddress', label: `Bank ${index + 1} - Bank Address` },
+                    { field: 'bankCity', label: `Bank ${index + 1} - Bank City` },
+                    { field: 'bankCountry', label: `Bank ${index + 1} - Bank Country` },
+                    { field: 'swiftCode', label: `Bank ${index + 1} - SWIFT Code` },
+                    { field: 'accountNo', label: `Bank ${index + 1} - Account Number` }
+                ];
+                
+                bankRequiredFields.forEach(({ field, label }) => {
+                    if (!account[field]?.trim()) {
+                        errors.push(`${label} is required`);
+                    }
+                });
+                
+                if (account.bankCountry === 'OTHER' && !account.bankCountryOther?.trim()) {
+                    errors.push(`Bank ${index + 1} - Please specify other country`);
+                }
+            });
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validatePassportUploadStep = (data) => {
+        const errors = [];
+        
+        // Check if passport documents are uploaded
+        if (!data.passportDocumentsUploaded) {
+            errors.push('Please upload all required passport documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDocumentAgreementsStep = (data) => {
+        const errors = [];
+        
+        const requiredAgreements = [
+            'companyProfile',
+            'statementSimulation',
+            'statementExperience',
+            'disclosureStatement',
+            'accountOpening',
+            'riskDisclosure',
+            'mandateAgreement',
+            'tradingRules',
+            'personalAccessPassword'
+        ];
+        
+        const agreementLabels = {
+            companyProfile: 'Company Profile',
+            statementSimulation: 'Statement of Having Simulation',
+            statementExperience: 'Statement of Having Experience',
+            disclosureStatement: 'Disclosure Statement',
+            accountOpening: 'Account Opening Application',
+            riskDisclosure: 'Risk Disclosure',
+            mandateAgreement: 'Mandate Agreement',
+            tradingRules: 'Trading Rules',
+            personalAccessPassword: 'Personal Access Password'
+        };
+        
+        requiredAgreements.forEach(agreement => {
+            if (!data[agreement]) {
+                errors.push(`Please agree to ${agreementLabels[agreement]}`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const handleStepValidation = (stepIndex, stepData, allData) => {
+        const validation = validateStep(stepIndex, stepData, allData);
+        
+        if (!validation.isValid) {
+            // Show notification with all validation errors
+            const errorMessage = validation.errors.length === 1 
+                ? validation.errors[0]
+                : `Please fix the following issues: ${validation.errors.join(', ')}`;
+                
+            showNotification({
+                title: 'Validation Error',
+                message: errorMessage,
+                type: 'error'
+            });
+        }
+        
+        return validation.isValid;
+    };
+
     const handleStepChange = (step, data) => {
         console.log(`Moving to step ${step}`, data);
     };
 
     const handleSubmit = (data) => {
         console.log('Submitting Regulated Company KYC:', data);
-        alert('Regulated Company KYC submitted successfully!');
+        showNotification({
+            title: 'Success',
+            message: 'Regulated Company KYC submitted successfully!',
+            type: 'success'
+        });
     };
 
     return (
@@ -99,6 +362,7 @@ const RegulatedCompanyForm = () => {
             steps={steps}
             onStepChange={handleStepChange}
             onSubmit={handleSubmit}
+            onStepValidation={handleStepValidation}
         >
             {renderStep}
         </MultiStepFormWrapper>
@@ -486,7 +750,25 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
             [documentName]: files
         };
         setUploadedDocuments(updatedDocs);
-        onChange({ ...data, uploadedDocuments: updatedDocs });
+        
+        // Check if all required documents are uploaded
+        const requiredDocuments = [
+            'Certificate of Incorporation',
+            'Board of Resolution', 
+            'Bank Statement',
+            'Address Proof',
+            'Management Structure',
+            'Ownership Structure',
+            'Beneficial Owner Passport'
+        ];
+        
+        const allDocsUploaded = requiredDocuments.every(doc => updatedDocs[doc] && updatedDocs[doc].length > 0);
+        
+        onChange({ 
+            ...data, 
+            uploadedDocuments: updatedDocs,
+            documentsUploaded: allDocsUploaded
+        });
     };
 
     const removeDocument = (documentName) => {
@@ -1200,13 +1482,21 @@ const PassportUploadStep = ({ data = {}, onChange }) => {
         if (files && files.length > 0) {
             const file = files[0];
             setPassportFile(file);
-            onChange({ ...data, passportFile: file });
+            onChange({ 
+                ...data, 
+                passportFile: file,
+                passportDocumentsUploaded: true
+            });
         }
     };
 
     const removeFile = () => {
         setPassportFile(null);
-        onChange({ ...data, passportFile: null });
+        onChange({ 
+            ...data, 
+            passportFile: null,
+            passportDocumentsUploaded: false
+        });
     };
 
     return (

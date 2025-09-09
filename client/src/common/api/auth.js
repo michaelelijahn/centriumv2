@@ -92,6 +92,17 @@ function AuthService() {
         },
         uploadTradesCsv: (formData) => {
             return HttpClient.post('/trades/upload-csv', formData);
+        },
+        
+        // KYC API functions
+        submitForeignCompanyKYC: (formData) => {
+            return HttpClient.post('/kyc/foreign-company/submit', formData);
+        },
+        getKYCApplications: () => {
+            return HttpClient.get('/kyc/applications');
+        },
+        getKYCApplicationStatus: (applicationId) => {
+            return HttpClient.get(`/kyc/application/${applicationId}`);
         }
     };
 }

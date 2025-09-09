@@ -11,6 +11,7 @@ const MultiStepFormWrapper = ({
     children, 
     onStepChange,
     onSubmit,
+    onStepValidation,
     canProceed = true,
     isLastStep = false 
 }) => {
@@ -21,6 +22,17 @@ const MultiStepFormWrapper = ({
 
     const handleNext = () => {
         const stepsLength = actualSteps ? actualSteps.length : steps.length;
+        
+        // Validate current step before proceeding
+        if (onStepValidation) {
+            const currentStepData = formData[`step_${currentStep}`] || {};
+            const isValid = onStepValidation(currentStep, currentStepData, formData);
+            
+            if (!isValid) {
+                return; // Don't proceed if validation fails
+            }
+        }
+        
         if (currentStep < stepsLength - 1) {
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
@@ -45,6 +57,16 @@ const MultiStepFormWrapper = ({
     };
 
     const handleSubmit = () => {
+        // Validate final step before submitting
+        if (onStepValidation) {
+            const currentStepData = formData[`step_${currentStep}`] || {};
+            const isValid = onStepValidation(currentStep, currentStepData, formData);
+            
+            if (!isValid) {
+                return; // Don't submit if validation fails
+            }
+        }
+        
         if (onSubmit) {
             onSubmit(formData);
         }

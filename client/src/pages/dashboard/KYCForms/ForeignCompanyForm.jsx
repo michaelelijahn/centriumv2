@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
+import { useNotificationContext } from '../../../common/context/useNotificationContext';
+import AuthService from '../../../common/api/auth';
 
 const ForeignCompanyForm = () => {
     const [formData, setFormData] = useState({});
+    const { showNotification } = useNotificationContext();
 
     const steps = [
         {
@@ -75,7 +78,7 @@ const ForeignCompanyForm = () => {
             case 4:
                 return <AuthorizePersonStep data={stepData} onChange={updateFormData} />;
             case 5:
-                return <ReviewStep allData={formData} onChange={updateFormData} />;
+                return <ReviewStep data={stepData} onChange={updateFormData} allData={formData} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
@@ -93,10 +96,335 @@ const ForeignCompanyForm = () => {
         }
     };
 
-    const handleSubmit = (data) => {
-        console.log('Submitting Foreign Company KYC:', data);
-        // Here you would submit to your API
-        alert('Foreign Company KYC submitted successfully!');
+    // Validation functions for each step
+    const validateStep = (stepIndex, stepData, allData) => {
+        switch (stepIndex) {
+            case 0: // Requirements step - always valid (just informational)
+                return { isValid: true, errors: [] };
+            
+            case 1: // Email Registration step
+                return validateEmailStep(stepData);
+            
+            case 2: // Company Details step
+                return validateCompanyDetailsStep(stepData);
+            
+            case 3: // Document Upload step
+                return validateDocumentUploadStep(stepData);
+            
+            case 4: // Authorize Person step
+                return validateAuthorizePersonStep(stepData);
+            
+            case 5: // Review step
+                return validateReviewStep(stepData);
+            
+            default:
+                return { isValid: true, errors: [] };
+        }
+    };
+
+    const validateEmailStep = (data) => {
+        const errors = [];
+        
+        if (!data.email?.trim()) {
+            errors.push('Company email address is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        if (!data.demoAccountNo?.trim()) {
+            errors.push('Demo account selection is required');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateCompanyDetailsStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'companyRegistrationName', label: 'Company Registration Name' },
+            { field: 'companyLicenseNo', label: 'Company License Number' },
+            { field: 'natureOfBusiness', label: 'Nature of Business' },
+            { field: 'companyLegalForm', label: 'Company Legal Form' },
+            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'city', label: 'City' },
+            { field: 'postalCode', label: 'Postal/Zip Code' },
+            { field: 'country', label: 'Country' },
+            { field: 'placeOfEstablishment', label: 'Place of Establishment' },
+            { field: 'dateOfEstablishment', label: 'Date of Establishment' },
+            { field: 'countryCode', label: 'Country Code' },
+            { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
+            { field: 'beneficialOwnerName', label: 'Beneficial Owner Name' },
+            { field: 'beneficialOwnerPassportNo', label: 'Beneficial Owner Passport Number' },
+            { field: 'sourceOfFunds', label: 'Source of Funds' },
+            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
+            errors.push('Please specify the other legal form');
+        }
+        
+        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
+            errors.push('Please specify the other country');
+        }
+        
+        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
+            errors.push('Please specify the other source of funds');
+        }
+        
+        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
+            errors.push('Please specify the other trading account purpose');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDocumentUploadStep = (data) => {
+        const errors = [];
+        
+        // For now, we'll assume documents are valid if the step data exists
+        // In a real implementation, you'd check if files are actually uploaded
+        const requiredDocuments = [
+            'Certificate of Incorporation',
+            'Board of Resolution', 
+            'Address Proof',
+            'Bank Statement',
+            'Beneficial Owner Passport',
+            'Management Structure',
+            'Ownership Structure'
+        ];
+        
+        // This is a placeholder - in real implementation you'd check actual file uploads
+        if (!data.documentsUploaded) {
+            errors.push('Please upload all required documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateAuthorizePersonStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'authorizePersonTitle', label: 'Authorize Person Title' },
+            { field: 'authorizePersonFullName', label: 'Authorize Person Full Name' },
+            { field: 'authorizePersonPlaceOfBirth', label: 'Place of Birth' },
+            { field: 'authorizePersonDateOfBirth', label: 'Date of Birth' },
+            { field: 'authorizePersonPassportId', label: 'Passport ID Number' },
+            { field: 'authorizePersonEmail', label: 'Authorize Person Email' },
+            { field: 'authorizePersonGender', label: 'Gender' },
+            { field: 'authorizePersonMaritalStatus', label: 'Marital Status' },
+            { field: 'authorizePersonCitizen', label: 'Citizenship' },
+            { field: 'authorizePersonCountryCode', label: 'Phone Country Code' },
+            { field: 'authorizePersonPhoneNumber', label: 'Phone Number' },
+            { field: 'authorizePersonStreetAddress', label: 'Street Address' },
+            { field: 'authorizePersonCity', label: 'City' },
+            { field: 'authorizePersonPostalCode', label: 'Postal Code' },
+            { field: 'authorizePersonCountry', label: 'Country' },
+            { field: 'authorizePersonInvestmentExperience', label: 'Investment Experience' },
+            { field: 'authorizePersonFamilyInBappebti', label: 'Family in BAPPEBTI' },
+            { field: 'authorizePersonDeclaredBankrupt', label: 'Bankruptcy Declaration' },
+            { field: 'authorizePersonCompanyName', label: 'Company Name' },
+            { field: 'authorizePersonBusinessNature', label: 'Nature of Business' },
+            { field: 'authorizePersonJobPosition', label: 'Job Position' },
+            { field: 'authorizePersonOfficeAddress', label: 'Office Address' },
+            { field: 'authorizePersonOfficeCity', label: 'Office City' },
+            { field: 'authorizePersonOfficePostalCode', label: 'Office Postal Code' },
+            { field: 'authorizePersonOfficeCountry', label: 'Office Country' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.authorizePersonCitizen === 'OTHER' && !data.authorizePersonCitizenOther?.trim()) {
+            errors.push('Please specify other citizenship');
+        }
+        
+        if (data.authorizePersonCountry === 'OTHER' && !data.authorizePersonCountryOther?.trim()) {
+            errors.push('Please specify other country');
+        }
+        
+        if (data.authorizePersonOfficeCountry === 'OTHER' && !data.authorizePersonOfficeCountryOther?.trim()) {
+            errors.push('Please specify other office country');
+        }
+        
+        if (data.authorizePersonInvestmentExperience === 'YES' && !data.authorizePersonInvestmentExperienceDetails?.trim()) {
+            errors.push('Please provide details about your investment experience');
+        }
+        
+        // Validate email format
+        if (data.authorizePersonEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.authorizePersonEmail)) {
+            errors.push('Please enter a valid email address for authorize person');
+        }
+        
+        // Validate bank accounts
+        if (!data.bankAccounts || data.bankAccounts.length === 0) {
+            errors.push('At least one bank account is required');
+        } else {
+            data.bankAccounts.forEach((account, index) => {
+                const bankRequiredFields = [
+                    { field: 'bankName', label: `Bank ${index + 1} - Bank Name` },
+                    { field: 'accountName', label: `Bank ${index + 1} - Account Name` },
+                    { field: 'bankAddress', label: `Bank ${index + 1} - Bank Address` },
+                    { field: 'bankCity', label: `Bank ${index + 1} - Bank City` },
+                    { field: 'bankCountry', label: `Bank ${index + 1} - Bank Country` },
+                    { field: 'swiftCode', label: `Bank ${index + 1} - SWIFT Code` },
+                    { field: 'accountNo', label: `Bank ${index + 1} - Account Number` }
+                ];
+                
+                bankRequiredFields.forEach(({ field, label }) => {
+                    if (!account[field]?.trim()) {
+                        errors.push(`${label} is required`);
+                    }
+                });
+                
+                if (account.bankCountry === 'OTHER' && !account.bankCountryOther?.trim()) {
+                    errors.push(`Bank ${index + 1} - Please specify other country`);
+                }
+            });
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateReviewStep = (data) => {
+        const errors = [];
+        
+        const requiredAgreements = [
+            'companyProfile',
+            'statementSimulation', 
+            'statementExperience',
+            'disclosureStatement',
+            'accountOpening',
+            'riskDisclosure',
+            'mandateAgreement',
+            'tradingRules',
+            'personalAccessPassword'
+        ];
+        
+        const agreementLabels = {
+            companyProfile: 'Company Profile',
+            statementSimulation: 'Statement of Having Simulation',
+            statementExperience: 'Statement of Having Experience', 
+            disclosureStatement: 'Disclosure Statement',
+            accountOpening: 'Account Opening Application',
+            riskDisclosure: 'Risk Disclosure',
+            mandateAgreement: 'Mandate Agreement',
+            tradingRules: 'Trading Rules',
+            personalAccessPassword: 'Personal Access Password'
+        };
+        
+        requiredAgreements.forEach(agreement => {
+            if (!data[agreement]) {
+                errors.push(`Please agree to ${agreementLabels[agreement]}`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const handleStepValidation = (stepIndex, stepData, allData) => {
+        const validation = validateStep(stepIndex, stepData, allData);
+        
+        if (!validation.isValid) {
+            // Show notification with all validation errors
+            const errorMessage = validation.errors.length === 1 
+                ? validation.errors[0]
+                : `Please fix the following issues: ${validation.errors.join(', ')}`;
+                
+            showNotification({
+                title: 'Validation Error',
+                message: errorMessage,
+                type: 'error'
+            });
+        }
+        
+        return validation.isValid;
+    };
+
+    const handleSubmit = async (data) => {
+        console.log('Submitting Foreign Company KYC (raw data):', data);
+        
+        try {
+            // Flatten the nested step data structure
+            const flattenedData = {};
+            Object.keys(data).forEach(stepKey => {
+                if (stepKey.startsWith('step_') && typeof data[stepKey] === 'object') {
+                    Object.assign(flattenedData, data[stepKey]);
+                }
+            });
+            
+            console.log('Flattened form data:', flattenedData);
+            
+            // Create FormData object to handle both form data and file uploads
+            const formData = new FormData();
+            
+            // Add all form fields to FormData
+            Object.keys(flattenedData).forEach(key => {
+                if (key === 'bankAccounts' && Array.isArray(flattenedData[key])) {
+                    // Convert bank accounts array to JSON string
+                    formData.append('bankAccounts', JSON.stringify(flattenedData[key]));
+                } else if (typeof flattenedData[key] === 'object' && flattenedData[key] !== null && !(flattenedData[key] instanceof File)) {
+                    // Convert objects to JSON string (except File objects)
+                    formData.append(key, JSON.stringify(flattenedData[key]));
+                } else if (flattenedData[key] !== null && flattenedData[key] !== undefined) {
+                    // Add primitive values directly
+                    formData.append(key, flattenedData[key]);
+                }
+            });
+            
+            // Add file uploads to FormData
+            const documentFieldMapping = {
+                'certificateIncorporation': 'certificate_incorporation',
+                'boardResolution': 'board_resolution',
+                'addressProof': 'address_proof',
+                'bankStatement': 'bank_statement',
+                'beneficialOwnerPassport': 'beneficial_owner_passport',
+                'managementStructure': 'management_structure',
+                'ownershipStructure': 'ownership_structure',
+                'authorizePersonPassport': 'authorize_person_passport'
+            };
+            
+            // Add document files to FormData
+            Object.keys(documentFieldMapping).forEach(frontendKey => {
+                const backendKey = documentFieldMapping[frontendKey];
+                if (flattenedData[frontendKey] instanceof File) {
+                    formData.append(backendKey, flattenedData[frontendKey]);
+                }
+            });
+            
+            const response = await AuthService.submitForeignCompanyKYC(formData);
+            
+            if (response.success) {
+                showNotification({
+                    title: 'Success',
+                    message: `Foreign Company KYC submitted successfully! Application Reference: ${response.data.applicationReference}`,
+                    type: 'success'
+                });
+                
+                // Optionally, redirect to a success page or clear the form
+                setFormData({});
+            } else {
+                throw new Error(response.message || 'Submission failed');
+            }
+            
+        } catch (error) {
+            console.error('KYC Submission Error:', error);
+            showNotification({
+                title: 'Submission Failed',
+                message: error || 'An error occurred while submitting your KYC application. Please try again.',
+                type: 'error'
+            });
+        }
     };
 
     return (
@@ -105,6 +433,7 @@ const ForeignCompanyForm = () => {
             steps={steps}
             onStepChange={handleStepChange}
             onSubmit={handleSubmit}
+            onStepValidation={handleStepValidation}
         >
             {renderStep}
         </MultiStepFormWrapper>
@@ -168,17 +497,42 @@ const RequirementsStep = ({ requirements }) => {
 const EmailRegistrationStep = ({ data = {}, onChange }) => {
     const [email, setEmail] = useState(data.email || '');
     const [demoAccountNo, setDemoAccountNo] = useState(data.demoAccountNo || '');
+    const [emailValid, setEmailValid] = useState(true);
+    const { showNotification } = useNotificationContext();
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleEmailChange = (field, value) => {
         const newData = { ...data, [field]: value };
-        if (field === 'email') setEmail(value);
-        if (field === 'demoAccountNo') setDemoAccountNo(value);
+        
+        if (field === 'email') {
+            setEmail(value);
+            const isValid = value === '' || validateEmail(value);
+            setEmailValid(isValid);
+            
+            if (value && !isValid) {
+                showNotification({
+                    title: 'Invalid Email',
+                    message: 'Please enter a valid email address',
+                    type: 'error'
+                });
+            }
+        }
+        
+        if (field === 'demoAccountNo') {
+            setDemoAccountNo(value);
+        }
+        
         onChange(newData);
     };
+
 
     return (
         <div>
@@ -191,18 +545,29 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                 <Col lg={8}>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Register Company Email</Form.Label>
+                            <Form.Label className="text-muted">
+                                Register Company Email <span className="text-danger">*</span>
+                            </Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter company email address"
                                 value={email}
                                 onChange={(e) => handleEmailChange('email', e.target.value)}
+                                isInvalid={!emailValid}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid email address.
+                            </Form.Control.Feedback>
+                            <Form.Text className="text-muted">
+                                This email will be used for all KYC-related communications.
+                            </Form.Text>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Select Demo Account No.</Form.Label>
+                            <Form.Label className="text-muted">
+                                Select Demo Account No. <span className="text-danger">*</span>
+                            </Form.Label>
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
@@ -215,7 +580,17 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                                 <option value="DEMO004">DEMO004 - Demo Account 4</option>
                                 <option value="DEMO005">DEMO005 - Demo Account 5</option>
                             </Form.Select>
+                            <Form.Text className="text-muted">
+                                Choose a demo account to practice trading before live trading.
+                            </Form.Text>
                         </Form.Group>
+
+                        {email && demoAccountNo && (
+                            <Alert variant="success" className="mt-3">
+                                <i className="mdi mdi-check-circle me-2"></i>
+                                Email and demo account selection completed successfully!
+                            </Alert>
+                        )}
                     </Form>
                 </Col>
             </Row>
@@ -1051,10 +1426,25 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     <Card.Body>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted">Authorize Person Passport <span className="text-danger">*</span></Form.Label>
-                            <Form.Control type="file" accept=".pdf,.jpg,.jpeg,.png" required />
+                            <Form.Control 
+                                type="file" 
+                                accept=".pdf,.jpg,.jpeg,.png" 
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        onChange({ ...data, authorizePersonPassport: file });
+                                    }
+                                }}
+                                required 
+                            />
                             <Form.Text className="text-muted">
                                 Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                             </Form.Text>
+                            {data.authorizePersonPassport && (
+                                <Form.Text className="text-success">
+                                    File selected: {data.authorizePersonPassport.name}
+                                </Form.Text>
+                            )}
                         </Form.Group>
                     </Card.Body>
                 </Card>
@@ -1206,9 +1596,54 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
 };
 
 const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+    const [uploadedDocs, setUploadedDocs] = useState(data.uploadedDocuments || {});
+    const [uploadedFiles, setUploadedFiles] = useState(data.uploadedFiles || {});
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleFileUpload = (categoryIndex, docIndex, file) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = {
+            ...uploadedDocs,
+            [docKey]: file ? file.name : null
+        };
+        
+        const newUploadedFiles = {
+            ...uploadedFiles,
+            [docKey]: file || null
+        };
+        
+        setUploadedDocs(newUploadedDocs);
+        setUploadedFiles(newUploadedFiles);
+        
+        // Map document uploads to backend field names
+        const documentMappingByIndex = {
+            '0_0': 'certificateIncorporation',      // Certificate of Incorporation
+            '0_1': 'boardResolution',              // Board of Resolution  
+            '0_2': 'addressProof',                 // Address Proof
+            '1_0': 'bankStatement',                // Bank Statement
+            '2_0': 'beneficialOwnerPassport',      // Beneficial Owner Passport
+            '3_0': 'managementStructure',          // Management Structure
+            '3_1': 'ownershipStructure'            // Ownership Structure
+        };
+        
+        // Update parent component with both document names and File objects
+        const updatedData = {
+            ...data,
+            uploadedDocuments: newUploadedDocs,
+            uploadedFiles: newUploadedFiles,
+            documentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
+        };
+        
+        // Add the specific document file to the data using backend field names
+        if (documentMappingByIndex[docKey] && file) {
+            updatedData[documentMappingByIndex[docKey]] = file;
+        }
+        
+        onChange(updatedData);
+    };
 
     return (
         <div>
@@ -1217,21 +1652,42 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 <p className="text-muted fs-5">Upload all required documents</p>
             </div>
 
-            {requirements.map((category, index) => (
-                <Card key={index} className="mb-4 border-0 shadow-sm">
+            {requirements.map((category, categoryIndex) => (
+                <Card key={categoryIndex} className="mb-4 border-0 shadow-sm">
                     <Card.Header className="bg-light border-0">
                         <h6 className="mb-0 text-primary">{category.category}</h6>
                     </Card.Header>
                     <Card.Body>
-                        {category.documents.map((doc, docIndex) => (
-                            <Form.Group key={docIndex} className="mb-3">
-                                <Form.Label className="text-muted">{doc} <span className="text-danger">*</span></Form.Label>
-                                <Form.Control type="file" accept=".pdf,.jpg,.jpeg,.png" />
-                                <Form.Text className="text-muted">
-                                    Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                                </Form.Text>
-                            </Form.Group>
-                        ))}
+                        {category.documents.map((doc, docIndex) => {
+                            const docKey = `${categoryIndex}_${docIndex}`;
+                            const isUploaded = uploadedDocs[docKey];
+                            
+                            return (
+                                <Form.Group key={docIndex} className="mb-3">
+                                    <Form.Label className="text-muted">
+                                        {doc} <span className="text-danger">*</span>
+                                        {isUploaded && (
+                                            <span className="text-success ms-2">
+                                                <i className="mdi mdi-check-circle"></i> Uploaded
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control 
+                                        type="file" 
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                    />
+                                    <Form.Text className="text-muted">
+                                        Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG 
+                                    </Form.Text>
+                                    {isUploaded && (
+                                        <Form.Text className="text-success">
+                                            File uploaded: {isUploaded}
+                                        </Form.Text>
+                                    )}
+                                </Form.Group>
+                            );
+                        })}
                     </Card.Body>
                 </Card>
             ))}
@@ -1239,21 +1695,28 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
     );
 };
 
-const ReviewStep = ({ allData, onChange }) => {
+const ReviewStep = ({ data = {}, onChange, allData }) => {
     const [agreements, setAgreements] = useState({
-        companyProfile: false,
-        statementSimulation: false,
-        statementExperience: false,
-        disclosureStatement: false,
-        accountOpening: false,
-        riskDisclosure: false,
-        mandateAgreement: false,
-        tradingRules: false,
-        personalAccessPassword: false
+        companyProfile: data.companyProfile || false,
+        statementSimulation: data.statementSimulation || false,
+        statementExperience: data.statementExperience || false,
+        disclosureStatement: data.disclosureStatement || false,
+        accountOpening: data.accountOpening || false,
+        riskDisclosure: data.riskDisclosure || false,
+        mandateAgreement: data.mandateAgreement || false,
+        tradingRules: data.tradingRules || false,
+        personalAccessPassword: data.personalAccessPassword || false
     });
 
     const handleAgreementChange = (field, value) => {
-        setAgreements(prev => ({ ...prev, [field]: value }));
+        const newAgreements = { ...agreements, [field]: value };
+        setAgreements(newAgreements);
+        
+        // Update parent component with agreement data
+        onChange({
+            ...data,
+            ...newAgreements
+        });
     };
 
     const allAgreementsChecked = Object.values(agreements).every(Boolean);

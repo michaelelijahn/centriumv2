@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
+import { useNotificationContext } from '../../../common/context/useNotificationContext';
 
 const ForeignPersonForm = () => {
     const [formData, setFormData] = useState({});
+    const { showNotification } = useNotificationContext();
 
     const steps = [
         {
@@ -87,10 +89,283 @@ const ForeignPersonForm = () => {
             case 6:
                 return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} />;
             case 7:
-                return <ReviewStep allData={formData} onChange={updateFormData} />;
+                return <ReviewStep data={stepData} onChange={updateFormData} allData={formData} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
+    };
+
+    // Validation functions for each step
+    const validateStep = (stepIndex, stepData, allData) => {
+        switch (stepIndex) {
+            case 0: // Requirements step - always valid (just informational)
+                return { isValid: true, errors: [] };
+            
+            case 1: // Personal Email Registration step
+                return validatePersonalEmailStep(stepData);
+            
+            case 2: // Personal Data step
+                return validatePersonalDataStep(stepData);
+            
+            case 3: // Emergency Contact step
+                return validateEmergencyContactStep(stepData);
+            
+            case 4: // Employment Data step
+                return validateEmploymentDataStep(stepData);
+            
+            case 5: // Bank Account step
+                return validateBankAccountStep(stepData);
+            
+            case 6: // Document Upload step
+                return validateDocumentUploadStep(stepData);
+            
+            case 7: // Review step
+                return validateReviewStep(stepData);
+            
+            default:
+                return { isValid: true, errors: [] };
+        }
+    };
+
+    const validatePersonalEmailStep = (data) => {
+        const errors = [];
+        
+        if (!data.email?.trim()) {
+            errors.push('Personal email address is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        if (!data.demoAccountNo?.trim()) {
+            errors.push('Demo account selection is required');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validatePersonalDataStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'personalTitle', label: 'Title' },
+            { field: 'fullName', label: 'Full Name' },
+            { field: 'placeOfBirth', label: 'Place of Birth' },
+            { field: 'dateOfBirth', label: 'Date of Birth' },
+            { field: 'passportId', label: 'Passport ID Number' },
+            { field: 'gender', label: 'Gender' },
+            { field: 'maritalStatus', label: 'Marital Status' },
+            { field: 'citizen', label: 'Citizenship' },
+            { field: 'personalEmail', label: 'Personal Email' },
+            { field: 'countryCode', label: 'Country Code' },
+            { field: 'phoneNumber', label: 'Phone Number' },
+            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'city', label: 'City' },
+            { field: 'postalCode', label: 'Postal Code' },
+            { field: 'country', label: 'Country' },
+            { field: 'sourceOfFunds', label: 'Source of Funds' },
+            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' },
+            { field: 'investmentExperience', label: 'Investment Experience' },
+            { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
+            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.citizen === 'OTHER' && !data.citizenOther?.trim()) {
+            errors.push('Please specify other citizenship');
+        }
+        
+        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
+            errors.push('Please specify other country');
+        }
+        
+        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
+            errors.push('Please specify other source of funds');
+        }
+        
+        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
+            errors.push('Please specify other trading account purpose');
+        }
+        
+        if (data.investmentExperience === 'YES' && !data.investmentExperienceDetails?.trim()) {
+            errors.push('Please provide details about your investment experience');
+        }
+        
+        // Validate email format
+        if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
+            errors.push('Please enter a valid personal email address');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateEmergencyContactStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'emergencyTitle', label: 'Emergency Contact Title' },
+            { field: 'emergencyFullName', label: 'Emergency Contact Full Name' },
+            { field: 'emergencyRelationship', label: 'Relationship' },
+            { field: 'emergencyCountryCode', label: 'Emergency Contact Country Code' },
+            { field: 'emergencyPhoneNumber', label: 'Emergency Contact Phone Number' },
+            { field: 'emergencyStreetAddress', label: 'Emergency Contact Street Address' },
+            { field: 'emergencyCity', label: 'Emergency Contact City' },
+            { field: 'emergencyPostalCode', label: 'Emergency Contact Postal Code' },
+            { field: 'emergencyCountry', label: 'Emergency Contact Country' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.emergencyRelationship === 'OTHER' && !data.emergencyRelationshipOther?.trim()) {
+            errors.push('Please specify other relationship');
+        }
+        
+        if (data.emergencyCountry === 'OTHER' && !data.emergencyCountryOther?.trim()) {
+            errors.push('Please specify other emergency contact country');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateEmploymentDataStep = (data) => {
+        const errors = [];
+        
+        if (!data.employmentStatus?.trim()) {
+            errors.push('Employment status is required');
+        }
+        
+        // If employed or entrepreneur, validate employment details
+        if (data.employmentStatus === 'WORK' || data.employmentStatus === 'ENTREPRENEUR') {
+            const employmentFields = [
+                { field: 'companyName', label: 'Company Name' },
+                { field: 'businessNature', label: 'Nature of Business' },
+                { field: 'jobPosition', label: 'Job Position' },
+                { field: 'officeAddress', label: 'Office Address' },
+                { field: 'officeCity', label: 'Office City' },
+                { field: 'officePostalCode', label: 'Office Postal Code' },
+                { field: 'officeCountry', label: 'Office Country' },
+                { field: 'monthlyIncome', label: 'Monthly Income' },
+                { field: 'annualIncome', label: 'Annual Income' }
+            ];
+            
+            employmentFields.forEach(({ field, label }) => {
+                if (!data[field]?.trim()) {
+                    errors.push(`${label} is required`);
+                }
+            });
+            
+            if (data.officeCountry === 'OTHER' && !data.officeCountryOther?.trim()) {
+                errors.push('Please specify other office country');
+            }
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateBankAccountStep = (data) => {
+        const errors = [];
+        
+        if (!data.bankAccounts || data.bankAccounts.length === 0) {
+            errors.push('At least one bank account is required');
+        } else {
+            data.bankAccounts.forEach((account, index) => {
+                const bankRequiredFields = [
+                    { field: 'bankName', label: `Bank ${index + 1} - Bank Name` },
+                    { field: 'accountName', label: `Bank ${index + 1} - Account Name` },
+                    { field: 'bankAddress', label: `Bank ${index + 1} - Bank Address` },
+                    { field: 'bankCity', label: `Bank ${index + 1} - Bank City` },
+                    { field: 'bankCountry', label: `Bank ${index + 1} - Bank Country` },
+                    { field: 'swiftCode', label: `Bank ${index + 1} - SWIFT Code` },
+                    { field: 'accountNo', label: `Bank ${index + 1} - Account Number` }
+                ];
+                
+                bankRequiredFields.forEach(({ field, label }) => {
+                    if (!account[field]?.trim()) {
+                        errors.push(`${label} is required`);
+                    }
+                });
+                
+                if (account.bankCountry === 'OTHER' && !account.bankCountryOther?.trim()) {
+                    errors.push(`Bank ${index + 1} - Please specify other country`);
+                }
+            });
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDocumentUploadStep = (data) => {
+        const errors = [];
+        
+        // Check if documents are uploaded
+        if (!data.documentsUploaded) {
+            errors.push('Please upload all required documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateReviewStep = (data) => {
+        const errors = [];
+        
+        const requiredAgreements = [
+            'companyProfile',
+            'statementSimulation', 
+            'statementExperience',
+            'disclosureStatement',
+            'accountOpening',
+            'riskDisclosure',
+            'mandateAgreement',
+            'tradingRules',
+            'personalAccessPassword'
+        ];
+        
+        const agreementLabels = {
+            companyProfile: 'Company Profile',
+            statementSimulation: 'Statement of Having Simulation',
+            statementExperience: 'Statement of Having Experience', 
+            disclosureStatement: 'Disclosure Statement',
+            accountOpening: 'Account Opening Application',
+            riskDisclosure: 'Risk Disclosure',
+            mandateAgreement: 'Mandate Agreement',
+            tradingRules: 'Trading Rules',
+            personalAccessPassword: 'Personal Access Password'
+        };
+        
+        requiredAgreements.forEach(agreement => {
+            if (!data[agreement]) {
+                errors.push(`Please agree to ${agreementLabels[agreement]}`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const handleStepValidation = (stepIndex, stepData, allData) => {
+        const validation = validateStep(stepIndex, stepData, allData);
+        
+        if (!validation.isValid) {
+            // Show notification with all validation errors
+            const errorMessage = validation.errors.length === 1 
+                ? validation.errors[0]
+                : `Please fix the following issues: ${validation.errors.join(', ')}`;
+                
+            showNotification({
+                title: 'Validation Error',
+                message: errorMessage,
+                type: 'error'
+            });
+        }
+        
+        return validation.isValid;
     };
 
     const handleStepChange = (step, data) => {
@@ -107,7 +382,12 @@ const ForeignPersonForm = () => {
 
     const handleSubmit = (data) => {
         console.log('Submitting Foreign Person KYC:', data);
-        alert('Foreign Person KYC submitted successfully!');
+        // Here you would submit to your API
+        showNotification({
+            title: 'Success',
+            message: 'Foreign Person KYC submitted successfully!',
+            type: 'success'
+        });
     };
 
     return (
@@ -116,6 +396,7 @@ const ForeignPersonForm = () => {
             steps={steps}
             onStepChange={handleStepChange}
             onSubmit={handleSubmit}
+            onStepValidation={handleStepValidation}
         >
             {renderStep}
         </MultiStepFormWrapper>
@@ -668,7 +949,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Full Name <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted">Full Name of Emergency Contact <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter emergency contact full name"
@@ -707,7 +988,7 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                 </Row>
 
                 {/* Address Information */}
-                <h5 className="text-primary mb-3 mt-4">Address Information</h5>
+                <h5 className="text-primary mb-3 mt-4">Emergency Contact Address Information</h5>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -1080,7 +1361,7 @@ const BankAccountStep = ({ data = {}, onChange }) => {
     return (
         <div>
             <div className="text-center mb-4">
-                <h4 className="text-primary mb-3">Bank Account Information</h4>
+                <h4 className="text-primary mb-3">Bank Account Information For Margin Deposit And Withdrawal</h4>
                 <p className="text-muted fs-5">Please provide your bank account details</p>
             </div>
 
@@ -1221,9 +1502,36 @@ const BankAccountStep = ({ data = {}, onChange }) => {
 };
 
 const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+    const [uploadedDocs, setUploadedDocs] = useState(data.uploadedDocuments || {});
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleFileUpload = (categoryIndex, docIndex, file) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = {
+            ...uploadedDocs,
+            [docKey]: file ? file.name : null
+        };
+        
+        setUploadedDocs(newUploadedDocs);
+        
+        // Calculate if all required documents are uploaded
+        const requiredDocsCount = requirements.filter(cat => !cat.optional)
+            .reduce((total, cat) => total + cat.documents.length, 0);
+        const uploadedRequiredCount = Object.entries(newUploadedDocs).filter(([key, value]) => {
+            const [catIdx] = key.split('_').map(Number);
+            return value && !requirements[catIdx]?.optional;
+        }).length;
+        
+        // Update parent component with uploaded documents info
+        onChange({
+            ...data,
+            uploadedDocuments: newUploadedDocs,
+            documentsUploaded: uploadedRequiredCount >= requiredDocsCount
+        });
+    };
 
     return (
         <div>
@@ -1232,24 +1540,46 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 <p className="text-muted fs-5">Upload all required documents</p>
             </div>
 
-            {requirements.map((category, index) => (
-                <Card key={index} className="mb-4 border-0 shadow-sm">
+            {requirements.map((category, categoryIndex) => (
+                <Card key={categoryIndex} className="mb-4 border-0 shadow-sm">
                     <Card.Header className="bg-light border-0">
-                        <h6 className="mb-0 text-primary">{category.category}</h6>
+                        <h6 className="mb-0 text-primary">
+                            {category.category}
+                            {category.optional && <span className="text-muted ms-2">(Optional)</span>}
+                        </h6>
                     </Card.Header>
                     <Card.Body>
-                        {category.documents.map((doc, docIndex) => (
-                            <Form.Group key={docIndex} className="mb-3">
-                                <Form.Label className="text-muted">
-                                    {doc} 
-                                    {!category.optional && <span className="text-danger">*</span>}
-                                </Form.Label>
-                                <Form.Control type="file" accept=".pdf,.jpg,.jpeg,.png" />
-                                <Form.Text className="text-muted">
-                                    Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                                </Form.Text>
-                            </Form.Group>
-                        ))}
+                        {category.documents.map((doc, docIndex) => {
+                            const docKey = `${categoryIndex}_${docIndex}`;
+                            const isUploaded = uploadedDocs[docKey];
+                            
+                            return (
+                                <Form.Group key={docIndex} className="mb-3">
+                                    <Form.Label className="text-muted">
+                                        {doc}
+                                        {!category.optional && <span className="text-danger">*</span>}
+                                        {isUploaded && (
+                                            <span className="text-success ms-2">
+                                                <i className="mdi mdi-check-circle"></i> Uploaded
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control 
+                                        type="file" 
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                    />
+                                    <Form.Text className="text-muted">
+                                        Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
+                                    </Form.Text>
+                                    {isUploaded && (
+                                        <Form.Text className="text-success">
+                                            File uploaded: {isUploaded}
+                                        </Form.Text>
+                                    )}
+                                </Form.Group>
+                            );
+                        })}
                     </Card.Body>
                 </Card>
             ))}
@@ -1257,21 +1587,28 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
     );
 };
 
-const ReviewStep = ({ allData }) => {
+const ReviewStep = ({ data = {}, onChange, allData }) => {
     const [agreements, setAgreements] = useState({
-        companyProfile: false,
-        statementSimulation: false,
-        statementExperience: false,
-        disclosureStatement: false,
-        accountOpening: false,
-        riskDisclosure: false,
-        mandateAgreement: false,
-        tradingRules: false,
-        personalAccessPassword: false
+        companyProfile: data.companyProfile || false,
+        statementSimulation: data.statementSimulation || false,
+        statementExperience: data.statementExperience || false,
+        disclosureStatement: data.disclosureStatement || false,
+        accountOpening: data.accountOpening || false,
+        riskDisclosure: data.riskDisclosure || false,
+        mandateAgreement: data.mandateAgreement || false,
+        tradingRules: data.tradingRules || false,
+        personalAccessPassword: data.personalAccessPassword || false
     });
 
     const handleAgreementChange = (field, value) => {
-        setAgreements(prev => ({ ...prev, [field]: value }));
+        const newAgreements = { ...agreements, [field]: value };
+        setAgreements(newAgreements);
+        
+        // Update parent component with agreement data
+        onChange({
+            ...data,
+            ...newAgreements
+        });
     };
 
     const allAgreementsChecked = Object.values(agreements).every(Boolean);
@@ -1382,29 +1719,6 @@ const ReviewStep = ({ allData }) => {
                                             className="text-decoration-underline"
                                         >
                                             statement of having experience
-                                        </a>. <span className="text-danger">*</span>
-                                    </span>
-                                }
-                                required
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Check
-                                type="checkbox"
-                                id="disclosureStatement"
-                                checked={agreements.disclosureStatement}
-                                onChange={(e) => handleAgreementChange('disclosureStatement', e.target.checked)}
-                                label={
-                                    <span>
-                                        I have read, understood and agreed to the{' '}
-                                        <a 
-                                            href="https://drive.google.com/file/d/1dfTD9xjnoz3-blO2bxprhhS1prXHDIKG/view" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="text-decoration-underline"
-                                        >
-                                            disclosure statement
                                         </a>. <span className="text-danger">*</span>
                                     </span>
                                 }

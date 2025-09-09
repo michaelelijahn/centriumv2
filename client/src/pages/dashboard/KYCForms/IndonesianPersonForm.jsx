@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
+import { useNotificationContext } from '../../../common/context/useNotificationContext';
 
 const IndonesianPersonForm = () => {
     const [formData, setFormData] = useState({});
+    const { showNotification } = useNotificationContext();
 
     // Steps for actual rendering logic
     const steps = [
@@ -48,28 +50,16 @@ const IndonesianPersonForm = () => {
             description: "Trading simulation declaration"
         },
         {
-            title: "Experience Statement",
-            description: "Trading experience declaration"
-        },
-        {
             title: "Disclosure Statement",
             description: "Risk disclosure acknowledgment"
-        },
-        {
-            title: "Account Application Summary",
-            description: "Complete application summary"
-        },
-        {
-            title: "Additional Disclosure Statement",
-            description: "Additional disclosure acknowledgment"
         },
         {
             title: "Risk Disclosure Document",
             description: "Detailed risk disclosure document"
         },
         {
-            title: "Risk Disclosure Acknowledgment",
-            description: "Acknowledgment for risk disclosure document"
+            title: "Additional Disclosure Statement",
+            description: "Additional disclosure acknowledgment"
         },
         {
             title: "Electronic Agreement",
@@ -84,8 +74,8 @@ const IndonesianPersonForm = () => {
             description: "Personal fund ownership declaration"
         },
         {
-            title: "Personal Information Summary",
-            description: "Transaction access code responsibility statement"
+            title: "Access Code Responsibility",
+            description: "Personal access password responsibility statement"
         },
         {
             title: "Process Verification",
@@ -179,30 +169,429 @@ const IndonesianPersonForm = () => {
             case 9:
                 return <TradingSimulationDeclaration data={stepData} onChange={updateFormData} allData={flattenedData} />;
             case 10:
-                return <ExperienceStatementStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
-            case 11:
                 return <DisclosureStatementStep data={stepData} onChange={updateFormData} />;
+            case 11:
+                return <RiskDisclosureDocumentStep data={stepData} onChange={updateFormData} />; 
             case 12:
-                return <AccountApplicationSummaryStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
-            case 13:
                 return <AdditionalDisclosureStatementStep data={stepData} onChange={updateFormData} />;
-            case 14:
-                return <RiskDisclosureDocumentStep data={stepData} onChange={updateFormData} />;
-            case 15:
-                return <RiskDisclosureAcknowledgmentStep data={stepData} onChange={updateFormData} />;
-            case 16:
+            case 13:
                 return <ElectronicAgreementStep data={stepData} onChange={updateFormData} />;
-            case 17:
+            case 14:
                 return <TradingRulesStep data={stepData} onChange={updateFormData} />;
-            case 18:
-                return <FundDeclarationStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
-            case 19:
-                return <PersonalInformationSummaryStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
-            case 20:
+            case 15:
+                return <NewFundDeclarationStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
+            case 16:
+                return <AccessCodeResponsibilityStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
+            case 17:
                 return <ProcessVerificationStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
+    };
+
+    // Validation functions for each step
+    const validateStep = (stepIndex, stepData, allData) => {
+        switch (stepIndex) {
+            case 0: // Requirements step - always valid (just informational)
+                return { isValid: true, errors: [] };
+            
+            case 1: // Account Information step
+                return validateAccountInformationStep(stepData);
+            
+            case 2: // Data Pribadi step
+                return validateDataPribadiStep(stepData);
+            
+            case 3: // Emergency Contact step
+                return validateEmergencyContactStep(stepData);
+            
+            case 4: // Data Pekerjaan step
+                return validateDataPekerjaanStep(stepData);
+            
+            case 5: // Daftar Kekayaan step
+                return validateDaftarKekayaanStep(stepData);
+            
+            case 6: // Rekening Bank step
+                return validateRekeningBankStep(stepData);
+            
+            case 7: // Document Upload step
+                return validateDocumentUploadStep(stepData);
+            
+            case 8: // Declaration step
+                return validateDeclarationStep(stepData);
+            
+            case 9: // Trading Simulation step
+                return validateTradingSimulationStep(stepData);
+            
+            case 10: // Disclosure Statement step
+                return validateDisclosureStatementStep(stepData);
+            
+            case 11: // Risk Disclosure Document step
+                return validateRiskDisclosureDocumentStep(stepData);
+            
+            case 12: // Additional Disclosure Statement step
+                return validateAdditionalDisclosureStep(stepData);
+            
+            case 13: // Electronic Agreement step
+                return validateElectronicAgreementStep(stepData);
+            
+            case 14: // Trading Rules step
+                return validateTradingRulesStep(stepData);
+            
+            case 15: // Fund Declaration step
+                return validateFundDeclarationStep(stepData);
+            
+            case 16: // Access Code Responsibility step
+                return validateAccessCodeResponsibilityStep(stepData);
+            
+            case 17: // Process Verification step
+                return validateProcessVerificationStep(stepData);
+            
+            default:
+                return { isValid: true, errors: [] };
+        }
+    };
+
+    const validateAccountInformationStep = (data) => {
+        const errors = [];
+        
+        if (!data.email?.trim()) {
+            errors.push('Email address is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        if (!data.demoAccountNo?.trim()) {
+            errors.push('Demo account selection is required');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDataPribadiStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'personalTitle', label: 'Title' },
+            { field: 'fullName', label: 'Full Name' },
+            { field: 'placeOfBirth', label: 'Place of Birth' },
+            { field: 'dateOfBirth', label: 'Date of Birth' },
+            { field: 'idNumber', label: 'ID Number' },
+            { field: 'personalEmail', label: 'Personal Email' },
+            { field: 'gender', label: 'Gender' },
+            { field: 'maritalStatus', label: 'Marital Status' },
+            { field: 'citizen', label: 'Citizenship' },
+            { field: 'countryCode', label: 'Country Code' },
+            { field: 'phoneNumber', label: 'Phone Number' },
+            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'city', label: 'City' },
+            { field: 'postalCode', label: 'Postal Code' },
+            { field: 'country', label: 'Country' },
+            { field: 'sourceOfFunds', label: 'Source of Funds' },
+            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' },
+            { field: 'investmentExperience', label: 'Investment Experience' },
+            { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
+            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Validate email format
+        if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
+            errors.push('Please enter a valid personal email address');
+        }
+        
+        // Check conditional fields
+        if (data.citizen === 'OTHER' && !data.citizenOther?.trim()) {
+            errors.push('Please specify other citizenship');
+        }
+        
+        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
+            errors.push('Please specify other country');
+        }
+        
+        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
+            errors.push('Please specify other source of funds');
+        }
+        
+        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
+            errors.push('Please specify other trading account purpose');
+        }
+        
+        if (data.investmentExperience === 'YES' && !data.investmentExperienceDetails?.trim()) {
+            errors.push('Please provide details about your investment experience');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateEmergencyContactStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'emergencyTitle', label: 'Emergency Contact Title' },
+            { field: 'emergencyFullName', label: 'Emergency Contact Full Name' },
+            { field: 'emergencyRelationship', label: 'Relationship' },
+            { field: 'emergencyCountryCode', label: 'Emergency Contact Country Code' },
+            { field: 'emergencyPhoneNumber', label: 'Emergency Contact Phone Number' },
+            { field: 'emergencyStreetAddress', label: 'Emergency Contact Street Address' },
+            { field: 'emergencyCity', label: 'Emergency Contact City' },
+            { field: 'emergencyPostalCode', label: 'Emergency Contact Postal Code' },
+            { field: 'emergencyCountry', label: 'Emergency Contact Country' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // Check conditional fields
+        if (data.emergencyRelationship === 'OTHER' && !data.emergencyRelationshipOther?.trim()) {
+            errors.push('Please specify other relationship');
+        }
+        
+        if (data.emergencyCountry === 'OTHER' && !data.emergencyCountryOther?.trim()) {
+            errors.push('Please specify other emergency contact country');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDataPekerjaanStep = (data) => {
+        const errors = [];
+        
+        if (!data.employmentStatus?.trim()) {
+            errors.push('Employment status is required');
+        }
+        
+        // If employed, validate employment details
+        if (data.employmentStatus === 'EMPLOYED' || data.employmentStatus === 'ENTREPRENEUR') {
+            const employmentFields = [
+                { field: 'companyName', label: 'Company Name' },
+                { field: 'businessNature', label: 'Nature of Business' },
+                { field: 'jobPosition', label: 'Job Position' },
+                { field: 'officeAddress', label: 'Office Address' },
+                { field: 'officeCity', label: 'Office City' },
+                { field: 'officePostalCode', label: 'Office Postal Code' },
+                { field: 'officeCountry', label: 'Office Country' },
+                { field: 'monthlyIncome', label: 'Monthly Income' },
+                { field: 'annualIncome', label: 'Annual Income' }
+            ];
+            
+            employmentFields.forEach(({ field, label }) => {
+                if (!data[field]?.trim()) {
+                    errors.push(`${label} is required`);
+                }
+            });
+            
+            if (data.officeCountry === 'OTHER' && !data.officeCountryOther?.trim()) {
+                errors.push('Please specify other office country');
+            }
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDaftarKekayaanStep = (data) => {
+        const errors = [];
+        const requiredFields = [
+            { field: 'estimatedNetWorth', label: 'Estimated Net Worth' },
+            { field: 'liquidAssets', label: 'Liquid Assets' },
+            { field: 'annualIncomeSource', label: 'Annual Income Source' }
+        ];
+        
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateRekeningBankStep = (data) => {
+        const errors = [];
+        
+        if (!data.bankAccounts || data.bankAccounts.length === 0) {
+            errors.push('At least one bank account is required');
+        } else {
+            data.bankAccounts.forEach((account, index) => {
+                const bankRequiredFields = [
+                    { field: 'bankName', label: `Bank ${index + 1} - Bank Name` },
+                    { field: 'accountName', label: `Bank ${index + 1} - Account Name` },
+                    { field: 'bankAddress', label: `Bank ${index + 1} - Bank Address` },
+                    { field: 'bankCity', label: `Bank ${index + 1} - Bank City` },
+                    { field: 'bankCountry', label: `Bank ${index + 1} - Bank Country` },
+                    { field: 'swiftCode', label: `Bank ${index + 1} - SWIFT Code` },
+                    { field: 'accountNo', label: `Bank ${index + 1} - Account Number` }
+                ];
+                
+                bankRequiredFields.forEach(({ field, label }) => {
+                    if (!account[field]?.trim()) {
+                        errors.push(`${label} is required`);
+                    }
+                });
+                
+                if (account.bankCountry === 'OTHER' && !account.bankCountryOther?.trim()) {
+                    errors.push(`Bank ${index + 1} - Please specify other country`);
+                }
+            });
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDocumentUploadStep = (data) => {
+        const errors = [];
+        
+        if (!data.documentsUploaded) {
+            errors.push('Please upload all required documents before proceeding');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDeclarationStep = (data) => {
+        const errors = [];
+        
+        if (!data.companyProfileAgreement) {
+            errors.push('Please acknowledge the company profile agreement');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateTradingSimulationStep = (data) => {
+        const errors = [];
+        
+        if (!data.tradingSimulationAgreement) {
+            errors.push('Please acknowledge the trading simulation agreement');
+        }
+        
+        if (!data.tradingExperience?.trim()) {
+            errors.push('Trading experience information is required');
+        }
+        
+        // If has experience, validate additional fields
+        if (data.tradingExperience === 'YES') {
+            if (!data.brokerName?.trim()) {
+                errors.push('Previous broker name is required');
+            }
+            if (!data.tradingAccountNumber?.trim()) {
+                errors.push('Previous trading account number is required');
+            }
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateDisclosureStatementStep = (data) => {
+        const errors = [];
+        
+        if (!data.disclosureStatementAgreement) {
+            errors.push('Please acknowledge the disclosure statement');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateRiskDisclosureDocumentStep = (data) => {
+        const errors = [];
+        
+        const requiredRiskStatements = [
+            'riskStatement1', 'riskStatement2', 'riskStatement3', 'riskStatement4', 'riskStatement5',
+            'riskStatement6', 'riskStatement7', 'riskStatement8', 'riskStatement9', 'riskStatement10',
+            'riskStatement11', 'riskStatement12', 'riskStatement13', 'riskStatement14'
+        ];
+        
+        requiredRiskStatements.forEach((statement, index) => {
+            if (!data[statement]) {
+                errors.push(`Please acknowledge risk statement ${index + 1}`);
+            }
+        });
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateAdditionalDisclosureStep = (data) => {
+        const errors = [];
+        
+        if (!data.additionalDisclosureAgreement) {
+            errors.push('Please acknowledge the additional disclosure statement');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateElectronicAgreementStep = (data) => {
+        const errors = [];
+        
+        if (!data.electronicAgreement) {
+            errors.push('Please acknowledge the electronic power of attorney agreement');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateTradingRulesStep = (data) => {
+        const errors = [];
+        
+        if (!data.tradingRulesAgreement) {
+            errors.push('Please acknowledge the PALN trading rules');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateFundDeclarationStep = (data) => {
+        const errors = [];
+        
+        if (!data.fundDeclarationAgreement) {
+            errors.push('Please acknowledge the personal fund ownership declaration');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateAccessCodeResponsibilityStep = (data) => {
+        const errors = [];
+        
+        if (!data.accessCodeResponsibilityAgreement) {
+            errors.push('Please acknowledge the personal access password responsibility statement');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateProcessVerificationStep = (data) => {
+        const errors = [];
+        
+        if (!data.processVerificationAgreement) {
+            errors.push('Please acknowledge the electronic customer acceptance process verification');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const handleStepValidation = (stepIndex, stepData, allData) => {
+        const validation = validateStep(stepIndex, stepData, allData);
+        
+        if (!validation.isValid) {
+            // Show notification with all validation errors
+            const errorMessage = validation.errors.length === 1 
+                ? validation.errors[0]
+                : `Please fix the following issues: ${validation.errors.join(', ')}`;
+                
+            showNotification({
+                title: 'Validation Error',
+                message: errorMessage,
+                type: 'error'
+            });
+        }
+        
+        return validation.isValid;
     };
 
     const handleStepChange = (step, data) => {
@@ -211,7 +600,11 @@ const IndonesianPersonForm = () => {
 
     const handleSubmit = (data) => {
         console.log('Submitting Indonesian Person KYC:', data);
-        alert('Indonesian Person KYC submitted successfully!');
+        showNotification({
+            title: 'Success',
+            message: 'Indonesian Person KYC submitted successfully!',
+            type: 'success'
+        });
     };
 
     // Function to map current step to progress step
@@ -232,6 +625,7 @@ const IndonesianPersonForm = () => {
             getProgressStep={getProgressStep}
             onStepChange={handleStepChange}
             onSubmit={handleSubmit}
+            onStepValidation={handleStepValidation}
         >
             {renderStep}
         </MultiStepFormWrapper>
@@ -345,6 +739,10 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
 };
 
 const DataPribadiStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <div className="text-center mb-4">
@@ -466,6 +864,24 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                         </Form.Group>
                     </Col>
                 </Row>
+
+                {/* Conditional Spouse Name Field */}
+                {data.statusPerkawinan === 'Married' && (
+                    <Row>
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label className="text-muted">Nama Istri / Suami <span className="text-danger">*</span></Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Spouse's full name"
+                                    value={data.namaIstriSuami || ''}
+                                    onChange={(e) => onChange({ ...data, namaIstriSuami: e.target.value })}
+                                    required
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                )}
 
                 {/* Address Information */}
                 <Row>
@@ -680,6 +1096,10 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
 };
 
 const EmergencyContactStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <div className="text-center mb-4">
@@ -788,6 +1208,10 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
 };
 
 const DataPekerjaanStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <div className="text-center mb-4">
@@ -809,7 +1233,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                 <option value="Swasta">Swasta (Private Employee)</option>
                                 <option value="Wiraswasta">Wiraswasta (Entrepreneur)</option>
                                 <option value="Ibu RT">Ibu RT (Housewife)</option>
-                                <option value="Profesional">Profesional (Professional)</option>
+                                <option value="Profesional">Profesional</option>
                                 <option value="ASN">ASN (Civil Servant)</option>
                                 <option value="Mahasiswa">Mahasiswa (Student)</option>
                                 <option value="Lainnya">Lainnya (Other)</option>
@@ -977,6 +1401,10 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
 };
 
 const DaftarKekayaanStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <div className="text-center mb-4">
@@ -1078,6 +1506,10 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
         bankAccountType: '',
         bankAccountTypeOther: ''
     }]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
 
     const addBankAccount = () => {
         const newAccounts = [...bankAccounts, { 
@@ -1247,6 +1679,10 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
 };
 
 const DeclarationStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return <CompanyProfileDeclaration data={data} onChange={onChange} />;
 };
 
@@ -1696,118 +2132,11 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
     );
 };
 
-const ExperienceStatementStep = ({ data = {}, onChange, allData = {} }) => {
-    // Flatten all form data from all steps into a single object
-    const flattenedData = Object.values(allData).reduce((acc, curr) => {
-        return { ...acc, ...curr };
-    }, {});
-
-    return (
-        <div>
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h5 className="mb-0 text-primary text-center">
-                        SURAT PERNYATAAN TELAH BERPENGALAMAN MELAKSANAKAN TRANSAKSI PERDAGANGAN
-                    </h5>
-                    <h6 className="mb-0 text-primary text-center">
-                        BERJANGKA KOMODITI
-                    </h6>
-                </Card.Header>
-                <Card.Body>
-                    <div className="mb-4">
-                        <p className="mb-4">Yang mengisi formulir di bawah ini:</p>
-                        
-                        <Row className="mb-3">
-                            <Col md={4}><strong>Nama Lengkap</strong></Col>
-                            <Col md={8}>: {flattenedData.namaLengkap || flattenedData.fullName || ','}</Col>
-                        </Row>
-                        
-                        <Row className="mb-3">
-                            <Col md={4}><strong>Tempat Lahir & Tgl. Lahir</strong></Col>
-                            <Col md={8}>: {flattenedData.tempatLahir || 'aaaaaa'}, {flattenedData.tanggalLahir || '09-04-2000'}</Col>
-                        </Row>
-                        
-                        <Row className="mb-3">
-                            <Col md={4}><strong>Alamat</strong></Col>
-                            <Col md={8}>: {flattenedData.streetAddress || flattenedData.alamat || 'aaaa, 121'}</Col>
-                        </Row>
-                        
-                        <Row className="mb-3">
-                            <Col md={4}><strong>Kota & Kode Pos</strong></Col>
-                            <Col md={8}>: {flattenedData.city || 'aaaa'}, {flattenedData.postalCode || '121'}, {flattenedData.city || 'aaaa'}, {flattenedData.postalCode || '121'}</Col>
-                        </Row>
-                        
-                        <Row className="mb-3">
-                            <Col md={4}><strong>No. KTP</strong></Col>
-                            <Col md={8}>: {flattenedData.noKTP || flattenedData.ktpNumber || '1111'}</Col>
-                        </Row>
-                        
-                        <Row className="mb-4">
-                            <Col md={4}><strong>No. Akun Demo</strong></Col>
-                            <Col md={8}>: {flattenedData.demoAccountNo || flattenedData.demoAccountNumber || '12312'}</Col>
-                        </Row>
-                        
-                        <div className="mb-4">
-                            <p className="mb-3">
-                                Dengan mengisi kolom, "YA" dibawah ini saya menyatakan bahwa saya telah memiliki pengalaman yang mencukupi
-                                dalam melaksanakan transaksi Perdagangan Berjangka karena pernah bertransaksi pada Perusahaan Pialang
-                                Berjangka___ghgh___**) dan telah memahami tentang tata cara bertransaksi Perdagangan Berjangka.
-                            </p>
-                            
-                            <p>
-                                Demikian Pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, sehat jasmani dan rohani serta tanpa
-                                paksaan apapun dari pihak manapun.
-                            </p>
-                        </div>
-                    </div>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
-                            <Form.Check
-                                type="radio"
-                                id="experience-statement-ya"
-                                name="experienceStatement"
-                                label="Ya"
-                                value="ya"
-                                checked={data.experienceStatement === 'ya'}
-                                onChange={(e) => onChange({ ...data, experienceStatement: e.target.value })}
-                                required
-                            />
-                            <Form.Check
-                                type="radio"
-                                id="experience-statement-tidak"
-                                name="experienceStatement"
-                                label="Tidak"
-                                value="tidak"
-                                checked={data.experienceStatement === 'tidak'}
-                                onChange={(e) => onChange({ ...data, experienceStatement: e.target.value })}
-                                required
-                            />
-                        </div>
-                        {data.experienceStatement === 'tidak' && (
-                            <div className="mt-2">
-                                <small className="text-danger">You must select "Ya" to continue</small>
-                            </div>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted"><strong>Menerima Pada Tanggal:</strong></Form.Label>
-                        <Form.Control
-                            type="datetime-local"
-                            value={data.experienceStatementDate || '2025-04-09T14:15:39'}
-                            onChange={(e) => onChange({ ...data, experienceStatementDate: e.target.value })}
-                            required
-                        />
-                    </Form.Group>
-                </Card.Body>
-            </Card>
-        </div>
-    );
-};
-
 const DisclosureStatementStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <Card className="border-0 shadow-sm mb-4">
@@ -1845,6 +2174,12 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
                     <div className="border-top pt-4">
                         <p className="text-center mb-4">
                             <strong>SECARA DETAIL BACA DOKUMEN PEMBERITAHUAN ADANYA RISIKO DAN DOKUMEN PERJANJIAN PEMBERIAN AMANAT</strong>
+                        </p>
+                        <p className="text-center mb-4">
+                            Untuk mempelajari lebih lanjut mengenai Perdagangan Berjangka dapat anda mengunjungi situs{' '}
+                            <a href="https://www.bappebti.go.id" target="_blank" rel="noopener noreferrer" className="text-primary">
+                                www.bappebti.go.id
+                            </a>
                         </p>
                     </div>
 
@@ -1895,6 +2230,10 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
 };
 
 const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     const handleFileChange = (docName, file) => {
         const uploadedFiles = data.uploadedFiles || {};
         uploadedFiles[docName] = {
@@ -1947,6 +2286,10 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
 };
 
 const ReviewStep = ({ allData }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <div className="text-center mb-4">
@@ -1986,6 +2329,9 @@ const ReviewStep = ({ allData }) => {
                             <p><strong>No. NPWP:</strong> {allData.noNPWP || 'Not provided'}</p>
                             <p><strong>Jenis Kelamin:</strong> {allData.jenisKelamin || 'Not provided'}</p>
                             <p><strong>Status Perkawinan:</strong> {allData.statusPerkawinan || 'Not provided'}</p>
+                            {allData.statusPerkawinan === 'Married' && allData.namaIstriSuami && (
+                                <p><strong>Nama Istri / Suami:</strong> {allData.namaIstriSuami}</p>
+                            )}
                         </Col>
                         <Col md={6}>
                             <p><strong>Nama Ibu Kandung:</strong> {allData.namaIbuKandung || 'Not provided'}</p>
@@ -2183,59 +2529,59 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
     const riskDisclosurePoints = [
         {
             id: 'point1',
-            text: 'Perdagangan Kontrak Berjangka belum tentu layak bagi semua investor. Anda dapat menderita kerugian yang jumlah besar dan dalam jangka waktu singkat. Jumlah kerugian yang mungkin dapat melebihi jumlah uang yang pertama kali Anda setor (Margin awal) ke Pialang Berjangka Anda. Anda mungkin menderita kerugian seluruh Margin dari Margin tambahan yang diragukan nasabah kepada Anda untuk mempertahankan posisi Kontrak Berjangka Anda. Hal ini disebabkan Perdagangan Berjangka sangat berpegang oleh leverage tinggi, dimana dengan sejumlah investasi dalam bentuk yang relatif kecil dapat digunakan untuk membuka posisi dengan aset yang bernilai jauh lebih tinggi. Apabila Anda tidak siap dengan risiko seperti ini himbakkan jangka mengikut Kontrak Berjangka.'
+            text: '<strong>Perdagangan Kontrak Berjangka belum tentu layak bagi semua investor. Anda dapat menderita kerugian dalam jumlah besar dan dalam jangka waktu singkat.</strong> Jumlah kerugian uang dimungkinkan dapat melebihi jumlah uang yang pertama kali Anda setor (Margin awal) ke Pialang Berjangka Anda. Anda mungkin menderita kerugian seluruh Margin dan Margin tambahan yang ditempatkan pada Pialang Berjangka untuk mempertahankan posisi Kontrak Berjangka Anda. Hal ini disebabkan Perdagangan Berjangka sangat dipengaruhi oleh mekanisme leverage, dimana dengan jumlah investasi dalam bentuk yang relatif kecil dapat digunakan untuk membuka posisi dengan aset yang bernilai jauh lebih tinggi. Apabila Anda tidak siap dengan risiko seperti ini, sebaiknya Anda tidak melakukan perdagangan Kontrak Berjangka.'
         },
         {
             id: 'point2', 
-            text: 'Perdagangan Kontrak Berjangka mempunyai risiko dan mempunyai kemungkinan kerugian yang tidak terbatas yang jauh lebih besar dari jumlah yang disetor (Margin) ke Pialang Berjangka. Kontrak Berjangka sama seperti produk keuangan lainnya yang berbeda. Seacari khusus, dari menurut risiko terhadap dana yang Anda tidak siap untuk menderita rugi, seperti tabungan pensiun, dana kesehatan atu dana perkahwinan Anda, dana yang diperlukan untuk pendidikan atau kepemilikan rumah, dana yang diperlukan dari pinjaman pendidikan atau gadai, atau dana yang digunakan untuk kesehatan keluarga sehari-hari.'
+            text: '<strong>Perdagangan Kontrak Berjangka mempunyai risiko dan mempunyai kemungkinan kerugian yang tidak terbatas yang jauh lebih besar dari jumlah uang yang disetor (Margin) ke Pialang Berjangka.</strong> Kontrak Berjangka sama dengan produk keuangan lainnya yang mempunyai risiko tinggi, Anda sebaiknya tidak menaruh risiko terhadap dana yang Anda tidak siap untuk menderita rugi, seperti tabungan pensiun, dana kesehatan atau dana untuk keadaan darurat, dana yang disediakan untuk pendidikan atau kepemilikan rumah, dana yang diperoleh dari pinjaman pendidikan atau gadai, atau dana yang digunakan untuk memenuhi kebutuhan sehari-hari.'
         },
         {
             id: 'point3',
-            text: 'Berhati-hatilah terhadap pernyataan bahwa Anda pasti mendapatkan keuntungan besar dari perdagangan Kontrak Berjangka. Masalah, penjualan Kontrak Berjangka dapat memberikan keuntungan yang besar dan cepat, namun hal tersebut tidak pasti, bahkan dapat memberikan kerugian yang besar dan cepat juga. Sebagai produk keuangan investasi yang tidak ada yang disarankan "hasil untung".'
+            text: '<strong>Berhati-hatilah terhadap pernyataan bahwa Anda pasti mendapatkan keuntungan besar dari perdagangan Kontrak Berjangka.</strong> Meskipun perdagangan Kontrak Berjangka dapat memberikan keuntungan yang besar dan cepat, namun hal tersebut tidak pasti, bahkan dapat menimbulkan kerugian yang besar dan cepat juga. Seperti produk keuangan lainnya, tidak ada yang dinamakan "pasti untung".'
         },
         {
             id: 'point4',
-            text: 'Diselabkan adanya mekanisme leverage dan efek dari transaksi Kontrak Berjangka, Anda dapat merasakan dampak bahwa Anda menderita kerugian dalam waktu cepat. Keuntungan maupun kerugian dimasa transaksi Kontrak Berjangka dapat berubah dengang sangat cepat atau didiuksi oleh leverage yang secara harian. Apabila pergerakan di pasar terhadap Kontrak Berjangka menunjukkan nilai posisi Anda dalam Kontrak Berjangka. Anda mendapat panggilan Margin dan rekening Anda berada dibawah minimum Margin yang telah ditetapkan Lembaga Kliring Berjangka atau Pialang Berjangka, maka transaksi tidak dapat dilakukan pada saat rugi, dan Anda wajib menyelesaikan defisit (jika ada) dalam rekening Anda.'
+            text: '<strong>Disebabkan adanya mekanisme leverage dan sifat dari transaksi Kontrak Berjangka, Anda dapat merasakan dampak bahwa Anda menderita kerugian dalam waktu cepat.</strong> Keuntungan maupun kerugian dalam transaksi Kontrak Berjangka akan langsung dikredit atau didebet ke rekening Anda, paling lambat secara harian. Apabila pergerakan di pasar terhadap Kontrak Berjangka menurunkan nilai posisi Anda dalam Kontrak Berjangka, Anda diwajibkan untuk menambah dana untuk pemenuhan kewajiban Margin ke Pialang Berjangka. Apabila rekening Anda berada dibawah minimum Margin yang telah ditetapkan Lembaga Kliring Berjangka atau Pialang Berjangka, maka posisi Anda dapat dilikuidasi pada saat rugi, dan Anda wajib menyelesaikan defisit (jika ada) dalam rekening Anda.'
         },
         {
             id: 'point5',
-            text: 'Pada saat pasar dalam keadaan tertentu, Anda mungkin akan sulit atau tidak mungkin melikuidasi posisi. Pada umumnya Anda harus melakukan transaksi offset jika ingin melikuidasi posisi dalam Kontrak Berjangka. Apabila Anda tidak dapat melikuidasi posisi Kontrak Berjangka, Anda tidak dapat merealisasikan keuntungan atau kerugian hingga posisi tersebut Anda tutup. Kemungkinan bahwa Anda tidak dapat melikuidasi dapat terjadi, antara lain jika perdagangan berhenri dua sebagai aktivitas perdagangan yang tidak lazim pada Kontrak Berjangka atau "subjek Kontrak Berjangka" yang bersabab. Kemungkinan untuk tidak dapat meikontrol posisi dalam marka tertup juga disebab oleh sistem aplikasi perwruhan yang kelak pada posisi Kontrak Berjangka atau Pialang Berjangka, atau sistem di Bursa Berjangka yang tidak dapat mengapa harga yang menguntungkan untuk mereka kamu besar.'
+            text: '<strong>Pada saat pasar dalam keadaan tertentu, Anda mungkin akan sulit atau tidak mungkin melikuidasi posisi.</strong> Pada umumnya Anda harus melakukan transaksi offset jika ingin melikuidasi posisi dalam Kontrak Berjangka. Apabila Anda tidak dapat melikuidasi posisi Kontrak Berjangka, Anda tidak dapat merealisasikan keuntungan pada nilai posisi tersebut atau mencegah kerugian yang lebih tinggi. Kemungkinan tidak dapat melikuidasi dapat terjadi, antara lain: jika perdagangan berhenti dikarenakan aktivitas perdagangan yang tidak lazim pada Kontrak Berjangka atau subjek Kontrak Berjangka, terjadi kerusakan sistem pada Bursa Berjangka atau Pialang Berjangka, atau posisi Anda berada dalam pasar yang tidak likuid. Bahkan apabila Anda dapat melikuidasi posisi tersebut, Anda mungkin terpaksa melakukannya pada harga yang menimbulkan kerugian besar.'
         },
         {
             id: 'point6',
-            text: 'Pada saat pasar dalam keadaan tertentu, Anda mungkin akan sulit atau tidak mungkin mengolola risko atas posisi terbuka Kontrak Berjangka dengan cara membuka posisi dengan nilai yang sama namun dengan arah yang berlawanan dalam subjek yang sama atau yang terkait. Ini dapat terjadi, contohnya, saat perdagangan dihentikan pada pasar yang berbeda dari "subjek Kontrak Berjangka" yang bersabab. Kemungkinan untuk tidak dapat mengimbil posisi dalam marka tertutup juga dapat disebabkan oleh aktivitas perdagangan yang tidak lazim pada Kontrak Berjangka atau "subjek Kontrak Berjangka".'
+            text: '<strong>Pada saat pasar dalam keadaan tertentu, Anda mungkin akan sulit atau tidak mungkin mengelola risiko atas posisi terbuka Kontrak Berjangka dengan cara membuka posisi dengan nilai yang sama namun dengan posisi yang berlawanan dalam kontrak bulan yang berbeda, dalam pasar yang berbeda atau dalam "subjek Kontrak Berjangka" yang berbeda.</strong> Kemungkinan untuk tidak dapat mengambil posisi dalam rangka membatasi risiko yang timbul, contohnya: jika perdagangan dihentikan pada pasar yang berbeda disebabkan aktivitas perdagangan yang tidak lazim pada Kontrak Berjangka atau "subjek Kontrak Berjangka".'
         },
         {
             id: 'point7',
-            text: 'Anda dapat diwajibkan untuk menyelesaikan Kontrak Berjangka dengan penyerahan fisik dari "subjek Kontrak Berjangka" atau kas berdasarkan pemberitahuan posisi penyerahan yang diberikan sampai hari terakhir perdagangan berdasarkan tanggal jatuh tempo Kontrak Berjangka. Anda akan diwajibkan memberikan pengarahan "subjek Kontrak Berjangka" dengan resiko, biaya, dan tanggung jawab penambahan biaya. Pengerian penyelesaian berbeda untuk situasi Kontrak Berjangka dengan Kontrak Berjangka lainnya atau suatu Bursa Berjangka dengan Kontrak Berjangka lainnya. Anda harus melihat secara teliti mengenai penyelesaian dan kondisi penyerahan sebelum memulai atau kontrak Berjangka.'
+            text: '<strong>Anda dapat diwajibkan untuk menyelesaikan Kontrak Berjangka dengan penyerahan fisik dari "subjek Kontrak Berjangka"</strong> Jika Anda mempertahankan posisi penyelesaian fisik dalam Kontrak Berjangka sampai hari terakhir perdagangan berdasarkan tanggal jatuh tempo Kontrak Berjangka, Anda akan diwajibkan menyerahkan atau menerima penyerahan "subjek Kontrak Berjangka" yang dapat mengakibatkan adanya penambahan biaya. Pengertian penyelesaian dapat berbeda untuk suatu Kontrak Berjangka dengan Kontrak Berjangka lainnya atau suatu Bursa Berjangka dengan Bursa Berjangka lainnya. Anda harus melihat secara teliti mengenai penyelesaian dan kondisi penyerahan sebelum membeli atau menjual Kontrak Berjangka.'
         },
         {
             id: 'point8',
-            text: 'Anda dapat menderita kerugian yang disebabkan kegagalan sistem informasi. Sebagaimana yang terjadi pada setiap transaksi keuangan, Anda dapat menderita kerugian jika amanat untuk melaksanakan transaksi Kontrak Berjangka tidak dapat dilakukan karena kegagalan sistem informasi di Bursa Berjangka, penyelenggara maupun sistem informasi di Pialang Berjangka yang mengelola posisi Anda. Kegala juga dapat benar jika Pialang Berjangka Anda tidak dapat mengolah amanat yang Anda dapat untuk tidak memiliki sistem informasi cadangan atau prosedur yang layak.'
+            text: '<strong>Anda dapat menderita kerugian yang disebabkan kegagalan sistem informasi. Sebagaimana yang terjadi pada setiap transaksi keuangan, Anda dapat menderita kerugian jika amanat untuk melaksanakan transaksi Kontrak Berjangka tidak dapat dilakukan karena kegagalan sistem informasi di Bursa Berjangka, penyelenggara maupun sistem informasi di Pialang Berjangka yang mengelola posisi Anda.</strong> Kerugian Anda akan semakin besar jika Pialang Berjangka yang mengelola posisi Anda tidak memiliki sistem informasi cadangan atau prosedur yang layak.'
         },
         {
             id: 'point9',
-            text: 'Semua Kontrak Berjangka mempunyai risiko, dan tidak ada strategi berdagang yang dapat menjamin untuk menghindangkan risiko tersebut. Strategi dengan menggunakan kombinasi posisi seperti spread, dapat sama beriskonya dengan posisi jangka atau short. Melakukan Perdagangan Berjangka memerlukan pengetahuan mengenai Kontrak Berjangka dan pasar berjangka.'
+            text: '<strong>Semua Kontrak Berjangka mempunyai risiko, dan tidak ada strategi berdagang yang dapat menjamin untuk menghilangkan risiko tersebut.</strong> Strategi dengan menggunakan kombinasi posisi seperti spread, dapat sama berisiko seperti posisi long atau short. Melakukan Perdagangan Berjangka memerlukan pengetahuan mengenai Kontrak Berjangka dan pasar berjangka.'
         },
         {
             id: 'point10',
-            text: 'Strategi perdagangan harian dalam Kontrak Berjangka dan produk lainnya memiliki risiko khusus. Seperti pada produk keuangan lainnya, pihak yang ingin membeli atau menjual Kontrak Berjangka yang sama dalam satu hari untuk mendapat keuntungan dan berhasil mengelola risko harga yang dapat Anda miliki beberapa risiko tertentu antara lain jumlah komisi yang besar, risiko terkena efek pergrigman "exposure to leverage" dengan perdagangan profesional. Anda harus memojah risiko tersebut dan memiliki pengalaman yang memadai sebelum melakukan perdagangan harian ("day trading").'
+            text: '<strong>Strategi perdagangan harian dalam Kontrak Berjangka dan produk lainnya memiliki risiko khusus.</strong> Seperti pada produk keuangan lainnya, pihak yang ingin membeli atau menjual Kontrak Berjangka yang sama dalam satu hari untuk mendapat keuntungan dari perubahan harga pada hari tersebut ("day traders") akan memiliki beberapa risiko tertentu antara lain jumlah komisi yang besar, risiko terkena efek pengungkit ("exposure to leverage"), dan persaingan dengan pedagang profesional. Anda harus mengerti risiko tersebut dan memiliki pengalaman yang memadai sebelum melakukan perdagangan harian ("day trading").'
         },
         {
             id: 'point11',
-            text: 'Menetapkan amanat bersyarat, seperti Kontrak Berjangka dilikuidasi pada keadaan tertentu untuk membatasi rugi (stop loss), mungkin tidak akan dapat membatasi kerugian Anda sampai jumlah tertentu said. Apabila amanat tersebut mungkin tidak dapat dilaksanakan karena kondisi pasar yang tidak memungkinkan melikuidasi Kontrak Berjangka.'
+            text: '<strong>Menetapkan amanat bersyarat, seperti Kontrak Berjangka dilikuidasi pada keadaan tertentu untuk membatasi rugi (stop loss), mungkin tidak akan dapat membatasi kerugian Anda sampai jumlah tertentu saja.</strong> Amanat bersyarat tersebut mungkin tidak dapat dilaksanakan karena terjadi kondisi pasar yang tidak memungkinkan melikuidasi Kontrak Berjangka.'
         },
         {
             id: 'point12',
-            text: 'Anda harus membaca dengan seksama dan memahami Perjanjian Pemberian Amanat dengan Pialang Berjangka Anda sebelum melakukan transaksi Kontrak Berjangka.'
+            text: '<strong>Anda harus membaca dengan seksama dan memahami Perjanjian Pemberian Amanat</strong> dengan Pialang Berjangka Anda sebelum melakukan transaksi Kontrak Berjangka.'
         },
         {
             id: 'point13',
-            text: 'Pernyataan singkat ini tidak dapat menunur secara rinci seluruh risiko atau aspek penting lainnya tentang Perdagangan Berjangka. Oleh karena itu Anda harus mempelajari kegiatan Perdagangan Berjangka secara cermat sebelum melakukan transaksi.'
+            text: '<strong>Pernyataan singkat ini tidak dapat memuat secara rinci seluruh risiko atau aspek penting lainnya tentang Perdagangan Berjangka.</strong> Oleh karena itu Anda harus mempelajari kegiatan Perdagangan Berjangka secara cermat sebelum memutuskan melakukan transaksi.'
         },
         {
             id: 'point14',
-            text: 'Dokumen Pemberitahuan Adanya Risiko (Risk Disclosure) ini dibuat dan ditandatangani dalam Bahasa Indonesia.'
+            text: '<strong>Dokumen Pemberitahuan Adanya Risiko (Risk Disclosure) ini dibuat dan ditandatangani dalam Bahasa Indonesia.</strong>'
         }
     ];
 
@@ -2273,7 +2619,7 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                         <div key={point.id} className="mb-4 border-bottom pb-3">
                             <div className="mb-3">
                                 <p className="mb-2">
-                                    <strong>{index + 1}.</strong> {point.text}
+                                    <strong>{index + 1}.</strong> <span dangerouslySetInnerHTML={{ __html: point.text }} />
                                 </p>
                             </div>
                             <div className="mb-2">
@@ -2298,7 +2644,7 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                         <div className="mb-4">
                             <p>
                                 Dengan mengisi kolom "YA" di bawah, saya menyatakan bahwa saya telah menerima
-                                "DOKUMEN PEMBERITAHUAN ADANYA RISIKO" mengerti dari menyebut isinya.
+                                "DOKUMEN PEMBERITAHUAN ADANYA RISIKO" mengerti dan menyetujui isinya.
                             </p>
                         </div>
 
@@ -2732,6 +3078,10 @@ const AccountApplicationSummaryStep = ({ data = {}, onChange, allData = {} }) =>
 };
 
 const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     return (
         <div>
             <Card className="border-0 shadow-sm mb-4">
@@ -2825,9 +3175,46 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
 };
 
 const ElectronicAgreementStep = ({ data = {}, onChange }) => {
+    // Function to generate current date in Indonesian format
+    const getCurrentIndonesianDate = () => {
+        const now = new Date();
+        
+        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const monthNames = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+        
+        const dayName = dayNames[now.getDay()];
+        const date = now.getDate().toString().padStart(2, '0');
+        const month = monthNames[now.getMonth()];
+        const year = now.getFullYear();
+        
+        return `${dayName}, tanggal ${date}, bulan ${month}, tahun ${year}`;
+    };
+
+    // CSS styles for field alignment
+    const fieldStyles = {
+        fieldRow: {
+            display: 'flex',
+            marginBottom: '8px',
+            alignItems: 'flex-start'
+        },
+        fieldLabel: {
+            width: '200px',
+            flexShrink: 0,
+            fontWeight: 'bold'
+        },
+        fieldContent: {
+            flex: 1,
+            paddingLeft: '10px'
+        },
+        multiLineContent: {
+            paddingLeft: '210px',
+            marginTop: '0px'
+        }
+    };
+
     return (
         <div>
-            <Card className="border-0 shadow-sm mb-4">
+            <Card className="border-0 shadow-sm mb-2">
                 <Card.Header className="bg-light border-0">
                     <h5 className="mb-0 text-primary text-center">
                         PERJANJIAN PEMBERIAN AMANAT SECARA ELEKTRONIK ONLINE
@@ -2844,20 +3231,20 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                     </div>
 
                     <div className="mb-4">
-                        <p>Pada hari ini Jumat, tanggal 29, bulan 08, tahun 2025, kami yang mengisi perjanjian di bawah ini:</p>
+                        <p>Pada hari ini {getCurrentIndonesianDate()}, kami yang mengisi perjanjian di bawah ini:</p>
                         
                         <div className="mb-3">
                             <p><strong>1. Nama</strong> : mmmmm</p>
-                            <p style={{ marginLeft: '20px' }}><strong>Pekerjaan/Jabatan</strong> : Mahasiswa (Students)</p>
-                            <p style={{ marginLeft: '20px' }}><strong>Alamat</strong> : 28 Barker Street, Kingsford, Sydney, 2017</p>
+                            <p style={{ marginLeft: '17px' }}><strong>Pekerjaan/Jabatan</strong> : Mahasiswa (Students)</p>
+                            <p style={{ marginLeft: '17px' }}><strong>Alamat</strong> : 28 Barker Street, Kingsford, Sydney, 2017</p>
                         </div>
                         
                         <p>Dalam hal ini bertindak untuk dan atas nama sendiri yang selanjutnya disebut Nasabah.</p>
                         
                         <div className="mb-3">
                             <p><strong>2. Nama</strong> : Petugas Wakil Pialang Berjangka yang ditunjuk memverifikasi</p>
-                            <p style={{ marginLeft: '20px' }}><strong>Pekerjaan/Jabatan</strong> : (Petugas Wakil Pialang Berjangka yang ditunjuk memverifikasi)</p>
-                            <p style={{ marginLeft: '20px' }}><strong>Alamat</strong> : Soho Capital Office Building Lt.16, Unit 1606-09, Jl. Letjen S. Parman Kav. 28, Kel. Tanjung Duren Selatan, Kec. Grogol Petamburan, Jakarta-Indonesia Kode Pos: 11470</p>
+                            <p style={{ marginLeft: '17px' }}><strong>Pekerjaan/Jabatan</strong> : (Petugas Wakil Pialang Berjangka yang ditunjuk memverifikasi)</p>
+                            <p style={{ marginLeft: '17px' }}><strong>Alamat</strong> : Soho Capital Office Building Lt.16, Unit 1608-09, Jl. Letjen S. Parman Kav. 28, Kel. Tanjung Duren Selatan, Kec. Grogol Petamburan, Jakarta, Indonesia Kode Pos: 11470</p>
                         </div>
                         
                         <p>Dalam hal ini bertindak untuk dan atas nama PT GENESIS GEMILANG FUTURES yang selanjutnya disebut Pialang Berjangka.</p>
@@ -2869,38 +3256,38 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
 
                     <div className="mb-4">
                         <h6><strong>1. Margin dan Pembayaran Lainnya</strong></h6>
-                        <p>(1) Nasabah menyerahkan sejumlah dana (Margin) ke Rekening Terpisah (Segregated Account) Pialang Berjangka sebagai Margin untuk amanat Nasabah, maupun biaya transaksi, penjualan maupun pembelian Kontrak Berjangka.</p>
-                        <p>(2) Membayar biaya-biaya yang diperlukan untuk transaksi yaitu biaya transaksi, pajak, komisi, dan biaya perjamian. biaya bunga sesuai tingkat yang berlaku, dan biaya lainnya yang dapat dipertanggungjawabkan berkaitan dengan transaksi sesuai amanat Nasabah, maupun biaya lain yang berhubungan dengan rekening Nasabah.</p>
+                        <p>(1) Nasabah menempatkan sejumlah dana (Margin) ke Rekening Terpisah (Segregated Account) Pialang Berjangka sebagai Margin awal dan wajib mempertahankannya sebagaimana ditetapkan.</p>
+                        <p>(2) Membayar biaya-biaya yang diperlukan untuk transaksi yaitu biaya transaksi, pajak, komisi, dan biaya pelayanan, biaya bunga sesuai tingkat yang berlaku, dan biaya lainnya yang dapat dipertanggungjawabkan berkaitan dengan transaksi sesuai amanat Nasabah, maupun biaya rekening Nasabah.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>2. Pelaksanaan Amanat</strong></h6>
-                        <p>(1) Setiap amanat yang disampaikan oleh Nasabah atau kuasanya yang ditunjuk secara tertulis oleh Nasabah, sebaiknya ada keterangan atau fakor dari Pialang Berjangka. Nasabah menyetujui bahwa tidak bahkan amanat tertulis yang ditandatangani oleh Nasabah atau kuasanya, amanat telepon yang diterima, dan atau amanat transaksi elektronik.</p>
-                        <p>(2) Setiap amanat Nasabah yang diterima dapat langsung dilaksanakan sepanjang nilai Margin yang tersedia pada rekeningnya mencukupi dan eksekusinya tergantung pada kondisi dan sistem transaksi yang berlaku yang mungkin dapat mengakibatkan Nasabah tidak dapat menutup posisi transaksi secara tepat waktu. Atas hal ini Nasabah tidak dapat menuntut Pialang Berjangka atas terjadinya hal tersebut dan posisi Margin dan posisi terbuka sebelum memberikan amanat untuk transaksi berikutnya.</p>
-                        <p>(3) Amanat Nasabah hanya dapat disetuijukan sepabila masuknya amanat tersebut belum terjadi. Pialang Berjangka tidak bertanggung jawab atas kerugian yang timbul akibat tidak berhasilnya pembatalan atau tidak menerima sepanjang buatan karena kelalaian Pialang Berjangka.</p>
-                        <p>(4) Pialang Berjangka bertanggung jawab atas Nasabah apabila pesanan atau diminta tidak wajar.</p>
-                        <p>(5) Nasabah bertanggung jawab atas keaslian dan penggunaan username dan password dalam transaksi Perdagangan Berjangka, oleh karenanya Nasabah dilarang memberitahukan, menyerahkan, atau menyerahkan kepada pihak lain selain Pialang Berjangka.</p>
+                        <p>(1) Setiap amanat yang disampaikan oleh Nasabah atau kuasanya yang ditunjuk secara tertulis oleh Nasabah, dianggap sah apabila diterima oleh Pialang Berjangka sesuai dengan ketentuan yang berlaku, dapat berupa amanat tertulis yang ditandatangani oleh Nasabah atau kuasanya, amanat telepon yang direkam, dan/atau amanat transaksi elektronik lainnya.</p>
+                        <p>(2) Setiap amanat Nasabah yang diterima dapat langsung dilaksanakan sepanjang nilai Margin yang tersedia pada rekeningnya mencukupi dan eksekusinya tergantung pada kondisi dan sistem transaksi yang berlaku yang mungkin dapat menimbulkan perbedaan waktu terhadap proses pelaksanaan amanat tersebut. Nasabah harus mengetahui posisi Margin dan posisi terbuka sebelum memberikan amanat untuk transaksi berikutnya.</p>
+                        <p>(3) Amanat Nasabah hanya dapat dibatalkan dan/atau diperbaiki apabila transaksi atas amanat tersebut belum terjadi. Pialang Berjangka tidak bertanggung jawab atas kerugian yang timbul akibat tidak terlaksananya pembatalan dan/atau perbaikan sepanjan bukan karena kelalaian Pialang Berjangka.</p>
+                        <p>(4) Pialang Berjangka berhak menolak amanat Nasabah apabila harga yang ditawarkan atau diminta tidak wajar.</p>
+                        <p>(5) Nasabah bertanggung jawab atas keamanan dan penggunaan username dan password dalam transaksi Perdagangan Berjangka, oleh karenanya Nasabah dilarang memberitahukan, menyerahkan, atau meminjamkan username dan password kepada pihak lain, termasuk kepada pegawai Pialang Berjangka.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>3. Antisipasi Penyerahan Barang</strong></h6>
-                        <p>(1) Untuk kontrak-kontrak tertentu, penyelesaian transaksi dapat dilakukan dengan penyerahan atau penerimaan barang (Delivery) karena sifat fisik dari kontrak tersebut, pihak yang melakukan transaksi tersebut mengindung risiko yang lebih besar daripada melikuidasi posisi dengan offset. Penyerahan fisik barang memiliki konsekuensi keubengan atau yang lebih besar serta berbahasa proses pengolahan barang.</p>
-                        <p>(2) Pialang Berjangka tidak bertanggung jawab atas kualifikasi mutu (grade), kualitas atau diminta-tingkat toleransi atas komoditi yang diserahkan atau akan diserahkan.</p>
-                        <p>(3) Pelaksanaan penyerahan barang tersebut akan diatur dan dijamin oleh Lembaga Kliring Berjangka.</p>
+                        <p>(1) Untuk kontrak-kontrak tertentu penyelesaian transaksi dapat dilakukan dengan penyerahan atau penerimaan barang (delivery) apabila kontrak jatuh tempo. Nasabah menyadari bahwa penyerahan atau penerimaan barang mengandung risiko yang lebih besar daripada melikuidasi posisi dengan offset. Penyerahan fisik barang memiliki konsekuensi kebutuhan dana yang lebih besar serta tambahan biaya pengelolaan barang.</p>
+                        <p>(2) Pialang Berjangka tidak bertanggung jawab atas klasifikasi mutu (grade), kualitas atau tingkat toleransi atas komoditi yang diserahkan atau akan diserahkan.</p>
+                        <p>(3) Pelaksanaan penyerahan atau penerimaan barang tersebut akan diatur dan dijamin oleh Lembaga Kliring Berjangka.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>4. Kewajiban Memelihara Margin</strong></h6>
-                        <p>(1) Nasabah wajib memelihara / memenuhi tingkat Margin yang harus tersedia di rekening pada Pialang Berjangka sesuai dengan dengan jumlah yang telah ditetapkan baik berupa:</p>
-                        <p>(2) Apabila jumlah Margin memerlukan penambahan maka Pialang Berjangka wajib Memberitahukan dan memakskikan kepada Nasabah untuk menambah Margin segera.</p>
-                        <p>(3) Apabila jumlah memerlukan pengurangan Margin Call, maka Nasabah wajib melakukan penyetoran Call Margin selambal-lambatnya sebelum dimulai hari perdagangan berikutnya. Kewajiban Nasabah sebagaimana dimaksud dalam ayat ini berlaku sejak timbulnya Call Margin oleh alat.</p>
+                        <p>(1) Nasabah wajib memelihara / memenuhi tingkat Margin yang harus tersedia di rekening pada Pialang Berjangka sesuai dengan jumlah yang telah ditetapkan baik diminta ataupun tidak oleh Pialang Berjangka.</p>
+                        <p>(2) Apabila jumlah Margin memerlukan penambahan maka Pialang Berjangka wajib Memberitahukan dan memintakan kepada Nasabah untuk menambah Margin segera.</p>
+                        <p>(3) Apabila jumlah Margin memerlukan tambahan (Call Margin) maka Nasabah wajib melakukan penyerahan Call Margin selambat-lambatnya sebelum dimulai hari perdagangan berikutnya. Kewajiban Nasabah sehubungan dengan penyerahan Call Margin tidak terbatas pada jumlah Margin awal.</p>
                         <p>(4) Pialang Berjangka tidak berkewajiban melaksanakan amanat untuk melakukan transaksi yang baru dari Nasabah sebelum Call Margin dipenuhi.</p>
-                        <p>(5) Untuk memenuhi kewajiban tersebut dan keuangan lainnya dari Nasabah, Pialang Berjangka dapat mencairkan dana Nasabah yang ada di Pialang Berjangka.</p>
+                        <p>(5) Untuk memenuhi kewajiban Call Margin dan keuangan lainnya dari Nasabah, Pialang Berjangka dapat mencairkan dana Nasabah yang ada di Pialang Berjangka.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>5. Hak Pialang Berjangka Melikuidasi Posisi Nasabah</strong></h6>
-                        <p>Nasabah bertanggung jawab sepenuhnya atas risiko posisi terbukanya secara terus-menerus dan memenuhi kewajibannya. Apabila dalam jangka waktu tertentu dana pada rekening Nasabah kurang dari yang dipersyaratkan, Pialang Berjangka dapat mernatikan posisi Nasabah yang masih terbuka, baik sebagian, keseluruhan, awal transaksi, atau tindakan lain untuk melindungi diri dalam penentuan Margin tersebut dengan tindakan dahulu memberitahukan kepada Nasabah dan Pialang Berjangka tidak bertanggung jawab atas kerugian akibat Tindakan tersebut.</p>
+                        <p>Nasabah bertanggung jawab memantau / mengetahui posisi terbukanya secara terus-menerus dan memenuhi kewajibannya. Apabila dalam jangka waktu tertentu dana pada rekening Nasabah kurang dari yang dipersyaratkan, Pialang Berjangka dapat menutup posisi terbuka Nasabah secara keseluruhan atau sebagian, membatasi transaksi, atau tindakan lain untuk melindungi diri dalam pemenuhan Margin tersebut dengan terlebih dahulu memberitahu atau tanpa memberitahu Nasabah dan Pialang Berjangka tidak bertanggung jawab atas kerugian yang timbul akibat Tindakan tersebut.</p>
                     </div>
 
                     <div className="mb-4">
@@ -2910,81 +3297,99 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
 
                     <div className="mb-4">
                         <h6><strong>7. Pengadaan Kerugian Tidak Adanya Penutupan Posisi</strong></h6>
-                        <p>Apabila Nasabah tidak mampu menutupkan penutupan dan transaksi yang jatuh tempo, Pialang Berjangka dapat menutupkan penutupan atas Kontrak Berjangka bahwa tidak mengenai pemyaratan biaya-biaya, termasuk biaya kerugian dan premi yang telah dibayarkan oleh Pialang Berjangka, dan apabila Nasabah lain unkembanyar biaya-biaya tersebut, Pialang Berjangka berhak mengambil pemyaraan biaya tersebut dari komoditi atau surat berharga tersebut.</p>
+                        <p>Apabila Nasabah tidak mampu melakukan penutupan atas transaksi yang jatuh tempo, Pialang Berjangka dapat melakukan penutupan atas transaksi di Bursa. Nasabah wajib membayar biaya-biaya, termasuk biaya kerugian dan premi yang telah dibayarkan oleh Pialang Berjangka, dan apabila Nasabah lalai untukmembayar biaya-biaya tersebut, Pialang Berjangka berhak untuk mengambil pembayaran dari dana Nasabah.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>8. Pialang Berjangka Dapat Membatasi Posisi</strong></h6>
-                        <p>Nasabah mengakui hak Pialang Berjangka untuk membatasi posisi terbuka Kontrak Berjangka Nasabah dan Nasabah tidak dapat mengajukan keberatan atas kebijakan tersebut.</p>
+                        <p>Nasabah mengakui hak Pialang Berjangka untuk membatasi posisi terbuka Kontrak Berjangka Nasabah dan Nasabah tidak melakukan transaksi melebihi batas yang telah ditetapkan tersebut.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>9. Tidak Ada Jaminan atas Informasi atau Rekomendasi</strong></h6>
                         <p>Nasabah mengakui bahwa:</p>
-                        <p>(a) Informasi dan rekomendasi yang diberikan oleh Pialang Berjangka kepada Nasabah tidak selalu Lengkap dan perlu diversifikasi.</p>
-                        <p>(b) Pialang Berjangka tidak menjamin bahwa informasi dan rekomendasi yang diberikan merupakan informasi yang akurat dan lengkap.</p>
-                        <p>(c) Informasi dan rekomendasi yang diberikan oleh Wakil Pialang Berjangka yang atau dengan yang lain mungkin berbeda penilaian, pendapat, interpretasi nasabah. Nasabah menyatakan bahwa ada kemungkinan Pialang Berjangka dan pihak tertsiliamya memiliki posisi di pasar dan memberikan rekomendasi tidak konsisten kepada Nasabah.</p>
+                        <p>(1) Informasi dan rekomendasi yang diberikan oleh Pialang Berjangka kepada Nasabah tidak selalu Lengkap dan perlu diverifikasi.</p>
+                        <p>(2) Pialang Berjangka tidak menjamin bahwa informasi dan rekomendasi yang diberikan merupakan informasi yang akurat dan lengkap.</p>
+                        <p>(3) Informasi dan rekomendasi yang diberikan oleh Wakil Pialang Berjangka yang satu dengan yang lain mungkin berbeda karena perbedaan analisis fundamental atau teknikal. Nasabah menyadari bahwa ada kemungkinan Pialang Berjangka dan pihak terafiliasinya memiliki posisi di pasar dan memberikan rekomendasi tidak konsisten kepada Nasabah.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>10. Pembatasan Tanggung Jawab Pialang Berjangka</strong></h6>
-                        <p>(1) Pialang Berjangka tidak bertanggung jawab untuk memberikan penilaian kepada Nasabah mengenai likm, pasar, nasabah dapat dari ekonomi nasional dan internasional, dan kontrak berjangka atau masalah yang memengaruhi harga kontrak berjangka atau sertifikat deposito berkaitan; dan sebagai hasilat mengenai keadaan pasar. Pialang Berjangka hanya memberikan pelayanan untuk melakukan transaksi sesuai dan atas permintaan Nasabah langsung dengan pasar.</p>
-                        <p>(2) Perdagangan sewaktu-waktu dapat dihentikan oleh pihak yang memiliki otoritas (Bappebti/Bursa Berjangka) tanpa pemberitahuan sebelumnya kepada Nasabah. Dalam hal ini Pialang Berjangka tidak bertanggung jawab atas saat perdagangan tersebut dihentikan, maka akan disesakaskan (likuidasi) berdasarkan pada peraturan/ketentuan yang dilakukan dan ditetapkan oleh pihak otoritas tersebut, dan semua kerugian serta biaya yang timbul sebagai akibat dihentikannya transaksi oleh pihak otoritas perdagangan tersebut, menjadi beban dan tanggung jawab Nasabah sepenuhnya.</p>
+                        <p>(1) Pialang Berjangka tidak bertanggung jawab untuk memberikan penilaian kepada Nasabah mengenai iklim, pasar, keadaan politik dan ekonomi nasional dan internasional, nilai kontrak berjangka, kolateral, atau memberikan nasihat mengenai keadaan pasar. Pialang Berjangka hanya memberikan pelayanan untuk melakukan transaksi secara jujur serta memberikan Laporan atas transaksi tersebut.</p>
+                        <p>(2) Perdagangan sewaktu-waktu dapat dihentikan oleh pihak yang memiliki otoritas (Bappebti/Bursa Berjangka) tanpa pemberitahuan terlebih dahulu kepada Nasabah. Atas posisi terbuka yang masih dimiliki oleh Nasabah pada saat perdagangan tersebut dihentikan, maka akan diselesaikan (likuidasi) berdasarkan pada peraturan/ketentuan yang dikeluarkan dan ditetapkan oleh pihak otoritas tersebut, dan semua kerugian serta biaya yang timbul sebagai akibat dihentikannya transaksi oleh pihak otoritas perdagangan tersebut, menjadi beban dan tanggung jawab Nasabah sepenuhnya.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>11. Transaksi Harus Mematuhi Peraturan Yang Berlaku</strong></h6>
-                        <p>Semua transaksi baik yang dilakukan sendiri oleh Nasabah maupun melalui Pialang Berjangka wajib mematuhi peraturan yang berlaku baik kepada Nasabah. Atas pokok terbuka yang dimiliki, interpretasi peraturan yang ditetapkan oleh Bappebti atau Bursa Berjangka.</p>
+                        <p>Semua transaksi baik yang dilakukan sendiri oleh Nasabah maupun melalui Pialang Berjangka wajib mematuhi peraturan perundang-undangan di bidang Perdagangan Berjangka, kebiasaan dan interpretasi resmi yang ditetapkan oleh Bappebti atau Bursa Berjangka.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>12. Pialang Berjangka tidak Bertanggung jawab atas Kegagalan Komunikasi</strong></h6>
-                        <p>Pialang Berjangka tidak bertanggung jawab atas keterlambatan atau tidak tepat wakunya pengiriman amanat atau informasi lainnya yang disababkan oleh kerusakan fasilitas komunikasi atau sebab lain diluar kontrol Pialang Berjangka.</p>
+                        <p>Pialang Berjangka tidak bertanggung jawab atas keterlambatan atau tidak tepat waktunya pengiriman amanat atau informasi lainnya yang disebabkan oleh kerusakan fasilitas komunikasi atau sebab lain diluar kontrol Pialang Berjangka.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>13. Konfirmasi</strong></h6>
-                        <p>(1) Konfirmasi atas Nasabah dapat bererupa surat, telax, media lain, secara tertulis ataupun rekaman suara.</p>
-                        <p>(2) Pialang Berjangka berkewajiban menyampaikan konfirmasi transaksi, laporan rekening, pemberitaan Call Margin, dan pemberitahuan lainnya kepada Nasabah secara tertulis melalui fax, e-mail, ataupun dengan cara lain yang disepakati dengan yang tertera dalam rekening Nasabah. Apabila dalam jangka waktu 2 x 24 jam setelah amanat jual atau beli disampaikan, Nasabah belum menerima konfirmasi tidak tidak adanya Nasabah dapat menghubungi hal tersebut kepada Pialang Berjangka melalui telepon atau didisreusasi dengan pemberitahuan tertulis.</p>
-                        <p>(3) Jika dalam waktu 2 x 24 jam setelah tanggal konfirmasi dikirimkan, belum ada sanggahan dari Nasabah maka konfirmasi Pialang Berjangka dianggap benar dan sah.</p>
-                        <p>(4) Kekurangan atau kelebihan yang ditemukan Pialang Berjangka atau yang diberitahukan oleh Nasabah sesuai keadaan yang sebenarnya dan dari hukum konfirmasi yang telah diterima.</p>
-                        <p>(5) Nasabah tidak bertanggung jawab atas transaksi yang dilaksanakan atas rekeningnya apabila konfirmasi tersebut sudah diterima secara tertulis ataupun rekaman suara.</p>
+                        <p>(1) Konfirmasi dari Nasabah dapat berupa surat, telex, media lain, secara tertulis ataupun rekaman suara.</p>
+                        <p>(2) Pialang Berjangka berkewajiban menyampaikan konfirmasi transaksi, laporan rekening, permintaan Call Margin, dan pemberitahuan lainnya kepada Nasabah secara akurat, benar dan secepatnya pada alamat Nasabah sesuai dengan yang tertera dalam rekening Nasabah. Apabila dalam jangka waktu 2 x 24 jam setelah amanat jual atau beli disampaikan, tetapi Nasabah belum menerima konfirmasi tertulis, Nasabah segera memberitahukan hal tersebut kepada Pialang Berjangka melalui telepon dan disusul dengan pemberitahuan tertulis.</p>
+                        <p>(3) Jika dalam waktu 2 x 24 jam sejak tanggal penerimaan konfirmasi tertulis tersebut tidak ada sanggahan dari Nasabah maka konfirmasi Pialang Berjangka dianggap benar dan sah.</p>
+                        <p>(4) Kekeliruan atas konfirmasi yang diterbitkan Pialang Berjangka akan diperbaiki oleh Pialang Berjangka sesuai keadaan yang sebenarnya dan demi hukum konfirmasi yang lama batal.</p>
+                        <p>(5) Nasabah tidak bertanggung jawab atas transaksi yang dilaksanakan atas rekeningnya apabila konfirmasi tersebut tidak disampaikan secara benar dan akurat.</p>
                     </div>
 
                     <div className="mb-4">
-                        <h6><strong>14. Kebesaran Informasi Nasabah</strong></h6>
-                        <p>Nasabah memberikan informasi yang benar dan akurat mengenai data Nasabah yang diminta oleh Pialang Berjangka guna pelayanan yang diberikan oleh Pialang Berjangka kepada Nasabah. Dalam hal ini Nasabah Pialang Berjangka dapat menerapkan perubahan kemampuan keuangannya untuk terus melaksanakan transaksi.</p>
+                        <h6><strong>14. Kebenaran Informasi Nasabah</strong></h6>
+                        <p>Nasabah memberikan informasi yang benar dan akurat mengenai data Nasabah yang diminta oleh Pialang Berjangka dan akan memberitahukan paling lambat dalam waktu 3 (tiga) hari kerja setelah terjadi perubahan, termasuk perubahan kemampuan keuangannya untuk terus melaksanakan transaksi.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>15. Komisi Transaksi</strong></h6>
-                        <p>Nasabah setuju untuk membayar dan menyetujui bahwa Pialang Berjangka berhak untuk memungut komisi atas transaksi yang telah dilaksanakan, dalam jumlah sebagaimana akan ditetapkan dari waktu ke waktu oleh Pialang Berjangka. Pembahasan beban (fee) dan biaya lainnya akan dijelaskan dalam lampiran yang terpisah dari Perjanjian ini.</p>
+                        <p>Nasabah mengetahui dan menyetujui bahwa Pialang Berjangka berhak untuk memungut komisi atas transaksi yang telah dilaksanakan, dalam jumlah sebagaimana akan ditetapkan dari waktu ke waktu oleh Pialang Berjangka. Perubahan beban (fees) dan biaya lainnya harus disetujui secara tertulis oleh Para Pihak.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>16. Pemberian Kuasa</strong></h6>
-                        <p>(1) Nasabah memberikan kuasa kepada Pialang Berjangka untuk menghubungi bank, Lembaga keuangan, Pialang Berjangka, dll. yang terkait untuk memperoleh keterangan dan verifikasi mengenai informasi yang diberima dari Nasabah. Nasabah menyatakan bahwa semua informasi yang diberikan kepada Pialang Berjangka akan dirahasiakan, dan Pialang Berjangka akan dirahasiakan ooleh Pialang Berjangka apabila diperlukan. Nasabah diberikan kesempatan untuk memberitahukan secara tertulis apabila menginginkan informasi mereka tidak boleh diberikan atau dicatat.</p>
-                        <p>(2) Nasabah dapat juga memberikan kuasa kepada pihak lain (bukan Petugas Pialang Berjangka bukan Wakil Pialang Berjangka) secara tertulis dan telah jatuh tempo atau untuk melakukan transaksi yang diperlukan atas rekening yang dimiliki Nasabah, berdasarkan surat kuasa dalam bentuk dan isi yang tidak bertentangan dengan ketentuan Peraturan Perundang-undangan.</p>
+                        <p>(1) Nasabah memberikan kuasa kepada Pialang Berjangka untuk menghubungi bank, Lembaga keuangan, Pialang Berjangka lain, atau institusi lain yang terkait untuk memperoleh keterangan atau verifikasi mengenai informasi yang diterima dari Nasabah. Nasabah mengerti bahwa penelitian mengenai data hutang pribadi dan bisnis dapat dilakukan oleh Pialang Berjangka apabila diperlukan. Nasabah diberikan kesempatan untuk memberitahukan secara tertulis dalam jangka waktu yang telah disepakati untuk melengkapi persyaratan yang diperlukan.</p>
+                        <p>(2) Nasabah dapat juga memberikan kuasa kepada pihak lain (bukan Pengurus Pialang Berjangka bukan Wakil Pialang Berjangka yang menanda-tangani perjanjian ini dan bukan pegawai Pialang Berjangka yang jabatannya satu tingkat di bawah Direksi) yang ditunjuk oleh Nasabah untuk menjalankan hak-hak yang timbul atas rekening, termasuk memberikan instruksi kepada Pialang Berjangka atas rekening yang dimiliki Nasabah, berdasarkan surat kuasa dalam bentuk dan isi yang tidak bertentangan dengan ketentuan Peraturan Perundang-undangan. </p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>17. Pemindahan Dana</strong></h6>
-                        <p>Pialang Berjangka dapat setiap saat memindahkan dana atau salu rekening ke rekening lainnya berkaitan dengan kepasitas transaksi yang dilakukan Nasabah seperti pembayaran komisi, pembayaran biaya transaksi, biing, dan keterlamaban dalam memenuhi kewajibannya, tanpa terlebih dahulu memberitahukan kepada Nasabah. Transfer yang dilakukan akan sepenuhnya dinformasi secara tertulis kepada Nasabah.</p>
+                        <p>Pialang Berjangka dapat setiap saat mengalihkan dana dari satu rekening ke rekening lainnya berkaitan dengan kegiatan transaksi yang dilakukan Nasabah seperti pembayaran komisi, pembayaran biaya transaksi, kliring, dan keterlambatan dalam memenuhi kewajibannya, tanpa terlebih dahulu memberitahukan kepada Nasabah. Transfer yang telah dilakukan akan segera diberitahukan secara tertulis kepada Nasabah.</p>
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-2">
                         <h6><strong>18. Pemberitahuan</strong></h6>
-                        <p>(1) Semua komunikasi, uang, surat berharga, dan kekayaan lainnya harus dikirimkan langsung kepada alamat Nasabah seperti tertera dalam lembaran/atau atau surat lainnya yang didengar secara tertulis oleh Nasabah.</p>
+                        <p>(1) Semua komunikasi, uang, surat berharga, dan kekayaan lainnya harus dikirimkan langsung ke alamat Nasabah seperti tertera dalam rekeningnya atau alamat lain yang ditetapkan/diberitahukan secara tertulis oleh Nasabah.</p>
                         <p>(2) Semua uang, harus disetor atau ditransfer langsung oleh Nasabah ke Rekening Terpisah (Segregated Account) Pialang Berjangka:</p>
                         <div className="ms-4">
-                            <p><strong>a. Nama</strong> : PT GENESIS GEMILANG FUTURES</p>
-                            <p><strong>b. Alamat</strong> : SOHO CAPITAL OFFICE BUILDING<br />
-                            Lantai 16 Unit 1606-09, Jalan Letban Jenderal S. Parman Kaving 28,<br />
-                            Kelurahan Tanjung Duren Selatan, Kecamatan Grogol Petamburan, Jakarta Barat,<br />
-                            Kode Pos 11470, Indonesia</p>
-                            <p><strong>c. Bank</strong> : Bank CMB NIAGA Kantor Cabang Jakarta Cideng</p>
-                            <p><strong>d. No. Rekening Terpisah</strong> : 808777699500 (IDR)<br />
-                            808777776540 (USD)</p>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>a. Nama :</span>
+                                <span style={fieldStyles.fieldContent}>PT GENESIS GEMILANG FUTURES</span>
+                            </div>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>b. Alamat :</span>
+                                <span style={fieldStyles.fieldContent}>SOHO CAPITAL OFFICE BUILDING</span>
+                            </div>
+                            <div style={fieldStyles.multiLineContent}>
+                                Lantai 16 Unit 1608-09, Jalan Letnan Jenderal S.<br />
+                                Parman Kavling 28,<br />
+                                Kelurahan Tanjung Duren Selatan, Kecamatan<br />
+                                Grogol Petamburan, Jakarta Barat, Kode Pos 11470,<br />
+                                Indonesia
+                            </div>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>c. Bank :</span>
+                                <span style={fieldStyles.fieldContent}>Bank CIMB NIAGA Kantor Cabang Jakarta Cideng</span>
+                            </div>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>d. No. Rekening Terpisah :</span>
+                                <span style={fieldStyles.fieldContent}>808777699500 (IDR)</span>
+                            </div>
+                            <div style={fieldStyles.multiLineContent}>
+                                808777776540 (USD)
+                            </div>
                         </div>
                         <p>dan dianggap sudah diterima oleh Pialang Berjangka apabila sudah ada tanda terima bukti setor atau transfer dari pegawai Pialang Berjangka.</p>
                     </div>
@@ -2992,13 +3397,29 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                     <div className="mb-4">
                         <p>(3) Semua surat berharga, kekayaan lainnya, atau komunikasi harus dikirim kepada Pialang Berjangka:</p>
                         <div className="ms-4">
-                            <p><strong>a. Nama</strong> : PT GENESIS GEMILANG FUTURES</p>
-                            <p><strong>b. Alamat</strong> : SOHO CAPITAL OFFICE BUILDING<br />
-                            Lantai 16 Unit 1606-09, Jalan Lethan Jenderal S. Parman Kaving 28,<br />
-                            Kelurahan Tanjung Duren Selatan, Kecamatan Grogol Petamburan, Jakarta Barat,<br />
-                            Kode Pos 11470, Indonesia</p>
-                            <p><strong>c. Telepon</strong> : (+62)21-5010-6574</p>
-                            <p><strong>d. E-Mail</strong> : support@genesis.co.id</p>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>a. Nama :</span>
+                                <span style={fieldStyles.fieldContent}>PT GENESIS GEMILANG FUTURES</span>
+                            </div>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>b. Alamat :</span>
+                                <span style={fieldStyles.fieldContent}>SOHO CAPITAL OFFICE BUILDING</span>
+                            </div>
+                            <div style={fieldStyles.multiLineContent}>
+                                Lantai 16 Unit 1608-09, Jalan Letnan Jenderal S.<br />
+                                Parman Kavling 28,<br />
+                                Kelurahan Tanjung Duren Selatan, Kecamatan<br />
+                                Grogol Petamburan, Jakarta Barat, Kode Pos 11470,<br />
+                                Indonesia
+                            </div>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>c. Telepon :</span>
+                                <span style={fieldStyles.fieldContent}>(+62)21-50100572</span>
+                            </div>
+                            <div style={fieldStyles.fieldRow}>
+                                <span style={fieldStyles.fieldLabel}>d. E-Mail :</span>
+                                <span style={fieldStyles.fieldContent}>support@genesis.co.id</span>
+                            </div>
                         </div>
                         <p>dan dianggap sudah diterima oleh Pialang Berjangka apabila sudah ada tanda bukti penerimaan dari pegawai Pialang Berjangka.</p>
                     </div>
@@ -3011,45 +3432,43 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                     <div className="mb-4">
                         <h6><strong>20. Jangka Waktu Perjanjian dan Pengakhiran</strong></h6>
                         <p>(1) Perjanjian ini mulai berlaku terhitung sejak tanggal ditandatanganinya sampai disampaikannya pemberitahuan pengakhiran tertulis dari Nasabah atau Pialang Berjangka.</p>
-                        <p>(2) Nasabah dapat mengakhiri Perjanjian ini hanya jika Nasabah sudah tidak lagi memiliki posisi terbuka dan tidak ada kewajiban Nasabah terhadap Pialang Berjangka.</p>
-                        <p>(3) Pengakhiran tidak membebaskan salah satu Pihak dari tanggung jawab atau kewajiban yang terjadi sebelum pengakhiran tersebut.</p>
+                        <p>(2) Nasabah dapat mengakhiri Perjanjian ini hanya jika Nasabah sudah tidak lagi memiliki posisi terbuka dan tidak ada kewajiban Nasabah yang diemban oleh atau terhutang kepada Pialang Berjangka.</p>
+                        <p>(3) Pengakhiran tidak membebaskan salah satu Pihak dari tanggung jawab atau kewajiban yang terjadi sebelum pemberitahuan tersebut.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>21. Berakhirnya Perjanjian</strong></h6>
                         <p>Perjanjian dapat berakhir dalam hal Nasabah:</p>
-                        <p>(1) Dinyatakan pailit, meninggal, hilang yang sangat besar, dalam proses peradilan, menjadi hilang ingatan, mengundurkan diri atau tidak cakap hukum menurut ketentuan hukum yang berlaku.</p>
-                        <p>(2) Tidak dapat memenuhi atau memotahti perjanjian ini dandalam melakukan pelanggaran terhadapnya.</p>
-                        <p>(3) Bertindak dengan cara yang dapat merugikan kepentingan atau reputasi Pialang Berjangka dalam:</p>
-                        <p>   (a) Menuruksan atau menutupi posisi Nasabah tersebut setelah mempembertangkannya secara cermat dan jujur; dan</p>
-                        <p>   (b) Mengadakan perintah dari Nasabah atau kuasanya.</p>
-                        <p>(4) Pengakhiran Perjanjian sebagaimana dimaksud dalam angka (1) dan (2) tersebut diatas tidak melepsakan kewajiban dari Para pihak yang menuntung dengan perantaraan atau kewajiban lainnya yang timbul dari perjanjian.</p>
+                        <p>(1) Dinyatakan pailit, memiliki hutang yang sangat besar, dalam proses peradilan, menjadi hilang ingatan, mengundurkan diri atau meninggal;</p>
+                        <p>(2) Tidak dapat memenuhi atau mematuhi perjanjian ini dan/atau melakukan pelanggaran terhadapnya;</p>
+                        <p>(3) Berkaitan dengan ayat (1) dan ayat (2) tersebut diatas, Pialang Berjangka dapat:</p>
+                        <p style={{marginLeft: '30px'}}>(i) Meneruskan atau menutup posisi Nasabah tersebut setelah mempertimbangkannya secara cermat dan jujur; dan</p>
+                        <p style={{marginLeft: '30px'}}>(ii) Menolak perintah dari Nasabah atau kuasanya.</p>
+                        <p>(4) Pengakhiran Perjanjian sebagaimana dimaksud dengan angka (1) dan (2) tersebut diatas tidak melepaskan kewajiban dari Para pihak yang berhubungan dengan penerimaan atau kewajiban pembayaran atau pertanggungjawaban kewajiban lainnya yang timbul dari perjanjian.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>22. Force Majeur</strong></h6>
-                        <p>Tidak ada satupun pihak di dalam Perjanjian dapat diminta bertanggungjawabannya untuk suatu keterlambatan atau kemahumnya memmenuhi Perjanjian yang disebabkan untuk kejadian diluar kontrol mereka dan kemampuannya atau kuasaannya (force majeur), sepanjang pemberitahuan tertulis mengenai sebab-lu tersebut telah diberikan kepada pihak lainnya. Yang dimaksud dengan force majeure termasuk tetapi tidak terbatas kepada: bencana alam, pemogokan, kebakaran, banjir, gempa bumi, dan sebagainya.</p>
-                        <p>Juga termasuk bencana kepada atau sebab-lu lainnya seperti (yang paling), kemacetan sistem perdagangan, huru bala negara (seperti perang, revolusi dan lain sebagaimana), ketidakstabilan ekonomi, peraturan pemerintah yang beubah dan kondisi di bidang ekonomi, keuangan dan perdagangan Berjangka, sehingga pihak tersebut terhambat atau tidak dapat melakukan transaksi sepenuhnya akibat hal tersebut.</p>
-                        <p>Namun demikian, miring adik, dan penyelesaian transaksi Kontrak Berjangka di mana transaksi dilaksanakan yang secara langsung mempengaruhi perdagangan Berjangka pada Bursa Berjangka serta tanggungjawa sistem perdagangan, miring dan penyelesaian transaksi Kontrak Berjangka dimana transaksi dilaksanakan yang secara langsung mempengaruhi posisi yang dipegang dalam perjanjian tersebut.</p>
+                        <p>Tidak ada satupun pihak di dalam Perjanjian dapat diminta pertanggungjawabannya untuk suatu keterlambatan atau terhalangnya memenuhi kewajiban berdasarkan Perjanjian yang diakibatkan oleh suatu sebab yang berada di luar kemampuannya atau kekuasaannya (force majeur), sepanjang pemberitahuan tertulis mengenai sebab itu disampaikannya kepada pihak lain dalam Perjanjian dalam waktu tidak lebih dari 24  dua puluh empat) jam sejak timbulnya sebab itu. Yang dimaksud dengan Force Majeure dalam Perjanjian adalah peristiwa kebakaran, bencana alam (seperti gempa bumi, banjir, angin topan, petir), pemogokan umum, huru hara, peperangan, perubahan terhadap peraturan perundangundangan yang berlaku dan kondisi di bidang ekonomi, keuangan dan Perdagangan Berjangka, pembatasan yang dilakukan oleh otoritas Perdagangan Berjangka dan Bursa Berjangka serta terganggunya sistem perdagangan, kliring dan penyelesaian transaksi Kontrak Berjangka di mana transaksi dilaksanakan yang secara langsung mempengaruhi pelaksanaan pekerjaan berdasarkan perjanjian.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>23. Perubahan atas lain dalam Perjanjian Pemberian Amanat</strong></h6>
-                        <p>Perubahan atas lain dalam Perjanjian ini hanya dapat dilakukan atas persetujuan Para Pihak, atau Pialang Berjangka telah memberitahukan secara tertulis perubahan yang diinginkan, dan Nasabah tidak memberikan tanggapan untuk transaksi dengan tanpa memberikan tanggapan secara tertulis atas usul perubahan tersebut. Tindakan Nasabah dapat sebaagi mana dimaksud pada angka (1) angka (2), maka Para Pihak sepakat untuk menyelesaikan perselisihan melalui lain tersebut dimaksud pada Peraturan dari penjanjian ini.</p>
+                        <p>Perubahan atas isian dalam Perjanjian ini hanya dapat dilakukan atas persetujuan Para Pihak, atau Pialang Berjangka telah memberitahukan secara tertulis perubahan yang diinginkan, dan Nasabah tetap memberikan perintah untuk transaksi dengan tanpa memberikan tanggapan secara tertulis atas usul perubahan tersebut. Tindakan Nasabah tersebut dianggap setuju atas usul perubahan tersebut.</p>
                     </div>
 
                     <div className="mb-4">
                         <h6><strong>24. Penyelesaian Perselisihan</strong></h6>
-                        <p>(1) Semua perselisihan dan perbedaan pendapat yang timbul dalam pelaksanaan Perjanjian ini wajib diselesaikan terlebih dahulu secara musyawarah untuk mufakat antara Para Pihak.</p>
-                        <p>(2) Apabila penyelesaian dan perbedaan pendapat yang timbul tidak dapat diselesaikan secara musyawarah untuk mencapai mufakat, Para Pihak wajib memanfaatkan jasa mediasi atau arbitrase di Bursa Berjangka.</p>
-                        <p>(3) Apabila penyelesaian dan perbedaan pendapat yang timbul tidak dapat diselesaikan melalui cara sebagaimana dimaksud pada angka (1) dan angka (2), maka Para Pihak sepakat untuk menyelesaikan perselisihan melalui lain.</p>
+                        <p>(1) Semua perselisihan dan perbedaan pendapat yang timbul dalam pelaksanaan Perjanjian ini wajib diselesaikan terlebih dahulu secara musyawarah untuk mencapai mufakat antara Para Pihak.</p>
+                        <p>(2) Apabila perselisihan dan perbedaan pendapat yang timbul tidak dapat diselesaikan secara musyawarah untuk mencapai mufakat, Para Pihak wajib memanfaatkan sarana penyelesaian Perselisihan yang tersedia di Bursa Berjangka.</p>
+                        <p>(3) Apabila perselisihan dan perbedaan pendapat yang timbul tidak dapat diselesaikan melalui cara sebagaimana dimaksud pada angka (1) dan angka (2), maka Para Pihak sepakat untuk menyelesaikan perselisihan melalui:</p>
                         
                         <div className="border p-3 bg-light mb-3">
                             <p className="text-danger mb-2"><strong>Penyelesaian Perselisihan Melalui :</strong></p>
                             <Form.Check
                                 type="checkbox"
                                 id="dispute-bappebti"
-                                label="Badan Arbitrasi Perdagangan Berjangka Komoditi (BAKTI)"
+                                label="Badan Arbitrase Perdagangan Berjangka Komoditi (BAKTI)"
                                 checked={data.disputeResolutionBappebti || false}
                                 onChange={(e) => onChange({ ...data, disputeResolutionBappebti: e.target.checked })}
                             />
@@ -3060,7 +3479,8 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                                 checked={data.disputeResolutionJakarta || false}
                                 onChange={(e) => onChange({ ...data, disputeResolutionJakarta: e.target.checked })}
                             />
-                            <p className="mt-2 mb-1">(4) Kantor atau kantor cabang Pialang Berjangka berdomisili dengan Nasabah tempat penyelesaian dalam hal terjadi perselisihan.</p>
+                            <p className="mt-2">(4) Kantor atau kantor cabang Pialang Berjangka terdekat dengan domisili Nasabah tempat
+                            penyelesaian dalam hal terjadi perselisihan.</p>
                             <p><strong>Daftar Kantor</strong></p>
                             <p>Kantor Pusat</p>
                             <p>PT Genesis Gemilang Futures</p>
@@ -3135,7 +3555,7 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
 
     return (
         <div>
-            <Card className="border-0 shadow-sm mb-4">
+            <Card className="border-0 shadow-sm mb-2">
                 <Card.Header className="bg-light border-0">
                     <h5 className="mb-0 text-primary text-center">
                         PERATURAN TRANSAKSI
@@ -3143,38 +3563,119 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
                     <h6 className="mb-0 text-secondary text-center">
                         PT GENESIS GEMILANG FUTURES
                     </h6>
+                    <p className="mb-0 text-center mt-2">
+                        PERATURAN TRANSAKSI (TRADING RULES) KONTRAK BERJANGKA PENYALURAN AMANAT<br />
+                        NASABAH KE BURSA BERJANGKA LUAR NEGERI (PALN)
+                    </p>
                 </Card.Header>
-                <Card.Body>
-                    {/* PDF Viewer */}
+                <Card.Body style={{ maxHeight: '80vh', overflowY: 'auto' }}>
                     <div className="mb-4">
-                        <div className="pdf-container" style={{ height: '600px', border: '1px solid #dee2e6', borderRadius: '0.375rem' }}>
-                            <iframe
-                                src="/Trading Rules PALN Equivalent.6780c13224fec7.70609845.pdf"
-                                width="100%"
-                                height="100%"
-                                style={{ border: 'none', borderRadius: '0.375rem' }}
-                                title="Trading Rules PALN Equivalent Document"
-                            >
-                                <p>Your browser does not support PDFs. <a href="/Trading Rules PALN Equivalent.6780c13224fec7.70609845.pdf" target="_blank" rel="noopener noreferrer">Download the PDF</a>.</p>
-                            </iframe>
-                        </div>
-                        <div className="text-center mt-2">
-                            <a 
-                                href="/Trading Rules PALN Equivalent.6780c13224fec7.70609845.pdf" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="btn btn-outline-primary btn-sm"
-                            >
-                                <i className="fas fa-external-link-alt me-1"></i>
-                                Open PDF in New Window
-                            </a>
-                        </div>
+                        <h6><strong>I. KETENTUAN UMUM</strong></h6>
+                        <p><strong>1. Pialang Penyaluran Amanat ke Bursa Berjangka Luar Negeri (PALN)</strong> bertindak sebagai Pialang PALN merupakan Pialang Luar Negeri yang menjadi Anggota Singapore Exchange (SGX) dan terdaftar resmi pada Monetary Authority of Singapore ("MAS").</p>
+                        <p><strong>2. Tempat pelaksanaan (Venue Execution)</strong> untuk kontrak yang diperdagangkan pada Layanan ini, Pialang PALN adalah satu-satunya tempat bertransaksi. Pialang PALN akan menghubungkan atas semua posisi Nasabah dengan penyedia likuiditas eksternal, di mana penyedia likuiditas tersebut menggunakan Singapore Exchange (SGX) untuk mengeksekusi instrumen yang mendasarinya. Semua kontrak didukung penuh oleh instrumen dasar yang sesuai.</p>
+                        <p><strong>3. Produk </strong>yang ditawarkan pada Layanan ini akan berupa kontrak yang terdaftar dan diperdagangkan di Singapore Exchange (SGX).</p>
+                        <p><strong>4. Transaksi </strong>dilakukan melalui sistem elektronik (secara Online) yaitu dengan Sistem Transaksi PALN yang disediakan oleh Jakarta Futures Exchange (JFX).</p>
+                        <p><strong>5. Day Trading </strong>Adalah transaksi jual dan beli yang dilakukan pada hari yang sama, sehingga tidak ada posisi terbuka baru pada rekening Nasabah ketika Perdagangan Pasar ditutup. Hal ini juga dikenal sebagai Intraday Trading.</p>
+                        <p><strong>6. Overnight </strong>Trading Adalah salah satu metode transaksi yang terjadi/dilakukan lebih dari satu hari yang sama, membiarkan posisi terbuka (open position) walaupun Pasar Perdagangan Berjangka telah ditutup.</p>
+                        <p><strong>7. Likuidasi </strong>Adalah tindakan yang dilakukan untuk menutup atau menghapus posisi terbuka dengan cara melakukan transaksi sejumlah posisi yang sama pada posisi yang berlawanan dengan posisi yang dimiliki semula.</p>
+                        <p><strong>8. Posisi Terbuka (Open Position) </strong>Adalah posisi beli (long) atau posisi jual (short) yang belum dilikuidasi.</p>
+                        <p><strong>9. Saldo Awal (Deposit Margin) </strong>Adalah sejumlah dana minimum yang telah disetor oleh nasabah ke Rekening Bank terpisah (Segregated Account) Perusahaan Pialang Berjangka dan Komoditi PT Genesis Gemilang Futures pada saat pembukaan awal akun rekening nasabah.</p>
+                        <p><strong>10. Kewajiban Margin (Margin Requirement) </strong>Adalah sejumlah dana yang ditempatkan oleh nasabah kepada Lembaga Kliring Berjangka melalui Perusahaan Pialang Berjangka dan komoditi, guna untuk menjamin pelaksanaan transaksi Kontrak Berjangka.</p>
+                        <p><strong>11. Penarikan Dana (Withdrawal) </strong>Pengajuan penarikan dana akan diproses pada hari yang sama, jika diterima sebelum pukul 11:00 WIB, kecuali hari libur nasional/perbankan. Untuk pengajuan penarikan dana setelah pukul 11:00 WIB, akan diproses pada hari kerja berikutnya, kecuali hari libur nasional/perbankan. Jika dalam proses penarikan dana terdapat biaya bank, maka biaya bank tersebut akan dibebankan kepada Nasabah.</p>
+                        <p><strong>12. Harga Penyelesaian (Settlement Price) </strong>Adalah harga yang ditentukan oleh Singapore Exchange (SGX) sebagai harga resmi pada akhir hari perdagangan sesuai dengan spesifikasi kontrak masing-masing.</p>
+                        <p><strong>13. Spread </strong>Adalah selisih dalam poin antara harga Jual (bid) dan harga Beli (Ask).</p>
+                        <p><strong>14. Poin (point) </strong>Adalah satuan terkecil antara suatu harga dengan harga sebelumnya yang dapat dinyatakan dalam satuan angka penuh atau satuan angka sekian desimal dibelakang koma tergantung pada kebiasaan masing-masing kontrak. Dalam perdagangan kontrak antar valuta (forex) ini biasa disebut sebagai satu "PIP".</p>
+                        <p><strong>15. Equity </strong>Adalah jumlah keseluruhan dana nasabah yang dimiliki dan tercatat pada akun nasabah setelah diperhitungkan dengan jumlah keuntungan/kerugian selama melakukan transaksi berjangka dan Komoditi.</p>
+                        <p><strong>16. Keadaan Hectic Market </strong>Adalah keadaan ketika pasar dalam kondisi yang tidak normal atau tidak menentu. Pada situasi ini spread akan didasarkan pada kondisi pergerakan harga sebagaimana quotasi yang disampaikan oleh system PALN.</p>
+                        <p><strong>17. Kesalahan Kuotasi (Wrong Quote) </strong>Adalah suatu keadaan dimana harga jual (bid) atau harga beli (ask) yang ditampilkan Sistem Transaksi PALN tidak mencerminkan harga jual (bid) atau harga beli (ask) /keadaan pasar yang sebenarnya.</p>
+                        <p><strong>18. Market Order </strong>Adalah amanat dari nasabah untuk mengambil harga jual (bid) atau harga beli (ask) yang pada saat itu dimana harganya berada pada harga terbaik dengan harga yang diminta.</p>
+                        <p><strong>19. Limit Order </strong>Adalah amanat dari Nasabah untuk mengambil harga jual (bid) atau harga beli (ask) pada saat mencapai suatu harga tertentu. Biasanya digunakan untuk membuka posisi atau melikuidasi.</p>
+                        <p><strong>20. Stop Order </strong>Adalah amanat dari nasabah untuk mengambil harga beli (bid) atau harga jual (Ask) kalau sudah mencapai suatu harga tertentu biasanya digunakan untuk menutup posisi agar tidak menderita rugi lebih besar lagi.</p>
+                        <p><strong>21. Locking </strong>Adalah pembukaan posisi baru yang berlawanan dengan posisi sebelumnya tanpa bermaksud untuk melikuidasi posisi.</p>
+                        <p><strong>22. Laba/Rugi Yang Belum Terealisasi (Floating Profit/Loss) </strong>Adalah keuntungan atau kerugian yang belum terealisasi pada posisi terbuka. Keuntungan dan kerugian yang belum terealisasi ini meningkat atau berkurang sesuai dengan situasi pasar dan akan direalisasi ketika posisi terbuka ini ditutup. Keuntungan dan kerugian yang belum terealisasi untuk posisi terbuka dihitung berdasarkan pada harga jual (bid) dan beli (ask).</p>
+                        <p><strong>23. Komisi (Commission) </strong>Adalah sejumlah dana yang dikenakan kepada Nasabah untuk setiap lot transaksi.</p>
+                        <p><strong>24. Biaya Bunga dan Beban Keuangan Lainnya (Swap) </strong>Adalah biaya yang dikenakan kepada nasabah terhadap setiap posisi terbuka dari kontrak yang diperdagangkan, sehingga dapat mempengaruhi Equity nasabah dan dapat berubah dari waktu ke waktu. Interest/Swap diperhitungkan setiap hari selama posisi terbuka, kecuali pada hari Rabu dimana akan diperhitungkan 3 (tiga) hari sekaligus.</p>
+                        <p><strong>25. Margin Call </strong>akan dilakukan jika terjadi floating loss pada posisi transaksi nasabah yang masih terbuka/open pada saat berlangsungnya jam perdagangan, berada pada kondisi range 70% terhadap current balance/equity yang ada (berdasarkan harga bid dan ask). Pemberitahuan perihal margin call disampaikan melalui sistem PALN dan email nasabah yang terdaftar.</p>
+                        <p><strong>26. Auto Cut Equity </strong>Apabila equity Nasabah turun mencapai 30% atau kurang dari Margin Requirement per lot, maka :</p>
+                        <p style={{ marginLeft: '20px' }}><strong>a.</strong> Secara otomatis sistem akan melikuidasi sebagian atau seluruh posisi Nasabah tanpa perlu mendapat persetujuan dari Nasabah terlebih dahulu.</p>
+                        <p style={{ marginLeft: '20px' }}><strong>b.</strong> Penentuan angka auto-cut adalah berdasarkan harga bid dan ask yang ada di sistem Sistem PALN.</p>
+                        <p style={{ marginLeft: '20px' }}><strong>c.</strong> PT Genesis Gemilang Futures tidak bertanggung jawab akibat kerugian yang dialami nasabah.</p>
+                        <p style={{ marginLeft: '20px' }}><strong>d.</strong> Apabila terjadi kekurangan margin maupun over loss maka semua kerugian yang timbul akan menjadi tanggung jawab nasabah.</p>
+                        <p style={{ marginLeft: '20px' }}><strong>e.</strong> Nasabah wajib melunasi kekurangan margin maupun over loss.</p>
+                    </div>
+
+                    <div className="mb-4">
+                        <h6><strong>II. MEKANISME TRANSAKSI ELEKTRONIK</strong></h6>
+                        <p><strong>1.</strong> Nasabah memperoleh User ID (Login) dan Password dari Sistem Aplikasi PALN. Nasabah wajib melakukan penggantian Master Password awal yang diterima sebelum mulai melakukan transaksinya dan demi menjaga keamanan dalam ber-transaksi maka kepada nasabah juga dianjurkan untuk secara berkala melakukan pembaruan / penggantian password tanpa harus memberitahukan kepada pihak Perusahaan PT Genesis Gemilang Futures.</p>
+                        <p><strong>2.</strong> Penyampaian order dilaksanakan secara online melalui sistem PALN.</p>
+                        <p><strong>3.</strong> Sistem PALN adalah sebuat platform Trading on-line. Kegagalan atas perangkat keras (hardware) atau perangkat lunak (software) dan/atau terganggunya koneksi jaringan internet dapat mengakibatkan terjadinya kemungkinan nasabah akan mengalami risiko yang berkaitan dengan sistem tersebut. Apabila dikarenakan kondisi tersebut dan amanat nasabah tidak dapat diteruskan, nasabah segera menghubungi via email, telepon, kepada tim Info@granjaya.io atau support@genesis.co.id.</p>
+                        <p><strong>4.</strong> Platform sistem memiliki kemampuan untuk secara otomatis menolak terhadap amanat nasabah apabila kewajiban margin yang timbul dari posisi baru tersebut melebihi dana nasabah.</p>
+                        <p><strong>5.</strong> Amanat didasarkan pada harga jual (bid) dan harga beli (ask) yang diberikan secara on-line melalui platform Sistem PALN dan dapat dimonitor oleh nasabah secara langsung.</p>
+                        <p><strong>6.</strong> Amanat jual dan beli yang sudah matched di dalam sistem diperlakukan sebagai transaksi jual dan beli dan tidak dapat dibatalkan.</p>
+                        <p><strong>7.</strong> Jenis-jenis amanat nasabah yang dapat dilayani oleh sistem sekurang-kurangnya:</p>
+                        <p style={{ marginLeft: '20px' }}><strong>a.</strong> Market Order</p>
+                        <p style={{ marginLeft: '20px' }}><strong>b.</strong> Stop (Stop/Loss) Order</p>
+                        <p style={{ marginLeft: '20px' }}><strong>c.</strong> Limit (Take/Profit) Order</p>
+                        <p><strong>8.</strong> Order dengan batas harga Limit (Take/Profit) Order dan Stop (Stop/Loss) Order dilaksanakan dengan ketentuan sebagai berikut:</p>
+                    </div>
+
+                    <div className="mb-4">
+                        <h6><strong>III. LAPORAN HARIAN NASABAH</strong></h6>
+                        <p><strong>a)</strong> Nasabah dapat mengakses Laporan Keuangan secara langsung, melalui Sistem PALN secara online, Apabila nasabah menyatakan tidak menerima informasi laporan tentang aktivitas transaksi dan/atau informasi perkembangan dana nasabah (Statement), maka nasabah dapat segera menghubungi PT Genesis Gemilang Futures, melalui informasi sebagai berikut di bawah ini;</p>
+                        <p style={{ marginLeft: '20px' }}>E-mail : support@genesis.co.id Telp : 021-50217217</p>
+                        <p><strong>b)</strong> Nasabah harus mereview dan melaporkan dengan segera jika ditemukan ketidaksesuaian yang terdapat pada laporan yang diterbitkan oleh PT. Genesis Gemilang Futures.</p>
+                        <p><strong>c)</strong> Segala pelaporan dalam Sistem tersebut akan dianggap telah disetujui apabila PT. Genesis Gemilang Futures tidak menerima pemberitahuan melalui telepon dan disusul dengan pemberitahuan tertulis selambat-lambatnya 2 (dua) hari kerja dari tanggal Laporan Keuangan nasabah tersebut.</p>
+                    </div>
+
+                    <div className="mb-4">
+                        <h6><strong>IV. PERSELISIHAN</strong></h6>
+                        <p>Nasabah dan Perusahaan PT Genesis Gemilang Futures dalam hal ini sepakat bahwa apabila timbul perselisihan, maka terkait kebutuhan proses pembuktian adalah di dasarkan pada seluruh fakta data historis transaksi, laporan dan data pendukung lainnya yang ada Perusahaan PT Genesis Gemilang Futures antara lain:</p>
+                        <p><strong>a)</strong> Pembuktian atas fakta-fakta, di mana fakta-fakta tersebut dapat dilihat antara lain di dalam histori transaksi dan data-data pendukung lainnya.</p>
+                        <p><strong>b)</strong> Mengacu pada data-data terakhir yang tercatat di PT. Genesis Gemilang Futures dan sesuai dengan ketentuan - ketentuan yang ada di dalam Trading Rules.</p>
+                        <p><strong>c)</strong> Jika ada pengaduan atau keluhan, nasabah dapat mengisi Formulir Pengaduan Nasabah dan mengajukan kepada Bagian Compliance PT. Genesis Gemilang Futures dengan alamat email pengaduan@genesis.co.id dan bisa melalui pengaduan online yang disediakan Bappebti https://pengaduan.bappebti.go.id</p>
+                    </div>
+
+                    <div className="mb-4">
+                        <h6><strong>V. PENDAFTARAN AMANAT TRANSAKSI</strong></h6>
+                        <p>Seluruh amanat nasabah yang diterima oleh Perusahaan PT Genesis Gemilang Futures sesuai dengan ketentuan dan prosedur PALN selanjutnya akan terdaftar pada Jakarta Futures Exchange (JFX) dan secara otomatis sistem PALN akan meneruskannya dengan mendaftarkan Amanat nasabah ke Kliring Berjangka Indonesia (KBI) dan akan dapat dilihat (monitor) melalui aplikasi SITNA oleh nasabah.</p>
                     </div>
 
                     <div className="mb-4">
                         <div className="text-center mb-3">
-                            <p>Dengan mengisi kolom "YA" di bawah ini, saya menyatakan bahwa saya telah membaca tentang <strong>PERATURAN PERDAGANGAN (TRADING RULES)</strong>, mengerti dan menerima ketentuan dalam bertransaksi</p>
+                            <h6><strong>DAFTAR KONTRAK YANG DIPERDAGANGKAN PALN SGX FX (Singapore Exchange)</strong></h6>
+                            <h6><strong>PERATURAN TRANSAKSI (TRADING RULES) KONTRAK BERJANGKA PENYALURAN AMANAT NASABAH KE BURSA BERJANGKA LUAR NEGERI (PALN)</strong></h6>
                         </div>
+                        
+                        {/* PDF Viewer */}
+                        <div className="mb-4">
+                            <div className="pdf-container" style={{ height: '600px', border: '1px solid #dee2e6', borderRadius: '0.375rem' }}>
+                                <iframe
+                                    src="/documents/kyc/indonesian-person/Trading Rules PALN Equivalent.6780c13224fec7.70609845.pdf"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 'none', borderRadius: '0.375rem' }}
+                                    title="Trading Rules PALN Equivalent Document"
+                                >
+                                    <p>Your browser does not support PDFs. <a href="/documents/kyc/indonesian-person/Trading Rules PALN Equivalent.6780c13224fec7.70609845.pdf" target="_blank" rel="noopener noreferrer">Download the PDF</a>.</p>
+                                </iframe>
+                            </div>
+                            <div className="text-center mt-2">
+                                <a 
+                                    href="/documents/kyc/indonesian-person/Trading Rules PALN Equivalent.6780c13224fec7.70609845.pdf" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="btn btn-outline-primary btn-sm"
+                                >
+                                    <i className="fas fa-external-link-alt me-1"></i>
+                                    Open PDF in New Window
+                                </a>
+                            </div>
+                        </div>
+
+                        <p className="text-center">
+                            Dengan mengisi kolom "YA" di bawah ini, saya menyatakan bahwa saya telah membaca tentang 
+                            <strong> PERATURAN PERDAGANGAN (TRADING RULES)</strong>, mengerti dan menerima ketentuan dalam bertransaksi
+                        </p>
                         
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
@@ -3204,6 +3705,243 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
                                 type="datetime-local"
                                 value={data.tradingRulesAcceptanceDate || new Date().toISOString().slice(0, 16)}
                                 onChange={(e) => handleCheckboxChange('tradingRulesAcceptanceDate', e.target.value)}
+                            />
+                        </Form.Group>
+                    </div>
+                </Card.Body>
+            </Card>
+        </div>
+    );
+};
+
+const NewFundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
+    const handleInputChange = (field, value) => {
+        onChange({ ...data, [field]: value });
+    };
+
+    // Flatten all form data from all steps into a single object
+    const flattenedData = Object.values(allData).reduce((acc, curr) => {
+        return { ...acc, ...curr };
+    }, {});
+
+    // Auto-populate fields from previous steps
+    const fullName = flattenedData.namaLengkap || '';
+    const placeOfBirth = flattenedData.tempatLahir || '';
+    const dateOfBirth = flattenedData.tanggalLahir || '';
+    const homeAddress = flattenedData.streetAddress || flattenedData.alamat || '';
+    const city = flattenedData.city || '';
+    const postalCode = flattenedData.postalCode || '';
+    const idNumber = flattenedData.noKTP || flattenedData.ktpNumber || '';
+
+    // Format the place and date of birth
+    const placeAndDateOfBirth = `${placeOfBirth}, ${dateOfBirth}`.replace(/^, |, $/, '');
+    // Format city and postal code
+    const cityAndPostalCode = `${city}, ${postalCode}`.replace(/^, |, $/, '');
+
+    return (
+        <div>
+            <Card className="border-0 shadow-sm mb-2">
+                <Card.Header className="bg-light border-0">
+                    <h6 className="mb-0 text-primary text-center">
+                        PERNYATAAN BAHWA DANA YANG DIGUNAKAN SEBAGAI MARGIN MERUPAKAN
+                    </h6>
+                    <h6 className="mb-0 text-primary text-center">
+                        DANA MILIK NASABAH SENDIRI
+                    </h6>
+                </Card.Header>
+                <Card.Body style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+                    <div className="mb-4">
+                        <p><strong>Yang mengisi formulir di bawah ini:</strong></p>
+                        
+                        <div className="mb-3">
+                            <p><strong>Nama Lengkap</strong> : {fullName}</p>
+                        </div>
+                        
+                        <div className="mb-3">
+                            <p><strong>Tempat Lahir & Tgl. Lahir</strong> : {placeAndDateOfBirth}</p>
+                        </div>
+                        
+                        <div className="mb-3">
+                            <p><strong>Alamat Rumah</strong> : {homeAddress}</p>
+                        </div>
+                        
+                        <div className="mb-3">
+                            <p><strong>Kota & Kode Pos</strong> : {cityAndPostalCode}</p>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <p><strong>No. KTP / SIM / Paspor</strong> : {idNumber}</p>
+                        </div>
+
+                        <div className="mb-4">
+                            <p>
+                                Dengan mengisi kolom "YA" di bawah ini, Bersama ini saya menyatakan bahwa dana yang saya gunakan untuk 
+                                bertransaksi di PT Genesis Gemilang Futures adalah milik saya pribadi dan bukan dana pihak lain, serta tidak 
+                                diperoleh dari hasil kejahatan, penipuan, penggelapan, tindak pidana korupsi, tindak pidana narkotika, tindak 
+                                pidana di bidang kehutanan, hasil pencucian uang, dan perbuatan melawan hukum lainnya serta tidak dimaksudkan 
+                                untuk melakukan pencucian uang dan/atau pendanaan terorisme.
+                            </p>
+                            
+                            <p>
+                                Demikian surat pernyataan ini saya buat dalam keadaan sadar, sehat jasmani dan rohani serta tanpa paksaan 
+                                dari pihak manapun.
+                            </p>
+                            
+                            <p>
+                                Demikian Pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, sehat jasmani dan rohani serta 
+                                tanpa paksaan apapun dari pihak manapun.
+                            </p>
+                        </div>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
+                            <div className="d-flex gap-3">
+                                <Form.Check
+                                    type="radio"
+                                    id="newFundDeclarationAccept"
+                                    name="newFundDeclarationAcceptance"
+                                    label="Ya"
+                                    checked={data.newFundDeclarationAcceptance === 'yes'}
+                                    onChange={(e) => handleInputChange('newFundDeclarationAcceptance', 'yes')}
+                                />
+                                <Form.Check
+                                    type="radio"
+                                    id="newFundDeclarationReject"
+                                    name="newFundDeclarationAcceptance"
+                                    label="Tidak"
+                                    checked={data.newFundDeclarationAcceptance === 'no'}
+                                    onChange={(e) => handleInputChange('newFundDeclarationAcceptance', 'no')}
+                                />
+                            </div>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-muted fw-bold">Pernyataan Pada Tanggal:</Form.Label>
+                            <Form.Control
+                                type="datetime-local"
+                                value={data.newFundDeclarationDate || new Date().toISOString().slice(0, 16)}
+                                onChange={(e) => handleInputChange('newFundDeclarationDate', e.target.value)}
+                            />
+                        </Form.Group>
+                    </div>
+                </Card.Body>
+            </Card>
+        </div>
+    );
+};
+
+const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {} }) => {
+    const handleInputChange = (field, value) => {
+        onChange({ ...data, [field]: value });
+    };
+
+    // Flatten all form data from all steps into a single object
+    const flattenedData = Object.values(allData).reduce((acc, curr) => {
+        return { ...acc, ...curr };
+    }, {});
+
+    // Auto-populate fields from previous steps
+    const fullName = flattenedData.namaLengkap || '';
+    const placeOfBirth = flattenedData.tempatLahir || '';
+    const dateOfBirth = flattenedData.tanggalLahir || '';
+    const homeAddress = flattenedData.streetAddress || flattenedData.alamat || '';
+    const city = flattenedData.city || '';
+    const postalCode = flattenedData.postalCode || '';
+    const idNumber = flattenedData.noKTP || flattenedData.ktpNumber || '';
+
+    // Format the place and date of birth
+    const placeAndDateOfBirth = `${placeOfBirth}, ${dateOfBirth}`.replace(/^, |, $/, '');
+    // Format city and postal code
+    const cityAndPostalCode = `${city}, ${postalCode}`.replace(/^, |, $/, '');
+
+    return (
+        <div>
+            <Card className="border-0 shadow-sm mb-2">
+                <Card.Header className="bg-light border-0">
+                    <h6 className="mb-0 text-primary text-center">
+                        PERNYATAAN BERTANGGUNG JAWAB ATAS
+                    </h6>
+                    <h6 className="mb-0 text-primary text-center">
+                        KODE AKSES TRANSAKSI NASABAH
+                    </h6>
+                </Card.Header>
+                <Card.Body style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+                    <div className="mb-4">
+                        <p><strong>Yang mengisi formulir di bawah ini:</strong></p>
+                        
+                        <div className="mb-3">
+                            <p><strong>Nama Lengkap</strong> : {fullName}</p>
+                        </div>
+                        
+                        <div className="mb-3">
+                            <p><strong>Tempat Lahir & Tgl. Lahir</strong> : {placeAndDateOfBirth}</p>
+                        </div>
+                        
+                        <div className="mb-3">
+                            <p><strong>Alamat Rumah</strong> : {homeAddress}</p>
+                        </div>
+                        
+                        <div className="mb-3">
+                            <p><strong>Kota & Kode Pos</strong> : {cityAndPostalCode}</p>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <p><strong>No. KTP / SIM / Paspor*</strong> : {idNumber}</p>
+                        </div>
+
+                        <div className="mb-4">
+                            <p>
+                                Dengan mengisi kolom "Ya" dibawah ini saya menyatakan bahwa saya bertanggungjawab sepenuhnya 
+                                terhadap kode akses transaksi Nasabah (Personal Access Password) dan tidak menyerahkan kode 
+                                akses transaksi nasabah (Personal Access Password) ke pihak lain, terutama kepada pegawai 
+                                Pialang Berjangka atau pihak yang memiliki kepentingan dengan Pialang berjangka.
+                            </p>
+                        </div>
+
+                        <div className="border p-3 bg-warning bg-opacity-10 mb-4">
+                            <h6 className="text-center mb-3"><strong>Peringatan!</strong></h6>
+                            <p className="text-center mb-0">
+                                Pialang Berjangka, Wakil Pialang Berjangka, pegawai Pialang Berjangka atau pihak Yang memiliki 
+                                kepentingan dengan pialang berjangka dilarang menerima Kode Akses Transaksi Nasabah 
+                                (Personal Access Password)
+                            </p>
+                        </div>
+
+                        <div className="mb-4">
+                            <p>
+                                Demikian pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, sehat jasmani dan rohani 
+                                serta tanpa paksaan apapun dari pihak manapun.
+                            </p>
+                        </div>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
+                            <div className="d-flex gap-3">
+                                <Form.Check
+                                    type="radio"
+                                    id="accessCodeResponsibilityAccept"
+                                    name="accessCodeResponsibilityAcceptance"
+                                    label="Ya"
+                                    checked={data.accessCodeResponsibilityAcceptance === 'yes'}
+                                    onChange={(e) => handleInputChange('accessCodeResponsibilityAcceptance', 'yes')}
+                                />
+                                <Form.Check
+                                    type="radio"
+                                    id="accessCodeResponsibilityReject"
+                                    name="accessCodeResponsibilityAcceptance"
+                                    label="Tidak"
+                                    checked={data.accessCodeResponsibilityAcceptance === 'no'}
+                                    onChange={(e) => handleInputChange('accessCodeResponsibilityAcceptance', 'no')}
+                                />
+                            </div>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label className="text-muted fw-bold">Pernyataan Pada Tanggal:</Form.Label>
+                            <Form.Control
+                                type="datetime-local"
+                                value={data.accessCodeResponsibilityDate || new Date().toISOString().slice(0, 16)}
+                                onChange={(e) => handleInputChange('accessCodeResponsibilityDate', e.target.value)}
                             />
                         </Form.Group>
                     </div>
