@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
+import AuthService from '../../../common/api/auth';
 
 const ForeignPersonForm = () => {
     const [formData, setFormData] = useState({});
@@ -146,7 +147,6 @@ const ForeignPersonForm = () => {
     const validatePersonalDataStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'personalTitle', label: 'Title' },
             { field: 'fullName', label: 'Full Name' },
             { field: 'placeOfBirth', label: 'Place of Birth' },
             { field: 'dateOfBirth', label: 'Date of Birth' },
@@ -154,15 +154,14 @@ const ForeignPersonForm = () => {
             { field: 'gender', label: 'Gender' },
             { field: 'maritalStatus', label: 'Marital Status' },
             { field: 'citizen', label: 'Citizenship' },
-            { field: 'personalEmail', label: 'Personal Email' },
             { field: 'countryCode', label: 'Country Code' },
             { field: 'phoneNumber', label: 'Phone Number' },
+            { field: 'contactEmail', label: 'Email' },
             { field: 'streetAddress', label: 'Street Address' },
             { field: 'city', label: 'City' },
             { field: 'postalCode', label: 'Postal Code' },
             { field: 'country', label: 'Country' },
-            { field: 'sourceOfFunds', label: 'Source of Funds' },
-            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' },
+            { field: 'accountOpeningPurpose', label: 'Account Opening Purpose' },
             { field: 'investmentExperience', label: 'Investment Experience' },
             { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
             { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
@@ -183,21 +182,17 @@ const ForeignPersonForm = () => {
             errors.push('Please specify other country');
         }
         
-        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
-            errors.push('Please specify other source of funds');
+        if (data.accountOpeningPurpose === 'Others' && !data.accountOpeningPurposeOther?.trim()) {
+            errors.push('Please specify other account opening purpose');
         }
         
-        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
-            errors.push('Please specify other trading account purpose');
-        }
-        
-        if (data.investmentExperience === 'YES' && !data.investmentExperienceDetails?.trim()) {
+        if (data.investmentExperience === 'Yes' && !data.investmentExperienceDetails?.trim()) {
             errors.push('Please provide details about your investment experience');
         }
         
         // Validate email format
-        if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
-            errors.push('Please enter a valid personal email address');
+        if (data.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
+            errors.push('Please enter a valid email address');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -206,15 +201,15 @@ const ForeignPersonForm = () => {
     const validateEmergencyContactStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'emergencyTitle', label: 'Emergency Contact Title' },
-            { field: 'emergencyFullName', label: 'Emergency Contact Full Name' },
-            { field: 'emergencyRelationship', label: 'Relationship' },
-            { field: 'emergencyCountryCode', label: 'Emergency Contact Country Code' },
-            { field: 'emergencyPhoneNumber', label: 'Emergency Contact Phone Number' },
-            { field: 'emergencyStreetAddress', label: 'Emergency Contact Street Address' },
-            { field: 'emergencyCity', label: 'Emergency Contact City' },
-            { field: 'emergencyPostalCode', label: 'Emergency Contact Postal Code' },
-            { field: 'emergencyCountry', label: 'Emergency Contact Country' }
+            { field: 'emergencyContactName', label: 'Emergency Contact Full Name' },
+            { field: 'emergencyContactRelationship', label: 'Relationship' },
+            { field: 'emergencyContactCountryCode', label: 'Emergency Contact Country Code' },
+            { field: 'emergencyContactPhoneNumber', label: 'Emergency Contact Phone Number' },
+            { field: 'emergencyContactStreetAddress', label: 'Emergency Contact Street Address' },
+            { field: 'emergencyContactCity', label: 'Emergency Contact City' },
+            { field: 'emergencyContactPostalCode', label: 'Emergency Contact Postal Code' },
+            { field: 'emergencyContactCountry', label: 'Emergency Contact Country' },
+            { field: 'emergencyContactEmail', label: 'Emergency Contact Email' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
@@ -224,11 +219,11 @@ const ForeignPersonForm = () => {
         });
         
         // Check conditional fields
-        if (data.emergencyRelationship === 'OTHER' && !data.emergencyRelationshipOther?.trim()) {
+        if (data.emergencyContactRelationship === 'OTHER' && !data.emergencyContactRelationshipOther?.trim()) {
             errors.push('Please specify other relationship');
         }
         
-        if (data.emergencyCountry === 'OTHER' && !data.emergencyCountryOther?.trim()) {
+        if (data.emergencyContactCountry === 'OTHER' && !data.emergencyContactCountryOther?.trim()) {
             errors.push('Please specify other emergency contact country');
         }
         
@@ -247,13 +242,14 @@ const ForeignPersonForm = () => {
             const employmentFields = [
                 { field: 'companyName', label: 'Company Name' },
                 { field: 'businessNature', label: 'Nature of Business' },
-                { field: 'jobPosition', label: 'Job Position' },
-                { field: 'officeAddress', label: 'Office Address' },
+                { field: 'position', label: 'Position' },
+                { field: 'lengthOfWork', label: 'Length of Work' },
+                { field: 'officeCountryCode', label: 'Office Country Code' },
+                { field: 'officePhoneNumber', label: 'Office Phone Number' },
+                { field: 'officeStreetAddress', label: 'Office Street Address' },
                 { field: 'officeCity', label: 'Office City' },
                 { field: 'officePostalCode', label: 'Office Postal Code' },
-                { field: 'officeCountry', label: 'Office Country' },
-                { field: 'monthlyIncome', label: 'Monthly Income' },
-                { field: 'annualIncome', label: 'Annual Income' }
+                { field: 'officeCountry', label: 'Office Country' }
             ];
             
             employmentFields.forEach(({ field, label }) => {
@@ -320,7 +316,6 @@ const ForeignPersonForm = () => {
             'companyProfile',
             'statementSimulation', 
             'statementExperience',
-            'disclosureStatement',
             'accountOpening',
             'riskDisclosure',
             'mandateAgreement',
@@ -332,7 +327,6 @@ const ForeignPersonForm = () => {
             companyProfile: 'Company Profile',
             statementSimulation: 'Statement of Having Simulation',
             statementExperience: 'Statement of Having Experience', 
-            disclosureStatement: 'Disclosure Statement',
             accountOpening: 'Account Opening Application',
             riskDisclosure: 'Risk Disclosure',
             mandateAgreement: 'Mandate Agreement',
@@ -380,14 +374,82 @@ const ForeignPersonForm = () => {
         }
     };
 
-    const handleSubmit = (data) => {
-        console.log('Submitting Foreign Person KYC:', data);
-        // Here you would submit to your API
-        showNotification({
-            title: 'Success',
-            message: 'Foreign Person KYC submitted successfully!',
-            type: 'success'
-        });
+    const handleSubmit = async (data) => {
+        try {
+            console.log('Submitting Foreign Person KYC:', data);
+            
+            // Flatten step data into a single object
+            const flattenedData = {};
+            Object.keys(data).forEach(stepKey => {
+                if (stepKey.startsWith('step_') && data[stepKey]) {
+                    Object.assign(flattenedData, data[stepKey]);
+                }
+            });
+            
+            console.log('Flattened data:', flattenedData);
+            
+            // Create FormData for multipart/form-data submission
+            const formData = new FormData();
+            
+            // Add all flattened form fields
+            Object.keys(flattenedData).forEach(key => {
+                if (flattenedData[key] !== null && flattenedData[key] !== undefined) {
+                    if (typeof flattenedData[key] === 'object' && !Array.isArray(flattenedData[key]) && !(flattenedData[key] instanceof File)) {
+                        // Skip file objects and convert other objects to JSON
+                        formData.append(key, JSON.stringify(flattenedData[key]));
+                    } else if (Array.isArray(flattenedData[key])) {
+                        // Convert arrays to JSON strings
+                        formData.append(key, JSON.stringify(flattenedData[key]));
+                    } else if (flattenedData[key] instanceof File) {
+                        // Handle file uploads
+                        formData.append(key, flattenedData[key]);
+                    } else {
+                        // Handle primitive values
+                        formData.append(key, flattenedData[key]);
+                    }
+                }
+            });
+            
+            // Add uploaded files
+            if (flattenedData.uploadedDocuments) {
+                Object.entries(flattenedData.uploadedDocuments).forEach(([key, fileName]) => {
+                    if (fileName && flattenedData[`file_${key}`]) {
+                        formData.append(key, flattenedData[`file_${key}`]);
+                    }
+                });
+            }
+            
+            const response = await AuthService.submitForeignPersonKYC(formData);
+            
+            if (response.success) {
+                showNotification({
+                    title: 'Success',
+                    message: 'Foreign Person KYC submitted successfully!',
+                    type: 'success'
+                });
+                
+                console.log('KYC Application submitted:', response.data);
+            } else {
+                throw new Error(response.message || 'Submission failed');
+            }
+        } catch (error) {
+            console.error('Error submitting Foreign Person KYC:', error);
+            
+            // Handle authentication errors more gracefully
+            if (error.message && error.message.includes('Session expired')) {
+                showNotification({
+                    title: 'Session Expired',
+                    message: 'Your session has expired. Please save your progress and log in again.',
+                    type: 'warning'
+                });
+            } else {
+                showNotification({
+                    title: 'Error',
+                    message: error.message || 'Failed to submit KYC application. Please try again.',
+                    type: 'error'
+                });
+            }
+        }
     };
 
     return (
@@ -1508,8 +1570,26 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
+    const getDocumentFieldName = (categoryIndex, docIndex) => {
+        // Map document categories to field names expected by backend
+        const category = requirements[categoryIndex];
+        const document = category.documents[docIndex];
+        
+        const fieldNameMapping = {
+            'Passport': 'passport',
+            'Photo Selfie': 'photo_selfie',
+            'Bank Account Statement or Credit Card Bill': 'bank_statement',
+            'Telephone or Electricity Bill': 'utility_bill',
+            'Personal Tax Document': 'tax_document'
+        };
+        
+        return fieldNameMapping[document] || `document_${categoryIndex}_${docIndex}`;
+    };
+
     const handleFileUpload = (categoryIndex, docIndex, file) => {
         const docKey = `${categoryIndex}_${docIndex}`;
+        const fieldName = getDocumentFieldName(categoryIndex, docIndex);
+        
         const newUploadedDocs = {
             ...uploadedDocs,
             [docKey]: file ? file.name : null
@@ -1525,12 +1605,21 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
             return value && !requirements[catIdx]?.optional;
         }).length;
         
-        // Update parent component with uploaded documents info
-        onChange({
+        // Store file object for later submission
+        const updatedData = {
             ...data,
             uploadedDocuments: newUploadedDocs,
-            documentsUploaded: uploadedRequiredCount >= requiredDocsCount
-        });
+            documentsUploaded: uploadedRequiredCount >= requiredDocsCount,
+            [`file_${docKey}`]: file  // Store actual file object
+        };
+        
+        // Also store with backend field name
+        if (file) {
+            updatedData[fieldName] = file;
+        }
+        
+        // Update parent component with uploaded documents info
+        onChange(updatedData);
     };
 
     return (
@@ -1592,7 +1681,6 @@ const ReviewStep = ({ data = {}, onChange, allData }) => {
         companyProfile: data.companyProfile || false,
         statementSimulation: data.statementSimulation || false,
         statementExperience: data.statementExperience || false,
-        disclosureStatement: data.disclosureStatement || false,
         accountOpening: data.accountOpening || false,
         riskDisclosure: data.riskDisclosure || false,
         mandateAgreement: data.mandateAgreement || false,

@@ -177,7 +177,15 @@ function HttpClient() {
         if (error.response.status === 401) {
             const originalRequest = error.config;
             
-            if (originalRequest._retry || originalRequest.url.includes('/auth/refresh')) {
+            // Only log out if this is already a retry AND refresh failed, or if it's a refresh endpoint failing
+            if (originalRequest._retry && originalRequest.url.includes('/auth/refresh')) {
+                handleSessionExpired();
+                return Promise.reject('Session expired. Please login again.');
+            }
+            
+            // Don't immediately log out on first 401 - try to refresh token first
+            if (originalRequest._retry) {
+                // This is a retry of a non-refresh request - token refresh probably failed
                 handleSessionExpired();
                 return Promise.reject('Session expired. Please login again.');
             }
@@ -193,7 +201,9 @@ function HttpClient() {
                 originalRequest.headers['Authorization'] = `Bearer ${newTokens.access}`;
                 return _httpClient.request(originalRequest);
             } catch (refreshError) {
-                return Promise.reject(refreshError);
+                console.error('Token refresh failed:', refreshError);
+                handleSessionExpired();
+                return Promise.reject('Session expired. Please login again.');
             }
         }
 
