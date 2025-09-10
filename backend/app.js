@@ -16,6 +16,7 @@ const supportRoutes = require('./routes/support');
 const tradeRoutes = require('./routes/trade');
 const ticketsRoutes = require('./routes/adminTicket');
 const usersRoutes = require('./routes/user');
+const kycRoutes = require('./routes/kyc');
 
 const app = express();
 
@@ -63,6 +64,8 @@ app.use('/support', express.json(), supportRoutes);
 app.use('/tickets', express.json(), ticketsRoutes);
 app.use('/trades', express.json(), tradeRoutes);
 app.use('/users', express.json(), usersRoutes);
+// KYC routes don't use express.json() middleware because they handle file uploads
+app.use('/kyc', kycRoutes);
 
 // Test route
 app.get('/test', (req, res) => {
