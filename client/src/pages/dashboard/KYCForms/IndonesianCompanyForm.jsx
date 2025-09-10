@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
+import AuthService from '../../../common/api/auth';
 
 const IndonesianCompanyForm = () => {
     const [formData, setFormData] = useState({});
@@ -139,20 +140,24 @@ const IndonesianCompanyForm = () => {
     const validateCompanyDetailsStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'companyRegistrationName', label: 'Company Registration Name' },
-            { field: 'companyLicenseNo', label: 'Company License Number' },
-            { field: 'natureOfBusiness', label: 'Nature of Business' },
-            { field: 'companyLegalForm', label: 'Company Legal Form' },
-            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'companyName', label: 'Company Name' },
+            { field: 'businessLicenseNo', label: 'Business License Number' },
+            { field: 'businessEntity', label: 'Business Entity' },
+            { field: 'companyNPWP', label: 'Company NPWP' },
+            { field: 'streetName', label: 'Company Address' },
             { field: 'city', label: 'City' },
-            { field: 'postalCode', label: 'Postal/Zip Code' },
-            { field: 'country', label: 'Country' },
+            { field: 'postalCode', label: 'Postal Code' },
             { field: 'placeOfEstablishment', label: 'Place of Establishment' },
-            { field: 'dateOfEstablishment', label: 'Date of Establishment' },
-            { field: 'countryCode', label: 'Country Code' },
+            { field: 'establishmentDate', label: 'Establishment Date' },
+            { field: 'legalForm', label: 'Legal Form' },
+            { field: 'officeTelephoneCountryCode', label: 'Office Telephone Country Code' },
             { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
+            { field: 'beneficialOwnerName', label: 'Beneficial Owner Name' },
+            { field: 'beneficialOwnerIdNo', label: 'Beneficial Owner ID Number' },
             { field: 'sourceOfFunds', label: 'Source of Funds' },
-            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' }
+            { field: 'accountPurpose', label: 'Account Purpose' },
+            { field: 'authorizedPersonName', label: 'Authorized Person Name' },
+            { field: 'authorizedDebitPerson', label: 'Authorized Debit Person' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
@@ -162,20 +167,16 @@ const IndonesianCompanyForm = () => {
         });
         
         // Check conditional fields
-        if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
+        if (data.legalForm === 'OTHER' && !data.legalFormOther?.trim()) {
             errors.push('Please specify the other legal form');
-        }
-        
-        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
-            errors.push('Please specify the other country');
         }
         
         if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
             errors.push('Please specify the other source of funds');
         }
         
-        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
-            errors.push('Please specify the other trading account purpose');
+        if (data.accountPurpose === 'OTHER' && !data.accountPurposeOther?.trim()) {
+            errors.push('Please specify the other account purpose');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -195,24 +196,27 @@ const IndonesianCompanyForm = () => {
     const validatePowerOfAttorneyStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'powerOfAttorneyTitle', label: 'Power of Attorney Title' },
-            { field: 'powerOfAttorneyFullName', label: 'Power of Attorney Full Name' },
-            { field: 'powerOfAttorneyPlaceOfBirth', label: 'Place of Birth' },
-            { field: 'powerOfAttorneyDateOfBirth', label: 'Date of Birth' },
-            { field: 'powerOfAttorneyIdNo', label: 'ID Number' },
-            { field: 'powerOfAttorneyEmail', label: 'Email' },
-            { field: 'powerOfAttorneyGender', label: 'Gender' },
-            { field: 'powerOfAttorneyMaritalStatus', label: 'Marital Status' },
-            { field: 'powerOfAttorneyCitizen', label: 'Citizenship' },
-            { field: 'powerOfAttorneyCountryCode', label: 'Country Code' },
-            { field: 'powerOfAttorneyPhoneNumber', label: 'Phone Number' },
-            { field: 'powerOfAttorneyStreetAddress', label: 'Street Address' },
-            { field: 'powerOfAttorneyCity', label: 'City' },
-            { field: 'powerOfAttorneyPostalCode', label: 'Postal Code' },
-            { field: 'powerOfAttorneyCountry', label: 'Country' },
-            { field: 'powerOfAttorneyInvestmentExperience', label: 'Investment Experience' },
-            { field: 'powerOfAttorneyFamilyInBappebti', label: 'Family in BAPPEBTI' },
-            { field: 'powerOfAttorneyDeclaredBankrupt', label: 'Bankruptcy Declaration' }
+            { field: 'fullName', label: 'Full Name' },
+            { field: 'placeOfBirth', label: 'Place of Birth' },
+            { field: 'dateOfBirth', label: 'Date of Birth' },
+            { field: 'idPassportNo', label: 'ID/Passport Number' },
+            { field: 'npwpNo', label: 'NPWP Number' },
+            { field: 'gender', label: 'Gender' },
+            { field: 'motherName', label: 'Mother Name' },
+            { field: 'maritalStatus', label: 'Marital Status' },
+            { field: 'nationality', label: 'Nationality' },
+            { field: 'streetAddress', label: 'Street Address' },
+            { field: 'addressCity', label: 'City' },
+            { field: 'addressPostalCode', label: 'Postal Code' },
+            { field: 'homeTelephoneNo', label: 'Home Telephone Number' },
+            { field: 'handphoneNo', label: 'Handphone Number' },
+            { field: 'personalEmail', label: 'Email' },
+            { field: 'homeOwnershipStatus', label: 'Home Ownership Status' },
+            { field: 'accountOpeningPurpose', label: 'Account Opening Purpose' },
+            { field: 'investmentExperience', label: 'Investment Experience' },
+            { field: 'futuresTradingExperience', label: 'Futures Trading Experience' },
+            { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
+            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
@@ -222,21 +226,25 @@ const IndonesianCompanyForm = () => {
         });
         
         // Check conditional fields
-        if (data.powerOfAttorneyCitizen === 'OTHER' && !data.powerOfAttorneyCitizenOther?.trim()) {
-            errors.push('Please specify other citizenship');
+        if (data.nationality === 'OTHER' && !data.nationalityOther?.trim()) {
+            errors.push('Please specify other nationality');
         }
         
-        if (data.powerOfAttorneyCountry === 'OTHER' && !data.powerOfAttorneyCountryOther?.trim()) {
-            errors.push('Please specify other country');
+        if (data.homeOwnershipStatus === 'LAINNYA' && !data.homeOwnershipStatusOther?.trim()) {
+            errors.push('Please specify other home ownership status');
         }
         
-        if (data.powerOfAttorneyInvestmentExperience === 'YES' && !data.powerOfAttorneyInvestmentExperienceDetails?.trim()) {
+        if (data.accountOpeningPurpose === 'LAINNYA' && !data.accountOpeningPurposeOther?.trim()) {
+            errors.push('Please specify other account opening purpose');
+        }
+        
+        if (data.investmentExperience === 'YA_BIDANG' && !data.investmentExperienceExplanation?.trim()) {
             errors.push('Please provide details about investment experience');
         }
         
         // Validate email format
-        if (data.powerOfAttorneyEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.powerOfAttorneyEmail)) {
-            errors.push('Please enter a valid email address for Power of Attorney');
+        if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
+            errors.push('Please enter a valid email address');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -256,55 +264,54 @@ const IndonesianCompanyForm = () => {
     const validateReadStatementsStep = (data) => {
         const errors = [];
         
+        // Updated to match actual field names used in Indonesian Company form
         const requiredStatements = [
-            'statementSimulation',
-            'statementExperience',
-            'disclosureStatement',
-            'accountOpening',
-            'riskDisclosure',
-            'mandateAgreement',
-            'tradingRules'
+            { field: 'companyProfileRead', label: 'Company Profile (Read)' },
+            { field: 'companyProfileUnderstanding', label: 'Company Profile (Understanding)' },
+            { field: 'statementRead', label: 'Statement of Having Simulation (Read)' },
+            { field: 'statementUnderstanding', label: 'Statement of Having Simulation (Understanding)' },
+            { field: 'experienceStatementRead', label: 'Statement of Having Experience (Read)' },
+            { field: 'experienceUnderstanding', label: 'Statement of Having Experience (Understanding)' },
+            { field: 'applicationStatementRead', label: 'Account Opening Application (Read)' },
+            { field: 'applicationUnderstanding', label: 'Account Opening Application (Understanding)' },
+            { field: 'riskDisclosureUnderstanding', label: 'Risk Disclosure (Understanding)' },
+            { field: 'mandateStatementRead', label: 'Mandate Agreement (Read)' },
+            { field: 'baktiArbitration', label: 'BAKTI Arbitration Agreement' },
+            { field: 'mandateUnderstanding', label: 'Mandate Agreement (Understanding)' },
+            { field: 'tradingRulesRead', label: 'Trading Rules (Read)' },
+            { field: 'tradingRulesUnderstanding', label: 'Trading Rules (Understanding)' },
+            { field: 'personalAccessPasswordRead', label: 'Personal Access Password (Read)' },
+            { field: 'personalAccessPasswordUnderstanding', label: 'Personal Access Password (Understanding)' }
         ];
         
-        const statementLabels = {
-            statementSimulation: 'Statement of Having Simulation',
-            statementExperience: 'Statement of Having Experience',
-            disclosureStatement: 'Disclosure Statement',
-            accountOpening: 'Account Opening Application',
-            riskDisclosure: 'Risk Disclosure',
-            mandateAgreement: 'Mandate Agreement',
-            tradingRules: 'Trading Rules'
-        };
-        
-        requiredStatements.forEach(statement => {
-            if (!data[statement]) {
-                errors.push(`Please read and acknowledge ${statementLabels[statement]}`);
+        requiredStatements.forEach(({ field, label }) => {
+            if (!data[field]) {
+                errors.push(`Please read and acknowledge ${label}`);
             }
         });
+        
+        // Check trading experience (required field)
+        if (!data.tradingExperience) {
+            errors.push('Please select your trading experience (Yes or No)');
+        }
+        
+        // Check conditional fields based on trading experience
+        if (data.tradingExperience === 'ya') {
+            if (!data.brokerCompany?.trim()) {
+                errors.push('Please specify the broker company name');
+            }
+            if (!data.demoAccountNumber?.trim()) {
+                errors.push('Please specify the demo account number');
+            }
+        }
         
         return { isValid: errors.length === 0, errors };
     };
 
     const validateReviewStep = (data) => {
-        const errors = [];
-        
-        const requiredAgreements = [
-            'companyProfile',
-            'finalAgreement'
-        ];
-        
-        const agreementLabels = {
-            companyProfile: 'Company Profile',
-            finalAgreement: 'Final Agreement and Terms'
-        };
-        
-        requiredAgreements.forEach(agreement => {
-            if (!data[agreement]) {
-                errors.push(`Please agree to ${agreementLabels[agreement]}`);
-            }
-        });
-        
-        return { isValid: errors.length === 0, errors };
+        // Review step is just for display - no additional validation needed
+        // All required fields should have been validated in previous steps
+        return { isValid: true, errors: [] };
     };
 
     const handleStepValidation = (stepIndex, stepData, allData) => {
@@ -330,13 +337,84 @@ const IndonesianCompanyForm = () => {
         console.log(`Moving to step ${step}`, data);
     };
 
-    const handleSubmit = (data) => {
-        console.log('Submitting Indonesian Company KYC:', data);
-        showNotification({
-            title: 'Success',
-            message: 'Indonesian Company KYC submitted successfully!',
-            type: 'success'
-        });
+    const handleSubmit = async (data) => {
+        console.log('Submitting Indonesian Company KYC (raw data):', data);
+        
+        try {
+            // Flatten the nested step data structure
+            const flattenedData = {};
+            Object.keys(data).forEach(stepKey => {
+                if (stepKey.startsWith('step_') && typeof data[stepKey] === 'object') {
+                    Object.assign(flattenedData, data[stepKey]);
+                }
+            });
+            
+            console.log('Flattened form data:', flattenedData);
+            
+            // Create FormData object to handle both form data and file uploads
+            const formData = new FormData();
+            
+            // Add all form fields to FormData
+            Object.keys(flattenedData).forEach(key => {
+                if (key === 'bankAccounts' && Array.isArray(flattenedData[key])) {
+                    // Convert bank accounts array to JSON string
+                    formData.append('bankAccounts', JSON.stringify(flattenedData[key]));
+                } else if (typeof flattenedData[key] === 'object' && flattenedData[key] !== null && !(flattenedData[key] instanceof File)) {
+                    // Convert objects to JSON string (except File objects)
+                    formData.append(key, JSON.stringify(flattenedData[key]));
+                } else if (flattenedData[key] !== null && flattenedData[key] !== undefined) {
+                    // Add primitive values directly
+                    formData.append(key, flattenedData[key]);
+                }
+            });
+            
+            // Add Indonesian Company specific document files to FormData
+            const documentFieldMapping = {
+                'articlesOfAssociation': 'articles_of_association',
+                'certificateOfIncorporation': 'certificate_of_incorporation',
+                'financialStatements': 'financial_statements',
+                'managementStructure': 'management_structure',
+                'ownershipStructure': 'ownership_structure',
+                'boardOfResolutionFile': 'board_of_resolution_file',
+                'powerOfAttorneyFile': 'power_of_attorney_file',
+                'currentAccountFile': 'current_account_file',
+                'electricityPhoneAccountFile': 'electricity_phone_account_file',
+                'photoSelfiePersonalFile': 'photo_selfie_personal_file',
+                'identityPassportPersonalFile': 'identity_passport_personal_file',
+                'npwpPersonalFile': 'npwp_personal_file'
+            };
+            
+            // Add document files to FormData
+            Object.keys(documentFieldMapping).forEach(frontendKey => {
+                const backendKey = documentFieldMapping[frontendKey];
+                if (flattenedData[frontendKey] instanceof File) {
+                    formData.append(backendKey, flattenedData[frontendKey]);
+                }
+            });
+            
+            const response = await AuthService.submitIndonesianCompanyKYC(formData);
+            
+            if (response.success) {
+                showNotification({
+                    title: 'Success',
+                    message: `Indonesian Company KYC submitted successfully! Application Reference: ${response.data.applicationReference}`,
+                    type: 'success'
+                });
+                
+                // Optionally, redirect to a success page or clear the form
+                setFormData({});
+            } else {
+                throw new Error(response.message || 'Submission failed');
+            }
+            
+        } catch (error) {
+            console.error('Indonesian Company KYC Submission Error:', error);
+            showNotification({
+                title: 'Submission Failed',
+                message: error.message || 'An error occurred while submitting your Indonesian Company KYC application. Please try again.',
+                type: 'error'
+            });
+        }
     };
 
     return (
@@ -960,38 +1038,66 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
     );
 };
 
-const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
     const [uploadedDocs, setUploadedDocs] = useState(data.uploadedCompanyDocuments || {});
+    const [uploadedFiles, setUploadedFiles] = useState(data.uploadedCompanyFiles || {});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const handleFileUpload = (docKey, file) => {
+    // Define company document requirements like Foreign Company/Person forms
+    const companyDocumentRequirements = [
+        {
+            category: "Company Documents",
+            documents: [
+                "Scan Anggaran Dasar Perusahaan (Scan Company's Articles of Association)",
+                "Scan Nomor Izin Usaha (Scan Certificate of Incorporation)",
+                "Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities)",
+                "Struktur Manajemen (Management Structure)",
+                "Struktur Kepemilikan (Ownership Structure)"
+            ]
+        }
+    ];
+
+    const handleFileUpload = (categoryIndex, docIndex, file) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
         const newUploadedDocs = {
             ...uploadedDocs,
             [docKey]: file ? file.name : null
         };
         
+        const newUploadedFiles = {
+            ...uploadedFiles,
+            [docKey]: file || null
+        };
+        
         setUploadedDocs(newUploadedDocs);
+        setUploadedFiles(newUploadedFiles);
         
-        // Check if all required documents are uploaded
-        const requiredDocs = [
-            'articlesOfAssociation',
-            'certificateOfIncorporation',
-            'financialStatements',
-            'managementStructure',
-            'ownershipStructure'
-        ];
+        // Map document uploads to backend field names
+        const documentMappingByIndex = {
+            '0_0': 'articlesOfAssociation',        // Articles of Association
+            '0_1': 'certificateOfIncorporation',   // Certificate of Incorporation  
+            '0_2': 'financialStatements',          // Financial Statements
+            '0_3': 'managementStructure',          // Management Structure
+            '0_4': 'ownershipStructure'            // Ownership Structure
+        };
         
-        const allDocsUploaded = requiredDocs.every(doc => newUploadedDocs[doc]);
-        
-        // Update parent component with uploaded documents info
-        onChange({
+        // Update parent component with both document names and File objects
+        const updatedData = {
             ...data,
             uploadedCompanyDocuments: newUploadedDocs,
-            companyDocumentsUploaded: allDocsUploaded
-        });
+            uploadedCompanyFiles: newUploadedFiles,
+            companyDocumentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
+        };
+        
+        // Add the specific document file to the data using backend field names
+        if (documentMappingByIndex[docKey] && file) {
+            updatedData[documentMappingByIndex[docKey]] = file;
+        }
+        
+        onChange(updatedData);
     };
 
     return (
@@ -1001,163 +1107,103 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 <p className="text-muted fs-5">Upload all required company documents for Indonesian Company</p>
             </div>
 
-            <Card className="mb-4 border-0 shadow-sm">
-                <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">Required Company Documents</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">
-                            Scan Anggaran Dasar Perusahaan (Scan Company's Articles of Association) <span className="text-danger">*</span>
-                            {uploadedDocs.articlesOfAssociation && (
-                                <span className="text-success ms-2">
-                                    <i className="mdi mdi-check-circle"></i> Uploaded
-                                </span>
-                            )}
-                        </Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => handleFileUpload('articlesOfAssociation', e.target.files[0])}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                        {uploadedDocs.articlesOfAssociation && (
-                            <Form.Text className="text-success">
-                                File uploaded: {uploadedDocs.articlesOfAssociation}
-                            </Form.Text>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">
-                            Scan Nomor Izin Usaha (Scan Certificate of Incorporation) <span className="text-danger">*</span>
-                            {uploadedDocs.certificateOfIncorporation && (
-                                <span className="text-success ms-2">
-                                    <i className="mdi mdi-check-circle"></i> Uploaded
-                                </span>
-                            )}
-                        </Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => handleFileUpload('certificateOfIncorporation', e.target.files[0])}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                        {uploadedDocs.certificateOfIncorporation && (
-                            <Form.Text className="text-success">
-                                File uploaded: {uploadedDocs.certificateOfIncorporation}
-                            </Form.Text>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">
-                            Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities) <span className="text-danger">*</span>
-                            {uploadedDocs.financialStatements && (
-                                <span className="text-success ms-2">
-                                    <i className="mdi mdi-check-circle"></i> Uploaded
-                                </span>
-                            )}
-                        </Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => handleFileUpload('financialStatements', e.target.files[0])}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                        {uploadedDocs.financialStatements && (
-                            <Form.Text className="text-success">
-                                File uploaded: {uploadedDocs.financialStatements}
-                            </Form.Text>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">
-                            Struktur Manajemen (Management Structure) <span className="text-danger">*</span>
-                            {uploadedDocs.managementStructure && (
-                                <span className="text-success ms-2">
-                                    <i className="mdi mdi-check-circle"></i> Uploaded
-                                </span>
-                            )}
-                        </Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => handleFileUpload('managementStructure', e.target.files[0])}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                        {uploadedDocs.managementStructure && (
-                            <Form.Text className="text-success">
-                                File uploaded: {uploadedDocs.managementStructure}
-                            </Form.Text>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">
-                            Struktur Kepemilikan (Ownership Structure) <span className="text-danger">*</span>
-                            {uploadedDocs.ownershipStructure && (
-                                <span className="text-success ms-2">
-                                    <i className="mdi mdi-check-circle"></i> Uploaded
-                                </span>
-                            )}
-                        </Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => handleFileUpload('ownershipStructure', e.target.files[0])}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                        {uploadedDocs.ownershipStructure && (
-                            <Form.Text className="text-success">
-                                File uploaded: {uploadedDocs.ownershipStructure}
-                            </Form.Text>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, boardOfResolutionFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Surat Kuasa (Power of Attorney) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, powerOfAttorneyFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-                </Card.Body>
-            </Card>
+            {companyDocumentRequirements.map((category, categoryIndex) => (
+                <Card key={categoryIndex} className="mb-4 border-0 shadow-sm">
+                    <Card.Header className="bg-light border-0">
+                        <h6 className="mb-0 text-primary">{category.category}</h6>
+                    </Card.Header>
+                    <Card.Body>
+                        {category.documents.map((doc, docIndex) => {
+                            const docKey = `${categoryIndex}_${docIndex}`;
+                            const isUploaded = uploadedDocs[docKey];
+                            
+                            return (
+                                <Form.Group key={docIndex} className="mb-3">
+                                    <Form.Label className="text-muted">
+                                        {doc} <span className="text-danger">*</span>
+                                        {isUploaded && (
+                                            <span className="text-success ms-2">
+                                                <i className="mdi mdi-check-circle"></i> Uploaded
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control 
+                                        type="file" 
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                    />
+                                    <Form.Text className="text-muted">
+                                        Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
+                                    </Form.Text>
+                                    {isUploaded && (
+                                        <Form.Text className="text-success">
+                                            File uploaded: {isUploaded}
+                                        </Form.Text>
+                                    )}
+                                </Form.Group>
+                            );
+                        })}
+                    </Card.Body>
+                </Card>
+            ))}
+            
+             {/* Additional non-mapped documents */}
+             <Card className="mb-4 border-0 shadow-sm">
+                 <Card.Header className="bg-light border-0">
+                     <h6 className="mb-0 text-primary">Additional Documents</h6>
+                 </Card.Header>
+                 <Card.Body>
+                     <Form.Group className="mb-3">
+                         <Form.Label className="text-muted">
+                             Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution) <span className="text-danger">*</span>
+                             {data.boardOfResolutionFile && (
+                                 <span className="text-success ms-2">
+                                     <i className="mdi mdi-check-circle"></i> Uploaded
+                                 </span>
+                             )}
+                         </Form.Label>
+                         <Form.Control 
+                             type="file" 
+                             accept=".pdf,.jpg,.jpeg,.png" 
+                             onChange={(e) => onChange({ ...data, boardOfResolutionFile: e.target.files[0] })}
+                             required 
+                         />
+                         <Form.Text className="text-muted">
+                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
+                         </Form.Text>
+                         {data.boardOfResolutionFile && (
+                             <Form.Text className="text-success">
+                                 File uploaded: {data.boardOfResolutionFile.name}
+                             </Form.Text>
+                         )}
+                     </Form.Group>
+ 
+                     <Form.Group className="mb-3">
+                         <Form.Label className="text-muted">
+                             Surat Kuasa (Power of Attorney) <span className="text-danger">*</span>
+                             {data.powerOfAttorneyFile && (
+                                 <span className="text-success ms-2">
+                                     <i className="mdi mdi-check-circle"></i> Uploaded
+                                 </span>
+                             )}
+                         </Form.Label>
+                         <Form.Control 
+                             type="file" 
+                             accept=".pdf,.jpg,.jpeg,.png" 
+                             onChange={(e) => onChange({ ...data, powerOfAttorneyFile: e.target.files[0] })}
+                             required 
+                         />
+                         <Form.Text className="text-muted">
+                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
+                         </Form.Text>
+                         {data.powerOfAttorneyFile && (
+                             <Form.Text className="text-success">
+                                 File uploaded: {data.powerOfAttorneyFile.name}
+                             </Form.Text>
+                         )}
+                     </Form.Group>
+                 </Card.Body>
+             </Card>
         </div>
     );
 };
@@ -2010,37 +2056,65 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
 };
 
 const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
-    const [uploadedPersonalDocs, setUploadedPersonalDocs] = useState(data.uploadedPersonalDocuments || {});
+    const [uploadedDocs, setUploadedDocs] = useState(data.uploadedPersonalDocuments || {});
+    const [uploadedFiles, setUploadedFiles] = useState(data.uploadedPersonalFiles || {});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const handlePersonalFileUpload = (docKey, file) => {
+    // Define personal document requirements like Foreign Company/Person forms
+    const personalDocumentRequirements = [
+        {
+            category: "Personal Documents",
+            documents: [
+                "Rekening Koran / Tagihan Kartu Kredit (Current Account / Credit Card Statement)",
+                "Rekening Listrik / Telepon (Electricity / Phone Account)", 
+                "Foto Terkini (Photo Selfie)",
+                "KTP / SIM / Paspor (Identity No. / SIM / Passport)",
+                "NPWP (Tax Identification No.)"
+            ]
+        }
+    ];
+
+    const handleFileUpload = (categoryIndex, docIndex, file) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
         const newUploadedDocs = {
-            ...uploadedPersonalDocs,
+            ...uploadedDocs,
             [docKey]: file ? file.name : null
         };
         
-        setUploadedPersonalDocs(newUploadedDocs);
+        const newUploadedFiles = {
+            ...uploadedFiles,
+            [docKey]: file || null
+        };
         
-        // Check if all required personal documents are uploaded
-        const requiredPersonalDocs = [
-            'currentAccount',
-            'electricityPhone',
-            'photoSelfie',
-            'identityPassport',
-            'npwp'
-        ];
+        setUploadedDocs(newUploadedDocs);
+        setUploadedFiles(newUploadedFiles);
         
-        const allPersonalDocsUploaded = requiredPersonalDocs.every(doc => newUploadedDocs[doc]);
+        // Map document uploads to backend field names
+        const documentMappingByIndex = {
+            '0_0': 'currentAccountFile',              // Current Account Statement
+            '0_1': 'electricityPhoneAccountFile',     // Electricity/Phone Account  
+            '0_2': 'photoSelfiePersonalFile',         // Photo Selfie
+            '0_3': 'identityPassportPersonalFile',    // Identity/Passport
+            '0_4': 'npwpPersonalFile'                 // NPWP
+        };
         
-        // Update parent component with uploaded documents info
-        onChange({
+        // Update parent component with both document names and File objects
+        const updatedData = {
             ...data,
             uploadedPersonalDocuments: newUploadedDocs,
-            personalDocumentsUploaded: allPersonalDocsUploaded
-        });
+            uploadedPersonalFiles: newUploadedFiles,
+            personalDocumentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
+        };
+        
+        // Add the specific document file to the data using backend field names
+        if (documentMappingByIndex[docKey] && file) {
+            updatedData[documentMappingByIndex[docKey]] = file;
+        }
+        
+        onChange(updatedData);
     };
 
     return (
@@ -2050,77 +2124,45 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                 <p className="text-muted fs-5">Upload all required personal documents for Power of Attorney</p>
             </div>
 
-            <Card className="mb-4 border-0 shadow-sm">
-                <Card.Header className="bg-light border-0 py-2">
-                    <h6 className="mb-0 text-primary">Required Personal Documents</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Rekening Koran / Tagihan Kartu Kredit (Current Account / Credit Card Statement) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, currentAccountFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Rekening Listrik / Telepon (Electricity / Phone Account) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, electricityPhoneAccountFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Foto Terkini (Photo Selfie) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, photoSelfiePersonalFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">KTP / SIM / Paspor (Identity No. / SIM / Passport) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, identityPassportPersonalFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">NPWP (Tax Identification No.) <span className="text-danger">*</span></Form.Label>
-                        <Form.Control 
-                            type="file" 
-                            accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => onChange({ ...data, npwpPersonalFile: e.target.files[0] })}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
-                            Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                        </Form.Text>
-                    </Form.Group>
-                </Card.Body>
-            </Card>
+            {personalDocumentRequirements.map((category, categoryIndex) => (
+                <Card key={categoryIndex} className="mb-4 border-0 shadow-sm">
+                    <Card.Header className="bg-light border-0">
+                        <h6 className="mb-0 text-primary">{category.category}</h6>
+                    </Card.Header>
+                    <Card.Body>
+                        {category.documents.map((doc, docIndex) => {
+                            const docKey = `${categoryIndex}_${docIndex}`;
+                            const isUploaded = uploadedDocs[docKey];
+                            
+                            return (
+                                <Form.Group key={docIndex} className="mb-3">
+                                    <Form.Label className="text-muted">
+                                        {doc} <span className="text-danger">*</span>
+                                        {isUploaded && (
+                                            <span className="text-success ms-2">
+                                                <i className="mdi mdi-check-circle"></i> Uploaded
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control 
+                                        type="file" 
+                                        accept={docIndex === 2 ? ".jpg,.jpeg,.png" : ".pdf,.jpg,.jpeg,.png"}
+                                        onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                    />
+                                    <Form.Text className="text-muted">
+                                        Max 10MB. Accepted formats: {docIndex === 2 ? "JPG, JPEG, PNG" : "PDF, JPG, JPEG, PNG"}
+                                    </Form.Text>
+                                    {isUploaded && (
+                                        <Form.Text className="text-success">
+                                            File uploaded: {isUploaded}
+                                        </Form.Text>
+                                    )}
+                                </Form.Group>
+                            );
+                        })}
+                    </Card.Body>
+                </Card>
+            ))}
         </div>
     );
 };

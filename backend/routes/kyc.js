@@ -4,6 +4,7 @@ const multer = require('multer');
 const {
     submitForeignCompanyKYC,
     submitForeignPersonKYC,
+    submitIndonesianCompanyKYC,
     getKYCApplicationStatus,
     getUserKYCApplications
 } = require('../controllers/kycController');
@@ -50,6 +51,12 @@ router.post('/foreign-person/submit',
     authenticateToken, 
     upload.any(), // Accept any fields (both files and text)
     submitForeignPersonKYC
+);
+
+router.post('/indonesian-company/submit', 
+    authenticateToken, 
+    upload.any(), // Accept any fields (both files and text)
+    submitIndonesianCompanyKYC
 );
 
 // Test endpoint removed - using secure authentication

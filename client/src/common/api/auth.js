@@ -101,6 +101,9 @@ function AuthService() {
         submitForeignPersonKYC: (formData) => {
             return HttpClient.post('/kyc/foreign-person/submit', formData);
         },
+        submitIndonesianCompanyKYC: (formData) => {
+            return HttpClient.post('/kyc/indonesian-company/submit', formData);
+        },
         getKYCApplications: () => {
             return HttpClient.get('/kyc/applications');
         },

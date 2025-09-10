@@ -134,22 +134,21 @@ const RegulatedCompanyForm = () => {
     const validateCompanyDetailsStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'companyRegistrationName', label: 'Company Registration Name' },
-            { field: 'companyLicenseNo', label: 'Company License Number' },
+            { field: 'companyName', label: 'Company Registration Name' },
+            { field: 'licenseNumber', label: 'Company License Number' },
             { field: 'natureOfBusiness', label: 'Nature of Business' },
-            { field: 'companyLegalForm', label: 'Company Legal Form' },
+            { field: 'legalForm', label: 'Company Legal Form' },
             { field: 'streetAddress', label: 'Street Address' },
             { field: 'city', label: 'City' },
-            { field: 'postalCode', label: 'Postal/Zip Code' },
+            { field: 'zipCode', label: 'Postal/Zip Code' },
             { field: 'country', label: 'Country' },
             { field: 'placeOfEstablishment', label: 'Place of Establishment' },
             { field: 'dateOfEstablishment', label: 'Date of Establishment' },
-            { field: 'countryCode', label: 'Country Code' },
-            { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
+            { field: 'officePhone', label: 'Office Telephone Number' },
             { field: 'beneficialOwnerName', label: 'Beneficial Owner Name' },
-            { field: 'beneficialOwnerPassportNo', label: 'Beneficial Owner Passport Number' },
+            { field: 'beneficialOwnerPassport', label: 'Beneficial Owner Passport Number' },
             { field: 'sourceOfFunds', label: 'Source of Funds' },
-            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' }
+            { field: 'accountPurpose', label: 'Trading Account Purpose' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
@@ -159,7 +158,7 @@ const RegulatedCompanyForm = () => {
         });
         
         // Check conditional fields
-        if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
+        if (data.legalForm === 'OTHER' && !data.legalFormOther?.trim()) {
             errors.push('Please specify the other legal form');
         }
         
@@ -169,10 +168,6 @@ const RegulatedCompanyForm = () => {
         
         if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
             errors.push('Please specify the other source of funds');
-        }
-        
-        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
-            errors.push('Please specify the other trading account purpose');
         }
         
         return { isValid: errors.length === 0, errors };

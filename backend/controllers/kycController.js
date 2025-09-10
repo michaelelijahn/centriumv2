@@ -773,9 +773,430 @@ const getForeignPersonDocumentCategoryAndType = (fieldName) => {
     return documentMapping[fieldName] || documentMapping.default;
 };
 
+const submitIndonesianCompanyKYC = async (req, res, next) => {
+    const connection = await pool.getConnection();
+    
+    try {
+        debugLog('=== INDONESIAN COMPANY KYC SUBMISSION STARTED ===');
+        debugLog(`Authorization header: ${req.headers['authorization']}`);
+        debugLog(`req.user: ${JSON.stringify(req.user)}`);
+        
+        const user_id = req.user?.userId; // From authenticateToken middleware (JWT contains userId, not user_id)
+        
+        // Check if user is authenticated
+        if (!user_id) {
+            debugLog('ERROR: User not authenticated - req.user is undefined');
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required. Please log in again.'
+            });
+        }
+        
+        const formData = req.body;
+        const files = req.files || []; // With upload.any(), files is an array
+        
+        // Parse JSON strings from FormData
+        Object.keys(formData).forEach(key => {
+            if (typeof formData[key] === 'string') {
+                try {
+                    // Try to parse as JSON (for bankAccounts array, etc.)
+                    formData[key] = JSON.parse(formData[key]);
+                } catch (e) {
+                    // Keep as string if not valid JSON
+                }
+            }
+        });
+        
+        debugLog(`User ID: ${user_id}, Form Data: ${JSON.stringify(formData)}`);
+        debugLog(`Files received: ${files.length}`);
+        
+        // Debug: Check for undefined values
+        const checkForUndefined = (obj, prefix = '') => {
+            Object.keys(obj).forEach(key => {
+                if (obj[key] === undefined) {
+                    debugLog(`WARNING: ${prefix}${key} is undefined`);
+                } else if (obj[key] === null) {
+                    debugLog(`INFO: ${prefix}${key} is null (OK)`);
+                } else if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+                    checkForUndefined(obj[key], `${prefix}${key}.`);
+                }
+            });
+        };
+        
+        debugLog('=== CHECKING FOR UNDEFINED VALUES ===');
+        checkForUndefined(formData);
+        
+        if (formData.bankAccounts && Array.isArray(formData.bankAccounts)) {
+            formData.bankAccounts.forEach((account, index) => {
+                debugLog(`=== CHECKING BANK ACCOUNT ${index + 1} ===`);
+                checkForUndefined(account, `bankAccount[${index}].`);
+            });
+        }
+        
+        await connection.beginTransaction();
+        
+        // 1. Create master KYC application
+        const applicationReference = `IC-${Date.now()}-${user_id}`;
+        const [applicationResult] = await connection.execute(
+            `INSERT INTO kyc_applications 
+             (user_id, form_type, status, current_step, total_steps, application_reference, submitted_at) 
+             VALUES (?, 'indonesian_company', 'submitted', 8, 8, ?, NOW())`,
+            [user_id, applicationReference]
+        );
+        
+        const applicationId = applicationResult.insertId;
+        debugLog(`Created application with ID: ${applicationId}`);
+        
+        // 2. Insert email registration data
+        debugLog(`=== INSERTING EMAIL DATA ===`);
+        debugLog(`Email: ${formData.email}, Demo Account: ${formData.demoAccountNo}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_email (application_id, email, demo_account_no) 
+             VALUES (?, ?, ?)`,
+            [applicationId, safeValue(formData.email), safeValue(formData.demoAccountNo)]
+        );
+        
+        // 3. Insert company details
+        debugLog(`=== INSERTING COMPANY DETAILS ===`);
+        const companyDetailsParams = [
+            applicationId,
+            safeValue(formData.companyName),
+            safeValue(formData.businessLicenseNo),
+            safeValue(formData.businessEntity),
+            safeValue(formData.companyNPWP),
+            safeValue(formData.streetName),
+            safeValue(formData.city),
+            safeValue(formData.postalCode),
+            safeValue(formData.placeOfEstablishment),
+            safeValue(formData.establishmentDate),
+            safeValue(formData.legalForm),
+            safeValue(formData.legalFormOther),
+            safeValue(formData.officeTelephoneCountryCode),
+            safeValue(formData.officeTelephoneNo),
+            safeValue(formData.beneficialOwnerName),
+            safeValue(formData.beneficialOwnerIdNo),
+            safeValue(formData.sourceOfFunds),
+            safeValue(formData.sourceOfFundsOther),
+            safeValue(formData.accountPurpose),
+            safeValue(formData.accountPurposeOther),
+            safeValue(formData.authorizedPersonName),
+            safeValue(formData.authorizedDebitPerson)
+        ];
+        
+        debugLog(`Company details params: ${JSON.stringify(companyDetailsParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_details (
+                application_id, company_name, business_license_no, business_entity, company_npwp,
+                street_name, city, postal_code, place_of_establishment, establishment_date,
+                legal_form, legal_form_other, office_telephone_country_code, office_telephone_no,
+                beneficial_owner_name, beneficial_owner_id_no, source_of_funds, source_of_funds_other,
+                account_purpose, account_purpose_other, authorized_person_name, authorized_debit_person
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            companyDetailsParams
+        );
+        
+        // 4. Insert authorized person details
+        debugLog(`=== INSERTING AUTHORIZED PERSON DETAILS ===`);
+        const authorizedPersonParams = [
+            applicationId,
+            safeValue(formData.fullName),
+            safeValue(formData.placeOfBirth),
+            safeValue(formData.dateOfBirth),
+            safeValue(formData.idPassportNo),
+            safeValue(formData.npwpNo),
+            safeValue(formData.gender),
+            safeValue(formData.motherName),
+            safeValue(formData.maritalStatus),
+            safeValue(formData.nationality),
+            safeValue(formData.nationalityOther),
+            safeValue(formData.streetAddress),
+            safeValue(formData.addressCity),
+            safeValue(formData.addressPostalCode),
+            safeValue(formData.homeTelephoneNo),
+            safeValue(formData.handphoneNo),
+            safeValue(formData.homeFaxNo),
+            safeValue(formData.personalEmail),
+            safeValue(formData.homeOwnershipStatus),
+            safeValue(formData.homeOwnershipStatusOther),
+            safeValue(formData.accountOpeningPurpose),
+            safeValue(formData.accountOpeningPurposeOther),
+            safeValue(formData.investmentExperience),
+            safeValue(formData.investmentExperienceExplanation),
+            safeValue(formData.futuresTradingExperience),
+            safeValue(formData.familyInBappebti),
+            safeValue(formData.declaredBankrupt)
+        ];
+        
+        debugLog(`Authorized person params: ${JSON.stringify(authorizedPersonParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_authorized_person (
+                application_id, full_name, place_of_birth, date_of_birth, id_passport_no, npwp_no,
+                gender, mother_name, marital_status, nationality, nationality_other,
+                street_address, address_city, address_postal_code, home_telephone_no, handphone_no,
+                home_fax_no, personal_email, home_ownership_status, home_ownership_status_other,
+                account_opening_purpose, account_opening_purpose_other, investment_experience,
+                investment_experience_explanation, futures_trading_experience, family_in_bappebti, declared_bankrupt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            authorizedPersonParams
+        );
+        
+        // 5. Insert emergency contact details
+        debugLog(`=== INSERTING EMERGENCY CONTACT DETAILS ===`);
+        const emergencyContactParams = [
+            applicationId,
+            safeValue(formData.emergencyContactName),
+            safeValue(formData.emergencyContactHandphone),
+            safeValue(formData.emergencyContactStreetAddress),
+            safeValue(formData.emergencyContactCity),
+            safeValue(formData.emergencyContactPostalCode),
+            safeValue(formData.emergencyContactRelationship),
+            safeValue(formData.emergencyContactRelationshipOther)
+        ];
+        
+        debugLog(`Emergency contact params: ${JSON.stringify(emergencyContactParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_emergency_contact (
+                application_id, emergency_contact_name, emergency_contact_handphone,
+                emergency_contact_street_address, emergency_contact_city, emergency_contact_postal_code,
+                emergency_contact_relationship, emergency_contact_relationship_other
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            emergencyContactParams
+        );
+        
+        // 6. Insert employment details
+        debugLog(`=== INSERTING EMPLOYMENT DETAILS ===`);
+        const employmentParams = [
+            applicationId,
+            safeValue(formData.jobOfPowerOfAttorney),
+            safeValue(formData.jobOfPowerOfAttorneyOther),
+            safeValue(formData.employmentCompanyName),
+            safeValue(formData.businessField),
+            safeValue(formData.employmentPosition),
+            safeValue(formData.lengthOfWork),
+            safeValue(formData.previousCompany),
+            safeValue(formData.officeStreetAddress),
+            safeValue(formData.officeCity),
+            safeValue(formData.officePostalCode),
+            safeValue(formData.officePhoneCountryCode),
+            safeValue(formData.officePhoneNo),
+            safeValue(formData.officeFaxNo)
+        ];
+        
+        debugLog(`Employment params: ${JSON.stringify(employmentParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_employment (
+                application_id, job_of_power_of_attorney, job_of_power_of_attorney_other,
+                employment_company_name, business_field, employment_position, length_of_work,
+                previous_company, office_street_address, office_city, office_postal_code,
+                office_phone_country_code, office_phone_no, office_fax_no
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            employmentParams
+        );
+        
+        // 7. Insert assets information
+        debugLog(`=== INSERTING ASSETS INFORMATION ===`);
+        const assetsParams = [
+            applicationId,
+            safeValue(formData.annualIncome),
+            safeValue(formData.houseLocation),
+            safeValue(formData.njopValue),
+            safeValue(formData.bankDeposit),
+            safeValue(formData.totalAmount),
+            safeValue(formData.otherAssets)
+        ];
+        
+        debugLog(`Assets params: ${JSON.stringify(assetsParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_assets (
+                application_id, annual_income, house_location, njop_value,
+                bank_deposit, total_amount, other_assets
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            assetsParams
+        );
+        
+        // 8. Insert bank accounts
+        if (formData.bankAccounts && Array.isArray(formData.bankAccounts)) {
+            debugLog(`=== INSERTING ${formData.bankAccounts.length} BANK ACCOUNTS ===`);
+            for (let i = 0; i < formData.bankAccounts.length; i++) {
+                const account = formData.bankAccounts[i];
+                const bankAccountParams = [
+                    applicationId,
+                    safeValue(account.bankName),
+                    safeValue(account.accountName || account.accountHolderName), // Handle both field names
+                    safeValue(account.bankAddress || account.branch || ''), // Default if not provided, use branch as address if needed
+                    safeValue(account.bankCity || account.branch || 'Jakarta'), // Map branch to city if needed, default to Jakarta
+                    safeValue(account.bankCountry || 'ID'), // Default to Indonesia
+                    safeValue(account.bankCountryOther),
+                    safeValue(account.swiftCode || ''), // Default if not provided
+                    safeValue(account.accountNo), // Should be encrypted in production
+                    i + 1
+                ];
+                
+                debugLog(`Bank account ${i + 1} params: ${JSON.stringify(bankAccountParams)}`);
+                await connection.execute(
+                    `INSERT INTO kyc_bank_accounts (
+                        application_id, bank_name, account_name, bank_address, bank_city,
+                        bank_country, bank_country_other, swift_code, account_no, account_order
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    bankAccountParams
+                );
+            }
+        }
+        
+        // 9. Handle document uploads
+        const documentUploads = [];
+        for (const file of files) {
+            if (file) {
+                try {
+                    // Upload to S3
+                    const fileName = `kyc/${applicationId}/${Date.now()}-${file.originalname}`;
+                    const s3Response = await uploadToS3(file.buffer, fileName, file.mimetype);
+                    
+                    // Determine document category and type based on field name
+                    const { category, type } = getIndonesianCompanyDocumentCategoryAndType(file.fieldname);
+                    
+                    await connection.execute(
+                        `INSERT INTO kyc_documents (
+                            application_id, document_category, document_type, original_filename,
+                            stored_filename, file_path, file_size, mime_type
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            applicationId,
+                            category,
+                            type,
+                            file.originalname,
+                            fileName,
+                            s3Response.Location,
+                            file.size,
+                            file.mimetype
+                        ]
+                    );
+                    
+                    documentUploads.push({
+                        fieldName: file.fieldname,
+                        originalName: file.originalname,
+                        uploadedPath: s3Response.Location
+                    });
+                } catch (uploadError) {
+                    debugLog(`Error uploading file ${file.fieldname}: ${uploadError.message}`);
+                    throw new Error(`Failed to upload document: ${file.originalname}`);
+                }
+            }
+        }
+        
+        // 10. Insert agreements - using the new agreements table
+        debugLog(`=== INSERTING AGREEMENTS ===`);
+        const agreementsData = {
+            company_profile_read: formData.companyProfileRead || false,
+            company_profile_understanding: formData.companyProfileUnderstanding || false,
+            statement_read: formData.statementRead || false,
+            statement_understanding: formData.statementUnderstanding || false,
+            trading_experience: safeValue(formData.tradingExperience),
+            broker_company: safeValue(formData.brokerCompany),
+            demo_account_number: safeValue(formData.demoAccountNumber),
+            experience_statement_read: formData.experienceStatementRead || false,
+            experience_understanding: formData.experienceUnderstanding || false,
+            application_statement_read: formData.applicationStatementRead || false,
+            application_understanding: formData.applicationUnderstanding || false,
+            risk_disclosure_understanding: formData.riskDisclosureUnderstanding || false,
+            risk_statement_1: formData.riskStatement1 || false,
+            risk_statement_2: formData.riskStatement2 || false,
+            risk_statement_3: formData.riskStatement3 || false,
+            risk_statement_4: formData.riskStatement4 || false,
+            risk_statement_5: formData.riskStatement5 || false,
+            risk_statement_6: formData.riskStatement6 || false,
+            risk_statement_7: formData.riskStatement7 || false,
+            risk_statement_8: formData.riskStatement8 || false,
+            risk_statement_9: formData.riskStatement9 || false,
+            risk_statement_10: formData.riskStatement10 || false,
+            risk_statement_11: formData.riskStatement11 || false,
+            risk_statement_12: formData.riskStatement12 || false,
+            risk_statement_13: formData.riskStatement13 || false,
+            risk_statement_14: formData.riskStatement14 || false,
+            mandate_statement_read: formData.mandateStatementRead || false,
+            bakti_arbitration: formData.baktiArbitration || false,
+            mandate_understanding: formData.mandateUnderstanding || false,
+            trading_rules_read: formData.tradingRulesRead || false,
+            trading_rules_understanding: formData.tradingRulesUnderstanding || false,
+            personal_access_password_read: formData.personalAccessPasswordRead || false,
+            personal_access_password_understanding: formData.personalAccessPasswordUnderstanding || false
+        };
+        
+        const agreementParams = [
+            applicationId,
+            ...Object.values(agreementsData)
+        ];
+        
+        debugLog(`Agreements params: ${JSON.stringify(agreementParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_company_agreements (
+                application_id, company_profile_read, company_profile_understanding,
+                statement_read, statement_understanding, trading_experience, broker_company, demo_account_number,
+                experience_statement_read, experience_understanding, application_statement_read, application_understanding,
+                risk_disclosure_understanding, risk_statement_1, risk_statement_2, risk_statement_3, risk_statement_4,
+                risk_statement_5, risk_statement_6, risk_statement_7, risk_statement_8, risk_statement_9, risk_statement_10,
+                risk_statement_11, risk_statement_12, risk_statement_13, risk_statement_14, mandate_statement_read,
+                bakti_arbitration, mandate_understanding, trading_rules_read, trading_rules_understanding,
+                personal_access_password_read, personal_access_password_understanding
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            agreementParams
+        );
+        
+        await connection.commit();
+        debugLog(`Successfully submitted Indonesian Company KYC application ${applicationId}`);
+        
+        res.json({
+            success: true,
+            data: {
+                applicationId,
+                applicationReference,
+                message: 'Indonesian Company KYC application submitted successfully',
+                documentsUploaded: documentUploads.length,
+                documentDetails: documentUploads
+            }
+        });
+        
+    } catch (error) {
+        await connection.rollback();
+        debugLog(`Error in Indonesian Company KYC submission: ${error.message}`);
+        debugLog(`Error stack: ${error.stack}`);
+        next(error);
+    } finally {
+        connection.release();
+        debugLog('=== INDONESIAN COMPANY KYC SUBMISSION COMPLETED ===');
+    }
+};
+
+// Helper function to categorize documents based on field name for Indonesian Company
+const getIndonesianCompanyDocumentCategoryAndType = (fieldName) => {
+    const documentMapping = {
+        // Company Documents
+        'articlesOfAssociation': { category: 'Company Documents', type: 'Articles of Association' },
+        'certificateOfIncorporation': { category: 'Company Documents', type: 'Certificate of Incorporation' },
+        'financialStatements': { category: 'Company Documents', type: 'Financial Statements' },
+        'managementStructure': { category: 'Company Documents', type: 'Management Structure' },
+        'ownershipStructure': { category: 'Company Documents', type: 'Ownership Structure' },
+        'boardOfResolutionFile': { category: 'Company Documents', type: 'Board of Resolution' },
+        'powerOfAttorneyFile': { category: 'Company Documents', type: 'Power of Attorney' },
+        
+        // Personal Documents
+        'currentAccountFile': { category: 'Personal Documents', type: 'Current Account Statement' },
+        'electricityPhoneAccountFile': { category: 'Personal Documents', type: 'Electricity/Phone Bill' },
+        'photoSelfiePersonalFile': { category: 'Personal Documents', type: 'Photo Selfie' },
+        'identityPassportPersonalFile': { category: 'Personal Documents', type: 'Identity/Passport' },
+        'npwpPersonalFile': { category: 'Personal Documents', type: 'NPWP Document' },
+        
+        // Generic fallback
+        default: { category: 'Other Documents', type: 'Supporting Document' }
+    };
+    
+    return documentMapping[fieldName] || documentMapping.default;
+};
+
 module.exports = {
     submitForeignCompanyKYC,
     submitForeignPersonKYC,
+    submitIndonesianCompanyKYC,
     getKYCApplicationStatus,
     getUserKYCApplications
 };
