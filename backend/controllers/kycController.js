@@ -21,16 +21,6 @@ const safeValue = (value) => {
     return value === undefined ? null : value;
 };
 
-// Helper function to map frontend values to database ENUM values
-const mapTradingAccountPurpose = (frontendValue) => {
-    const mapping = {
-        'Hedging': 'HEDGING',
-        'Gain': 'INVESTMENT', // Map "Gain" to "INVESTMENT"
-        'Speculation': 'SPECULATION',
-        'Others': 'OTHER'
-    };
-    return mapping[frontendValue] || 'OTHER'; // Default to 'OTHER' if not found
-};
 
 const submitForeignCompanyKYC = async (req, res, next) => {
     const connection = await pool.getConnection();
@@ -550,7 +540,7 @@ const submitForeignPersonKYC = async (req, res, next) => {
             safeValue(formData.contactEmail), // Frontend uses contactEmail, not personalEmail
             safeValue(formData.sourceOfFunds) || 'OTHER', // Default since frontend uses accountOpeningPurpose instead
             safeValue(formData.sourceOfFundsOther) || safeValue(formData.accountOpeningPurpose), // Map accountOpeningPurpose to sourceOfFunds
-            mapTradingAccountPurpose(formData.tradingAccountPurpose || formData.accountOpeningPurpose), // Map from accountOpeningPurpose
+            safeValue(formData.tradingAccountPurpose) || safeValue(formData.accountOpeningPurpose) || 'Others', // Map from accountOpeningPurpose
             safeValue(formData.tradingAccountPurposeOther) || safeValue(formData.accountOpeningPurposeOther),
             safeValue(formData.investmentExperience),
             safeValue(formData.investmentExperienceDetails),
