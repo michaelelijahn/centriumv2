@@ -3,6 +3,7 @@ import { Form, Row, Col, Alert, Card, ListGroup, Button } from 'react-bootstrap'
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { FileUploader } from '../../../components/FileUploader/FileUploader';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
+import AuthService from '../../../common/api/auth';
 
 const RegulatedCompanyForm = () => {
     const [formData, setFormData] = useState({});
@@ -342,13 +343,67 @@ const RegulatedCompanyForm = () => {
         console.log(`Moving to step ${step}`, data);
     };
 
-    const handleSubmit = (data) => {
-        console.log('Submitting Regulated Company KYC:', data);
-        showNotification({
-            title: 'Success',
-            message: 'Regulated Company KYC submitted successfully!',
-            type: 'success'
-        });
+    const handleSubmit = async (data) => {
+        console.log('Submitting Regulated Company KYC (raw data):', data);
+        
+        try {
+            // Flatten the nested step data structure
+            const flattenedData = {};
+            Object.keys(data).forEach(stepKey => {
+                if (stepKey.startsWith('step_') && typeof data[stepKey] === 'object') {
+                    Object.assign(flattenedData, data[stepKey]);
+                }
+            });
+            
+            console.log('Flattened form data:', flattenedData);
+            
+            // Create FormData object to handle both form data and file uploads
+            const formData = new FormData();
+            
+            // Add all form fields to FormData
+            Object.keys(flattenedData).forEach(key => {
+                if (key === 'uploadedDocuments' && typeof flattenedData[key] === 'object') {
+                    // Handle uploaded company documents
+                    Object.keys(flattenedData[key]).forEach(docType => {
+                        const files = flattenedData[key][docType];
+                        if (Array.isArray(files) && files.length > 0) {
+                            files.forEach((file, index) => {
+                                formData.append(`${docType}_${index}`, file);
+                            });
+                        }
+                    });
+                } else if (typeof flattenedData[key] === 'object' && flattenedData[key] !== null && !(flattenedData[key] instanceof File)) {
+                    // Convert objects to JSON string (except File objects)
+                    formData.append(key, JSON.stringify(flattenedData[key]));
+                } else if (flattenedData[key] !== null && flattenedData[key] !== undefined) {
+                    // Add primitive values directly
+                    formData.append(key, flattenedData[key]);
+                }
+            });
+            
+            const response = await AuthService.submitRegulatedCompanyKYC(formData);
+            
+            if (response.success) {
+                showNotification({
+                    title: 'Success',
+                    message: `Regulated Company KYC submitted successfully! Application Reference: ${response.data.applicationReference}`,
+                    type: 'success'
+                });
+                
+                // Optionally, redirect to a success page or clear the form
+                setFormData({});
+            } else {
+                throw new Error(response.message || 'Submission failed');
+            }
+            
+        } catch (error) {
+            console.error('Regulated Company KYC Submission Error:', error);
+            showNotification({
+                title: 'Submission Failed',
+                message: error.message || 'An error occurred while submitting your Regulated Company KYC application. Please try again.',
+                type: 'error'
+            });
+        }
     };
 
     return (

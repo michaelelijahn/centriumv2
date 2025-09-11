@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
+import AuthService from '../../../common/api/auth';
 
 const IndonesianPersonForm = () => {
     const [formData, setFormData] = useState({});
@@ -167,7 +168,7 @@ const IndonesianPersonForm = () => {
             case 8:
                 return <DeclarationStep data={stepData} onChange={updateFormData} />;
             case 9:
-                return <TradingSimulationDeclaration data={stepData} onChange={updateFormData} allData={flattenedData} />;
+                return <TradingSimulationDeclaration data={stepData} onChange={updateFormData} allData={allFormData} />;
             case 10:
                 return <DisclosureStatementStep data={stepData} onChange={updateFormData} />;
             case 11:
@@ -179,11 +180,13 @@ const IndonesianPersonForm = () => {
             case 14:
                 return <TradingRulesStep data={stepData} onChange={updateFormData} />;
             case 15:
-                return <NewFundDeclarationStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
+                return <NewFundDeclarationStep data={stepData} onChange={updateFormData} allData={allFormData} />;
             case 16:
-                return <AccessCodeResponsibilityStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
+                return <AccessCodeResponsibilityStep data={stepData} onChange={updateFormData} allData={allFormData} />;
             case 17:
-                return <ProcessVerificationStep data={stepData} onChange={updateFormData} allData={flattenedData} />;
+                return <FundDeclarationStep data={stepData} onChange={updateFormData} allData={allFormData} />;
+            case 18:
+                return <ProcessVerificationStep data={stepData} onChange={updateFormData} allData={allFormData} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
@@ -237,13 +240,16 @@ const IndonesianPersonForm = () => {
             case 14: // Trading Rules step
                 return validateTradingRulesStep(stepData);
             
-            case 15: // Fund Declaration step
-                return validateFundDeclarationStep(stepData);
+            case 15: // New Fund Declaration step  
+                return validateNewFundDeclarationStep(stepData);
             
             case 16: // Access Code Responsibility step
                 return validateAccessCodeResponsibilityStep(stepData);
             
-            case 17: // Process Verification step
+            case 17: // Fund Declaration step
+                return validateFundDeclarationStep(stepData);
+            
+            case 18: // Process Verification step
                 return validateProcessVerificationStep(stepData);
             
             default:
@@ -270,26 +276,23 @@ const IndonesianPersonForm = () => {
     const validateDataPribadiStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'personalTitle', label: 'Title' },
-            { field: 'fullName', label: 'Full Name' },
-            { field: 'placeOfBirth', label: 'Place of Birth' },
-            { field: 'dateOfBirth', label: 'Date of Birth' },
-            { field: 'idNumber', label: 'ID Number' },
-            { field: 'personalEmail', label: 'Personal Email' },
-            { field: 'gender', label: 'Gender' },
-            { field: 'maritalStatus', label: 'Marital Status' },
-            { field: 'citizen', label: 'Citizenship' },
-            { field: 'countryCode', label: 'Country Code' },
-            { field: 'phoneNumber', label: 'Phone Number' },
+            { field: 'namaLengkap', label: 'Nama Lengkap' },
+            { field: 'tempatLahir', label: 'Tempat Lahir' },
+            { field: 'tanggalLahir', label: 'Tanggal Lahir' },
+            { field: 'noKTP', label: 'No. KTP' },
+            { field: 'noNPWP', label: 'No. NPWP' },
+            { field: 'jenisKelamin', label: 'Jenis Kelamin' },
+            { field: 'namaIbuKandung', label: 'Nama Ibu Kandung' },
+            { field: 'statusPerkawinan', label: 'Status Perkawinan' },
             { field: 'streetAddress', label: 'Street Address' },
             { field: 'city', label: 'City' },
             { field: 'postalCode', label: 'Postal Code' },
-            { field: 'country', label: 'Country' },
-            { field: 'sourceOfFunds', label: 'Source of Funds' },
-            { field: 'tradingAccountPurpose', label: 'Trading Account Purpose' },
-            { field: 'investmentExperience', label: 'Investment Experience' },
-            { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
-            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
+            { field: 'noHandphone', label: 'No. Handphone' },
+            { field: 'statusKepemilikanRumah', label: 'Status Kepemilikan Rumah' },
+            { field: 'tujuanPembukaanRekening', label: 'Tujuan Pembukaan Rekening' },
+            { field: 'pengalamanInvestasi', label: 'Pengalaman Investasi' },
+            { field: 'anggotaKeluargaBAPPEBTI', label: 'Anggota Keluarga BAPPEBTI' },
+            { field: 'pernahPailit', label: 'Pernah Pailit' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
@@ -298,29 +301,20 @@ const IndonesianPersonForm = () => {
             }
         });
         
-        // Validate email format
-        if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
-            errors.push('Please enter a valid personal email address');
-        }
-        
         // Check conditional fields
-        if (data.citizen === 'OTHER' && !data.citizenOther?.trim()) {
-            errors.push('Please specify other citizenship');
+        if (data.statusPerkawinan === 'Married' && !data.namaIstriSuami?.trim()) {
+            errors.push('Nama Istri/Suami is required when married');
         }
         
-        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
-            errors.push('Please specify other country');
+        if (data.statusKepemilikanRumah === 'Lainnya' && !data.statusKepemilikanRumahOther?.trim()) {
+            errors.push('Please specify other home ownership status');
         }
         
-        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
-            errors.push('Please specify other source of funds');
+        if (data.tujuanPembukaanRekening === 'Lainnya' && !data.tujuanPembukaanRekeningOther?.trim()) {
+            errors.push('Please specify other account opening purpose');
         }
         
-        if (data.tradingAccountPurpose === 'OTHER' && !data.tradingAccountPurposeOther?.trim()) {
-            errors.push('Please specify other trading account purpose');
-        }
-        
-        if (data.investmentExperience === 'YES' && !data.investmentExperienceDetails?.trim()) {
+        if (data.pengalamanInvestasi === 'Ya, di bidang' && !data.pengalamanInvestasiBidang?.trim()) {
             errors.push('Please provide details about your investment experience');
         }
         
@@ -330,15 +324,12 @@ const IndonesianPersonForm = () => {
     const validateEmergencyContactStep = (data) => {
         const errors = [];
         const requiredFields = [
-            { field: 'emergencyTitle', label: 'Emergency Contact Title' },
-            { field: 'emergencyFullName', label: 'Emergency Contact Full Name' },
-            { field: 'emergencyRelationship', label: 'Relationship' },
-            { field: 'emergencyCountryCode', label: 'Emergency Contact Country Code' },
-            { field: 'emergencyPhoneNumber', label: 'Emergency Contact Phone Number' },
-            { field: 'emergencyStreetAddress', label: 'Emergency Contact Street Address' },
-            { field: 'emergencyCity', label: 'Emergency Contact City' },
-            { field: 'emergencyPostalCode', label: 'Emergency Contact Postal Code' },
-            { field: 'emergencyCountry', label: 'Emergency Contact Country' }
+            { field: 'emergencyContactName', label: 'Emergency Contact Name' },
+            { field: 'emergencyContactPhone', label: 'Emergency Contact Phone' },
+            { field: 'emergencyContactStreetAddress', label: 'Emergency Contact Street Address' },
+            { field: 'emergencyContactCity', label: 'Emergency Contact City' },
+            { field: 'emergencyContactPostalCode', label: 'Emergency Contact Postal Code' },
+            { field: 'emergencyContactRelationship', label: 'Emergency Contact Relationship' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
@@ -348,12 +339,8 @@ const IndonesianPersonForm = () => {
         });
         
         // Check conditional fields
-        if (data.emergencyRelationship === 'OTHER' && !data.emergencyRelationshipOther?.trim()) {
+        if (data.emergencyContactRelationship === 'Lainnya' && !data.emergencyContactRelationshipOther?.trim()) {
             errors.push('Please specify other relationship');
-        }
-        
-        if (data.emergencyCountry === 'OTHER' && !data.emergencyCountryOther?.trim()) {
-            errors.push('Please specify other emergency contact country');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -362,22 +349,30 @@ const IndonesianPersonForm = () => {
     const validateDataPekerjaanStep = (data) => {
         const errors = [];
         
-        if (!data.employmentStatus?.trim()) {
-            errors.push('Employment status is required');
+        // Check for jenisPekerjaan (employment type in Indonesian form)
+        if (!data.jenisPekerjaan?.trim()) {
+            errors.push('Jenis Pekerjaan is required');
         }
         
-        // If employed, validate employment details
-        if (data.employmentStatus === 'EMPLOYED' || data.employmentStatus === 'ENTREPRENEUR') {
+        // If "Lainnya" (Other) is selected, check if other field is filled
+        if (data.jenisPekerjaan === 'Lainnya' && !data.jenisPekerjaanOther?.trim()) {
+            errors.push('Please specify other employment type');
+        }
+        
+        // If employment type requires company details, validate those fields
+        if (data.jenisPekerjaan === 'Swasta' || data.jenisPekerjaan === 'Wiraswasta' || 
+            data.jenisPekerjaan === 'Profesional' || data.jenisPekerjaan === 'ASN') {
+            
             const employmentFields = [
-                { field: 'companyName', label: 'Company Name' },
-                { field: 'businessNature', label: 'Nature of Business' },
-                { field: 'jobPosition', label: 'Job Position' },
-                { field: 'officeAddress', label: 'Office Address' },
-                { field: 'officeCity', label: 'Office City' },
-                { field: 'officePostalCode', label: 'Office Postal Code' },
-                { field: 'officeCountry', label: 'Office Country' },
-                { field: 'monthlyIncome', label: 'Monthly Income' },
-                { field: 'annualIncome', label: 'Annual Income' }
+                { field: 'namaPerusahaan', label: 'Nama Perusahaan' },
+                { field: 'bidangUsaha', label: 'Bidang Usaha' },
+                { field: 'jabatan', label: 'Jabatan' },
+                { field: 'lamaBekerja', label: 'Lama Bekerja' },
+                { field: 'kantorSebelumnya', label: 'Kantor Sebelumnya' },
+                { field: 'alamatKantor', label: 'Alamat Kantor' },
+                { field: 'kotaKantor', label: 'Kota Kantor' },
+                { field: 'postalCodeKantor', label: 'Postal Code Kantor' },
+                { field: 'noTeleponKantor', label: 'No. Telepon Kantor' }
             ];
             
             employmentFields.forEach(({ field, label }) => {
@@ -385,10 +380,6 @@ const IndonesianPersonForm = () => {
                     errors.push(`${label} is required`);
                 }
             });
-            
-            if (data.officeCountry === 'OTHER' && !data.officeCountryOther?.trim()) {
-                errors.push('Please specify other office country');
-            }
         }
         
         return { isValid: errors.length === 0, errors };
@@ -396,17 +387,13 @@ const IndonesianPersonForm = () => {
 
     const validateDaftarKekayaanStep = (data) => {
         const errors = [];
-        const requiredFields = [
-            { field: 'estimatedNetWorth', label: 'Estimated Net Worth' },
-            { field: 'liquidAssets', label: 'Liquid Assets' },
-            { field: 'annualIncomeSource', label: 'Annual Income Source' }
-        ];
         
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
+        // Only check required field: penghasilanPertahun (annual income)
+        if (!data.penghasilanPertahun?.trim()) {
+            errors.push('Penghasilan Pertahun is required');
+        }
+        
+        // Other fields (lokasiRumah, nilaiNJOP, bankDeposit, jumlah, lainnya) are optional
         
         return { isValid: errors.length === 0, errors };
     };
@@ -419,13 +406,11 @@ const IndonesianPersonForm = () => {
         } else {
             data.bankAccounts.forEach((account, index) => {
                 const bankRequiredFields = [
-                    { field: 'bankName', label: `Bank ${index + 1} - Bank Name` },
-                    { field: 'accountName', label: `Bank ${index + 1} - Account Name` },
-                    { field: 'bankAddress', label: `Bank ${index + 1} - Bank Address` },
-                    { field: 'bankCity', label: `Bank ${index + 1} - Bank City` },
-                    { field: 'bankCountry', label: `Bank ${index + 1} - Bank Country` },
-                    { field: 'swiftCode', label: `Bank ${index + 1} - SWIFT Code` },
-                    { field: 'accountNo', label: `Bank ${index + 1} - Account Number` }
+                    { field: 'namaBank', label: `Bank ${index + 1} - Nama Bank` },
+                    { field: 'cabang', label: `Bank ${index + 1} - Cabang` },
+                    { field: 'noRekening', label: `Bank ${index + 1} - No. Rekening` },
+                    { field: 'namaPemilikRekening', label: `Bank ${index + 1} - Nama Pemilik Rekening` },
+                    { field: 'bankAccountType', label: `Bank ${index + 1} - Jenis Rekening Bank` }
                 ];
                 
                 bankRequiredFields.forEach(({ field, label }) => {
@@ -434,8 +419,9 @@ const IndonesianPersonForm = () => {
                     }
                 });
                 
-                if (account.bankCountry === 'OTHER' && !account.bankCountryOther?.trim()) {
-                    errors.push(`Bank ${index + 1} - Please specify other country`);
+                // If "LAINNYA" (Other) is selected for bank account type, check the other field
+                if (account.bankAccountType === 'LAINNYA' && !account.bankAccountTypeOther?.trim()) {
+                    errors.push(`Bank ${index + 1} - Please specify other account type`);
                 }
             });
         }
@@ -446,8 +432,31 @@ const IndonesianPersonForm = () => {
     const validateDocumentUploadStep = (data) => {
         const errors = [];
         
-        if (!data.documentsUploaded) {
+        // List of required documents for Indonesian Person
+        const requiredDocuments = [
+            "Rekening Koran / Tagihan Kartu Kredit",
+            "Rekening Listrik / Telepon", 
+            "Foto Terkini",
+            "Identify No. (KTP)",
+            "NPWP"
+        ];
+        
+        // Check if uploadedFiles exists
+        if (!data.uploadedFiles) {
             errors.push('Please upload all required documents before proceeding');
+            return { isValid: false, errors };
+        }
+        
+        // Check each required document
+        const missingDocuments = [];
+        requiredDocuments.forEach(docName => {
+            if (!data.uploadedFiles[docName] || !data.uploadedFiles[docName].name) {
+                missingDocuments.push(docName);
+            }
+        });
+        
+        if (missingDocuments.length > 0) {
+            errors.push(`Missing required documents: ${missingDocuments.join(', ')}`);
         }
         
         return { isValid: errors.length === 0, errors };
@@ -456,8 +465,9 @@ const IndonesianPersonForm = () => {
     const validateDeclarationStep = (data) => {
         const errors = [];
         
-        if (!data.companyProfileAgreement) {
-            errors.push('Please acknowledge the company profile agreement');
+        // Check if the declaration radio button is set to "ya" (Yes)
+        if (!data.declaration) {
+            errors.push('Please acknowledge the company profile agreement by selecting "Ya"');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -466,21 +476,23 @@ const IndonesianPersonForm = () => {
     const validateTradingSimulationStep = (data) => {
         const errors = [];
         
-        if (!data.tradingSimulationAgreement) {
-            errors.push('Please acknowledge the trading simulation agreement');
+        // Check if the trading simulation radio button is set to "ya" (Yes)
+        if (!data.tradingSimulation) {
+            errors.push('Please acknowledge the trading simulation agreement by selecting "Ya"');
         }
         
-        if (!data.tradingExperience?.trim()) {
+        // Check if trading experience is selected
+        if (!data.tradingExperience) {
             errors.push('Trading experience information is required');
         }
         
         // If has experience, validate additional fields
-        if (data.tradingExperience === 'YES') {
-            if (!data.brokerName?.trim()) {
-                errors.push('Previous broker name is required');
+        if (data.tradingExperience === 'ya') {
+            if (!data.brokerCompany?.trim()) {
+                errors.push('Previous broker company name is required');
             }
-            if (!data.tradingAccountNumber?.trim()) {
-                errors.push('Previous trading account number is required');
+            if (!data.demoAccountNumber?.trim()) {
+                errors.push('Previous demo account number is required');
             }
         }
         
@@ -490,8 +502,9 @@ const IndonesianPersonForm = () => {
     const validateDisclosureStatementStep = (data) => {
         const errors = [];
         
-        if (!data.disclosureStatementAgreement) {
-            errors.push('Please acknowledge the disclosure statement');
+        // Check if the disclosure statement radio button is set to "ya" (Yes)
+        if (!data.disclosureStatement) {
+            errors.push('Please acknowledge the disclosure statement by selecting "Ya"');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -499,11 +512,11 @@ const IndonesianPersonForm = () => {
 
     const validateRiskDisclosureDocumentStep = (data) => {
         const errors = [];
-        
+
         const requiredRiskStatements = [
-            'riskStatement1', 'riskStatement2', 'riskStatement3', 'riskStatement4', 'riskStatement5',
-            'riskStatement6', 'riskStatement7', 'riskStatement8', 'riskStatement9', 'riskStatement10',
-            'riskStatement11', 'riskStatement12', 'riskStatement13', 'riskStatement14'
+            'point1', 'point2', 'point3', 'point4', 'point5',
+            'point6', 'point7', 'point8', 'point9', 'point10',
+            'point11', 'point12', 'point13', 'point14'
         ];
         
         requiredRiskStatements.forEach((statement, index) => {
@@ -518,7 +531,7 @@ const IndonesianPersonForm = () => {
     const validateAdditionalDisclosureStep = (data) => {
         const errors = [];
         
-        if (!data.additionalDisclosureAgreement) {
+        if (!data.additionalDisclosureStatement) {
             errors.push('Please acknowledge the additional disclosure statement');
         }
         
@@ -538,8 +551,18 @@ const IndonesianPersonForm = () => {
     const validateTradingRulesStep = (data) => {
         const errors = [];
         
-        if (!data.tradingRulesAgreement) {
+        if (!data.tradingRulesAcceptance) {
             errors.push('Please acknowledge the PALN trading rules');
+        }
+        
+        return { isValid: errors.length === 0, errors };
+    };
+
+    const validateNewFundDeclarationStep = (data) => {
+        const errors = [];
+        
+        if (data.newFundDeclarationAcceptance !== 'yes') {
+            errors.push('Please acknowledge the personal fund ownership declaration by selecting "Ya"');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -548,8 +571,8 @@ const IndonesianPersonForm = () => {
     const validateFundDeclarationStep = (data) => {
         const errors = [];
         
-        if (!data.fundDeclarationAgreement) {
-            errors.push('Please acknowledge the personal fund ownership declaration');
+        if (data.fundDeclarationAcceptance !== 'yes') {
+            errors.push('Please acknowledge the fund declaration by selecting "Ya"');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -558,7 +581,7 @@ const IndonesianPersonForm = () => {
     const validateAccessCodeResponsibilityStep = (data) => {
         const errors = [];
         
-        if (!data.accessCodeResponsibilityAgreement) {
+        if (!data.accessCodeResponsibilityAcceptance) {
             errors.push('Please acknowledge the personal access password responsibility statement');
         }
         
@@ -598,13 +621,85 @@ const IndonesianPersonForm = () => {
         console.log(`Moving to step ${step}`, data);
     };
 
-    const handleSubmit = (data) => {
-        console.log('Submitting Indonesian Person KYC:', data);
-        showNotification({
-            title: 'Success',
-            message: 'Indonesian Person KYC submitted successfully!',
-            type: 'success'
-        });
+    const handleSubmit = async (allFormData) => {
+        try {
+            console.log('Submitting Indonesian Person KYC:', allFormData);
+            
+            // Show loading notification
+            showNotification({
+                title: 'Processing',
+                message: 'Submitting your KYC application...',
+                type: 'info'
+            });
+            
+            // Flatten all form data from all steps
+            const flattenedData = Object.values(allFormData).reduce((acc, curr) => {
+                return { ...acc, ...curr };
+            }, {});
+            
+            console.log('Flattened data before submission:', flattenedData);
+            
+            // Create FormData object to handle file uploads
+            const formData = new FormData();
+            
+            // Add all form fields to FormData
+            Object.keys(flattenedData).forEach(key => {
+                const value = flattenedData[key];
+                
+                // Handle file uploads
+                if (key === 'uploadedFiles' && value) {
+                    Object.keys(value).forEach(fileName => {
+                        const fileData = value[fileName];
+                        if (fileData && fileData.file instanceof File) {
+                            formData.append('files', fileData.file);
+                            formData.append(`fileMetadata_${fileName}`, JSON.stringify({
+                                documentType: fileName,
+                                originalName: fileData.name
+                            }));
+                        }
+                    });
+                } else if (value !== null && value !== undefined && value !== '') {
+                    // Handle array data (like bank accounts)
+                    if (Array.isArray(value)) {
+                        formData.append(key, JSON.stringify(value));
+                    } else {
+                        formData.append(key, value);
+                    }
+                }
+            });
+            
+            // Log FormData contents for debugging
+            for (let [key, value] of formData.entries()) {
+                console.log(`FormData: ${key}:`, value);
+            }
+            
+            // Submit using AuthService (same pattern as other forms)
+            const response = await AuthService.submitIndonesianPersonKYC(formData);
+            
+            if (response.success) {
+                showNotification({
+                    title: 'Success',
+                    message: `Indonesian Person KYC submitted successfully! Application Reference: ${response.data.applicationReference || response.data.applicationId}`,
+                    type: 'success'
+                });
+                
+                console.log('Submission successful:', response);
+                
+                // Optionally clear the form
+                setFormData({});
+            } else {
+                throw new Error(response.message || 'Submission failed');
+            }
+            
+        } catch (error) {
+            console.error('Error submitting Indonesian Person KYC:', error);
+            
+            showNotification({
+                title: 'Submission Failed',
+                message: error.message || 'An error occurred while submitting your Indonesian Person KYC application. Please try again.',
+                type: 'error'
+            });
+        }
     };
 
     // Function to map current step to progress step
@@ -1507,6 +1602,9 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
         bankAccountTypeOther: ''
     }]);
 
+    // Debug: Log current bank accounts state
+    console.log('Current bank accounts:', bankAccounts);
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
@@ -1532,8 +1630,10 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
     };
 
     const updateBankAccount = (index, field, value) => {
+        console.log(`Updating bank account ${index}, field: ${field}, value: ${value}`);
         const newAccounts = [...bankAccounts];
         newAccounts[index] = { ...newAccounts[index], [field]: value };
+        console.log('Updated accounts:', newAccounts);
         setBankAccounts(newAccounts);
         onChange({ ...data, bankAccounts: newAccounts });
     };
@@ -1547,7 +1647,7 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
 
             <Form>
                 {bankAccounts.map((account, index) => (
-                    <Card key={index} className="mb-3 border-0 shadow-sm">
+                    <Card key={`bank-account-${index}`} className="mb-3 border-0 shadow-sm">
                         <Card.Header className="bg-light border-0 py-2 d-flex justify-content-between align-items-center">
                             <h6 className="mb-0 text-primary">Bank Account {index + 1}</h6>
                             {bankAccounts.length > 1 && (
@@ -1632,12 +1732,20 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                     <Form.Group className="mb-3">
                                         <Form.Label className="text-muted">Jenis Rekening Bank <span className="text-danger">*</span></Form.Label>
                                         <Form.Select
-                                            value={account.bankAccountType}
+                                            value={account.bankAccountType || ''}
                                             onChange={(e) => {
-                                                updateBankAccount(index, 'bankAccountType', e.target.value);
-                                                if (e.target.value !== 'LAINNYA') {
-                                                    updateBankAccount(index, 'bankAccountTypeOther', '');
-                                                }
+                                                console.log('Bank account type changed:', e.target.value);
+                                                const newValue = e.target.value;
+                                                
+                                                // Update both fields in a single operation to avoid state conflicts
+                                                const newAccounts = [...bankAccounts];
+                                                newAccounts[index] = { 
+                                                    ...newAccounts[index], 
+                                                    bankAccountType: newValue,
+                                                    bankAccountTypeOther: newValue !== 'LAINNYA' ? '' : newAccounts[index].bankAccountTypeOther
+                                                };
+                                                setBankAccounts(newAccounts);
+                                                onChange({ ...data, bankAccounts: newAccounts });
                                             }}
                                             required
                                         >
@@ -1982,6 +2090,11 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
 };
 
 const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => {
+    // Flatten all form data from all steps into a single object
+    const flattenedData = Object.values(allData).reduce((acc, curr) => {
+        return { ...acc, ...curr };
+    }, {});
+
     return (
         <div>
             <Card className="border-0 shadow-sm mb-4">
@@ -1993,32 +2106,32 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                     
                     <Row className="mb-3">
                         <Col md={4}><strong>Nama Lengkap</strong></Col>
-                        <Col md={8}>: {allData.namaLengkap || 'Not provided'}</Col>
+                        <Col md={8}>: {flattenedData.namaLengkap || 'Not provided'}</Col>
                     </Row>
                     
                     <Row className="mb-3">
                         <Col md={4}><strong>Tempat Lahir & Tgl. Lahir</strong></Col>
-                        <Col md={8}>: {allData.tempatLahir || 'Not provided'}, {allData.tanggalLahir || 'Not provided'}</Col>
+                        <Col md={8}>: {flattenedData.tempatLahir || 'Not provided'}, {flattenedData.tanggalLahir || 'Not provided'}</Col>
                     </Row>
                     
                     <Row className="mb-3">
                         <Col md={4}><strong>Alamat</strong></Col>
-                        <Col md={8}>: {`${allData.streetAddress || ''}, ${allData.city || ''}, ${allData.postalCode || ''}`.trim() || 'Not provided'}</Col>
+                        <Col md={8}>: {`${flattenedData.streetAddress || ''}, ${flattenedData.city || ''}, ${flattenedData.postalCode || ''}`.trim() || 'Not provided'}</Col>
                     </Row>
                     
                     <Row className="mb-3">
                         <Col md={4}><strong>Kota & Kode Pos</strong></Col>
-                        <Col md={8}>: {`${allData.city || ''}, ${allData.postalCode || ''}`.trim() || 'Not provided'}</Col>
+                        <Col md={8}>: {`${flattenedData.city || ''}, ${flattenedData.postalCode || ''}`.trim() || 'Not provided'}</Col>
                     </Row>
                     
                     <Row className="mb-3">
                         <Col md={4}><strong>No. KTP</strong></Col>
-                        <Col md={8}>: {allData.noKTP || 'Not provided'}</Col>
+                        <Col md={8}>: {flattenedData.noKTP || 'Not provided'}</Col>
                     </Row>
                     
                     <Row className="mb-4">
                         <Col md={4}><strong>No. Akun Demo</strong></Col>
-                        <Col md={8}>: {allData.demoAccountNo || 'Not selected'}</Col>
+                        <Col md={8}>: {flattenedData.demoAccountNo || 'Not selected'}</Col>
                     </Row>
                     
                     <div className="mb-4">

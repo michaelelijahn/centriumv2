@@ -1193,10 +1193,508 @@ const getIndonesianCompanyDocumentCategoryAndType = (fieldName) => {
     return documentMapping[fieldName] || documentMapping.default;
 };
 
+const submitIndonesianPersonKYC = async (req, res, next) => {
+    const connection = await pool.getConnection();
+    
+    try {
+        debugLog('=== INDONESIAN PERSON KYC SUBMISSION STARTED ===');
+        debugLog(`Authorization header: ${req.headers['authorization']}`);
+        debugLog(`req.user: ${JSON.stringify(req.user)}`);
+        
+        const user_id = req.user?.userId; // From authenticateToken middleware (JWT contains userId, not user_id)
+        
+        // Check if user is authenticated
+        if (!user_id) {
+            debugLog('ERROR: User not authenticated - req.user is undefined');
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required. Please log in again.'
+            });
+        }
+        
+        const formData = req.body;
+        const files = req.files || []; // With upload.any(), files is an array
+        
+        // Parse JSON strings from FormData
+        Object.keys(formData).forEach(key => {
+            if (typeof formData[key] === 'string') {
+                try {
+                    // Try to parse as JSON (for bankAccounts array, etc.)
+                    formData[key] = JSON.parse(formData[key]);
+                } catch (e) {
+                    // Keep as string if not valid JSON
+                }
+            }
+        });
+        
+        debugLog(`User ID: ${user_id}, Form Data: ${JSON.stringify(formData)}`);
+        debugLog(`Files received: ${files.length}`);
+        
+        // Debug: Check for undefined values
+        const checkForUndefined = (obj, prefix = '') => {
+            Object.keys(obj).forEach(key => {
+                if (obj[key] === undefined) {
+                    debugLog(`WARNING: ${prefix}${key} is undefined`);
+                } else if (obj[key] === null) {
+                    debugLog(`INFO: ${prefix}${key} is null (OK)`);
+                } else if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+                    checkForUndefined(obj[key], `${prefix}${key}.`);
+                }
+            });
+        };
+        
+        debugLog('=== CHECKING FOR UNDEFINED VALUES ===');
+        checkForUndefined(formData);
+        
+        if (formData.bankAccounts && Array.isArray(formData.bankAccounts)) {
+            formData.bankAccounts.forEach((account, index) => {
+                debugLog(`=== CHECKING BANK ACCOUNT ${index + 1} ===`);
+                checkForUndefined(account, `bankAccount[${index}].`);
+            });
+        }
+        
+        await connection.beginTransaction();
+        
+        // 1. Create master KYC application
+        const applicationReference = `IP-${Date.now()}-${user_id}`;
+        const [applicationResult] = await connection.execute(
+            `INSERT INTO kyc_applications 
+             (user_id, form_type, status, current_step, total_steps, application_reference, submitted_at) 
+             VALUES (?, 'indonesian_person', 'submitted', 19, 19, ?, NOW())`,
+            [user_id, applicationReference]
+        );
+        
+        const applicationId = applicationResult.insertId;
+        debugLog(`Created application with ID: ${applicationId}`);
+        
+        // 2. Insert email registration data
+        debugLog(`=== INSERTING EMAIL DATA ===`);
+        debugLog(`Email: ${formData.email}, Demo Account: ${formData.demoAccountNo}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_person_email (application_id, email, demo_account_no) 
+             VALUES (?, ?, ?)`,
+            [applicationId, safeValue(formData.email), safeValue(formData.demoAccountNo)]
+        );
+        
+        // 3. Insert personal details with Indonesian-to-English field mapping
+        debugLog(`=== INSERTING PERSONAL DETAILS ===`);
+        
+        // Map Indonesian form fields to English database fields
+        const mapGender = (jenisKelamin) => {
+            const mapping = {
+                // Indonesian values
+                'Laki-laki': 'LAKI_LAKI',
+                'Perempuan': 'PEREMPUAN',
+                // English values (from frontend)
+                'Male': 'LAKI_LAKI',
+                'Female': 'PEREMPUAN'
+            };
+            return mapping[jenisKelamin] || jenisKelamin;
+        };
+        
+        const mapMaritalStatus = (statusPerkawinan) => {
+            const mapping = {
+                // Indonesian values
+                'Belum Kawin': 'BELUM_KAWIN',
+                'Kawin': 'KAWIN',
+                'Cerai': 'CERAI',
+                'Janda/Duda': 'JANDA_DUDA',
+                // English values (from frontend)
+                'Single': 'BELUM_KAWIN',
+                'Married': 'KAWIN',
+                'Divorced': 'CERAI',
+                'Widowed': 'JANDA_DUDA'
+            };
+            return mapping[statusPerkawinan] || statusPerkawinan;
+        };
+        
+        const mapHomeOwnership = (statusKepemilikanRumah) => {
+            const mapping = {
+                // Indonesian values (already correct from frontend)
+                'Pribadi': 'PRIBADI',
+                'Keluarga': 'KELUARGA',
+                'Sewa/Kontrak': 'SEWA_KONTRAK',
+                'Lainnya': 'LAINNYA'
+            };
+            return mapping[statusKepemilikanRumah] || statusKepemilikanRumah;
+        };
+        
+        const mapAccountPurpose = (tujuanPembukaanRekening) => {
+            const mapping = {
+                // Indonesian values (need to check what frontend sends)
+                'Lindung Nilai': 'LINDUNG_NILAI',
+                'Keuntungan': 'KEUNTUNGAN', 
+                'Spekulasi': 'SPEKULASI',
+                'Lainnya': 'LAINNYA'
+            };
+            return mapping[tujuanPembukaanRekening] || tujuanPembukaanRekening;
+        };
+        
+        const mapInvestmentExperience = (pengalamanInvestasi) => {
+            const mapping = {
+                // Indonesian values
+                'Ya, di bidang': 'YA',
+                'Ya': 'YA',
+                'Tidak': 'TIDAK',
+                // English values (from frontend)
+                'Yes': 'YA',
+                'None': 'TIDAK'
+            };
+            return mapping[pengalamanInvestasi] || pengalamanInvestasi;
+        };
+        
+        const mapYesNo = (value) => {
+            const mapping = {
+                // Indonesian values
+                'Ya': 'YA',
+                'Tidak': 'TIDAK',
+                // English values (from frontend)
+                'Yes': 'YA',
+                'No': 'TIDAK'
+            };
+            return mapping[value] || value;
+        };
+        
+        const personalDetailsParams = [
+            applicationId,
+            safeValue(formData.namaLengkap), // full_name
+            safeValue(formData.tempatLahir), // place_of_birth
+            safeValue(formData.tanggalLahir), // date_of_birth
+            safeValue(formData.noKTP), // id_card_no
+            safeValue(formData.noNPWP), // npwp_no
+            mapGender(safeValue(formData.jenisKelamin)), // gender
+            safeValue(formData.namaIbuKandung), // mother_name
+            mapMaritalStatus(safeValue(formData.statusPerkawinan)), // marital_status
+            safeValue(formData.namaIstriSuami), // spouse_name
+            safeValue(formData.streetAddress), // street_address
+            safeValue(formData.city), // city
+            safeValue(formData.postalCode), // postal_code
+            safeValue(formData.noTelephoneRumah), // home_phone_no
+            safeValue(formData.noHandphone), // mobile_phone_no
+            safeValue(formData.noFaksimiliRumah), // home_fax_no
+            mapHomeOwnership(safeValue(formData.statusKepemilikanRumah)), // home_ownership_status
+            safeValue(formData.statusKepemilikanRumahOther), // home_ownership_status_other
+            mapAccountPurpose(safeValue(formData.tujuanPembukaanRekening)), // account_opening_purpose
+            safeValue(formData.tujuanPembukaanRekeningOther), // account_opening_purpose_other
+            mapInvestmentExperience(safeValue(formData.pengalamanInvestasi)), // investment_experience
+            safeValue(formData.pengalamanInvestasiBidang), // investment_experience_details
+            mapYesNo(safeValue(formData.anggotaKeluargaBAPPEBTI)), // family_in_bappebti
+            mapYesNo(safeValue(formData.pernahPailit)) // declared_bankrupt
+        ];
+        
+        debugLog(`Personal details params: ${JSON.stringify(personalDetailsParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_person_details (
+                application_id, full_name, place_of_birth, date_of_birth, id_card_no, npwp_no,
+                gender, mother_name, marital_status, spouse_name, street_address, city, postal_code,
+                home_phone_no, mobile_phone_no, home_fax_no, home_ownership_status, home_ownership_status_other,
+                account_opening_purpose, account_opening_purpose_other, investment_experience, investment_experience_details,
+                family_in_bappebti, declared_bankrupt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            personalDetailsParams
+        );
+        
+        // 4. Insert emergency contact details
+        debugLog(`=== INSERTING EMERGENCY CONTACT DETAILS ===`);
+        
+        const mapRelationship = (emergencyContactRelationship) => {
+            const mapping = {
+                'Pasangan': 'PASANGAN',
+                'Keluarga': 'KELUARGA',
+                'Anak': 'ANAK',
+                'Lainnya': 'LAINNYA'
+            };
+            return mapping[emergencyContactRelationship] || emergencyContactRelationship;
+        };
+        
+        const emergencyContactParams = [
+            applicationId,
+            safeValue(formData.emergencyContactName),
+            safeValue(formData.emergencyContactPhone),
+            safeValue(formData.emergencyContactStreetAddress),
+            safeValue(formData.emergencyContactCity),
+            safeValue(formData.emergencyContactPostalCode),
+            mapRelationship(safeValue(formData.emergencyContactRelationship)),
+            safeValue(formData.emergencyContactRelationshipOther)
+        ];
+        
+        debugLog(`Emergency contact params: ${JSON.stringify(emergencyContactParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_person_emergency_contact (
+                application_id, emergency_contact_name, emergency_contact_phone,
+                emergency_contact_street_address, emergency_contact_city, emergency_contact_postal_code,
+                emergency_contact_relationship, emergency_contact_relationship_other
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            emergencyContactParams
+        );
+        
+        // 5. Insert employment details
+        debugLog(`=== INSERTING EMPLOYMENT DETAILS ===`);
+        
+        const mapEmploymentType = (jenisPekerjaan) => {
+            const mapping = {
+                'Swasta': 'SWASTA',
+                'Wiraswasta': 'WIRASWASTA',
+                'Ibu RT': 'IBU_RT',
+                'Profesional': 'PROFESIONAL',
+                'ASN': 'ASN',
+                'Mahasiswa': 'MAHASISWA',
+                'Lainnya': 'LAINNYA'
+            };
+            return mapping[jenisPekerjaan] || jenisPekerjaan;
+        };
+        
+        const employmentParams = [
+            applicationId,
+            mapEmploymentType(safeValue(formData.jenisPekerjaan)), // employment_type
+            safeValue(formData.jenisPekerjaanOther), // employment_type_other
+            safeValue(formData.namaPerusahaan), // company_name
+            safeValue(formData.bidangUsaha), // business_field
+            safeValue(formData.jabatan), // position
+            safeValue(formData.lamaBekerja), // length_of_work
+            safeValue(formData.perusahaanSebelumnya), // previous_company
+            safeValue(formData.alamatKantor), // office_street_address
+            safeValue(formData.kotaKantor), // office_city
+            safeValue(formData.kodeposKantor), // office_postal_code
+            safeValue(formData.countryCodeKantor), // office_phone_country_code
+            safeValue(formData.noTelephoneKantor), // office_phone_no
+            safeValue(formData.noFaksimiliKantor) // office_fax_no
+        ];
+        
+        debugLog(`Employment params: ${JSON.stringify(employmentParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_person_employment (
+                application_id, employment_type, employment_type_other, company_name, business_field,
+                position, length_of_work, previous_company, office_street_address, office_city,
+                office_postal_code, office_phone_country_code, office_phone_no, office_fax_no
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            employmentParams
+        );
+        
+        // 6. Insert assets information
+        debugLog(`=== INSERTING ASSETS INFORMATION ===`);
+        
+        const mapAnnualIncome = (penghasilanPertahun) => {
+            const mapping = {
+                'Antara 100 - 250 juta rupiah': '100_250_JUTA',
+                'Antara 250 - 500 juta rupiah': '250_500_JUTA',
+                'Di atas 500 juta rupiah': 'ABOVE_500_JUTA'
+            };
+            return mapping[penghasilanPertahun] || penghasilanPertahun;
+        };
+        
+        const assetsParams = [
+            applicationId,
+            mapAnnualIncome(safeValue(formData.penghasilanPertahun)), // annual_income
+            safeValue(formData.lokasiRumah), // home_location
+            safeValue(formData.nilaiNJOP), // njop_value
+            safeValue(formData.bankDeposit), // bank_deposit
+            safeValue(formData.jumlahTotal), // total_amount
+            safeValue(formData.kekayaanLain) // other_assets
+        ];
+        
+        debugLog(`Assets params: ${JSON.stringify(assetsParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_indonesian_person_assets (
+                application_id, annual_income, home_location, njop_value,
+                bank_deposit, total_amount, other_assets
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            assetsParams
+        );
+        
+        // 7. Insert bank accounts (reuse existing table with Indonesian-specific fields)
+        if (formData.bankAccounts && Array.isArray(formData.bankAccounts)) {
+            debugLog(`=== INSERTING ${formData.bankAccounts.length} BANK ACCOUNTS ===`);
+            for (let i = 0; i < formData.bankAccounts.length; i++) {
+                const account = formData.bankAccounts[i];
+                
+                const mapBankAccountType = (bankAccountType) => {
+                    const mapping = {
+                        'Giro': 'GIRO',
+                        'Tabungan': 'TABUNGAN',
+                        'Lainnya': 'LAINNYA'
+                    };
+                    return mapping[bankAccountType] || bankAccountType;
+                };
+                
+                const bankAccountParams = [
+                    applicationId,
+                    safeValue(account.namaBank), // bank_name
+                    safeValue(account.namaPemilikRekening), // account_name
+                    safeValue(account.cabang || ''), // bank_address (using branch as address)
+                    safeValue(account.cabang || 'Jakarta'), // bank_city (using branch, default Jakarta)
+                    safeValue(account.bankCountry || 'ID'), // bank_country (default Indonesia)
+                    safeValue(account.bankCountryOther), // bank_country_other
+                    safeValue(account.swiftCode || ''), // swift_code
+                    safeValue(account.noRekening), // account_no
+                    i + 1, // account_order
+                    safeValue(account.namaPemilikRekening), // account_holder_name (duplicate for compatibility)
+                    safeValue(account.countryCodeBank || '+62'), // bank_telephone_country_code
+                    safeValue(account.noTeleponBank), // bank_telephone_no
+                    mapBankAccountType(safeValue(account.bankAccountType)), // bank_account_type
+                    safeValue(account.bankAccountTypeOther) // bank_account_type_other
+                ];
+                
+                debugLog(`Bank account ${i + 1} params: ${JSON.stringify(bankAccountParams)}`);
+                await connection.execute(
+                    `INSERT INTO kyc_bank_accounts (
+                        application_id, bank_name, account_name, bank_address, bank_city,
+                        bank_country, bank_country_other, swift_code, account_no, account_order,
+                        account_holder_name, bank_telephone_country_code, bank_telephone_no,
+                        bank_account_type, bank_account_type_other
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    bankAccountParams
+                );
+            }
+        }
+        
+        // 8. Handle document uploads (reuse existing table)
+        const documentUploads = [];
+        for (const file of files) {
+            if (file) {
+                try {
+                    // Upload to S3
+                    const fileName = `kyc/${applicationId}/${Date.now()}-${file.originalname}`;
+                    const s3Response = await uploadToS3(file.buffer, fileName, file.mimetype);
+                    
+                    // Determine document category and type based on field name for Indonesian Person
+                    const { category, type } = getIndonesianPersonDocumentCategoryAndType(file.fieldname);
+                    
+                    await connection.execute(
+                        `INSERT INTO kyc_documents (
+                            application_id, document_category, document_type, original_filename,
+                            stored_filename, file_path, file_size, mime_type
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            applicationId,
+                            category,
+                            type,
+                            file.originalname,
+                            fileName,
+                            s3Response.Location,
+                            file.size,
+                            file.mimetype
+                        ]
+                    );
+                    
+                    documentUploads.push({
+                        fieldName: file.fieldname,
+                        originalName: file.originalname,
+                        uploadedPath: s3Response.Location
+                    });
+                } catch (uploadError) {
+                    debugLog(`Error uploading file ${file.fieldname}: ${uploadError.message}`);
+                    throw new Error(`Failed to upload document: ${file.originalname}`);
+                }
+            }
+        }
+        
+        // 9. Insert agreements (Indonesian Person specific agreements - simplified approach using kyc_agreements table)
+        const agreementTypes = [
+            'company_profile',
+            'statement_simulation', 
+            'statement_experience',
+            'disclosure_statement',
+            'account_opening',
+            'risk_disclosure',
+            'mandate_agreement',
+            'trading_rules',
+            'personal_access_password'
+        ];
+        
+        const agreementUrls = {
+            company_profile: 'https://drive.google.com/file/d/company_profile_indonesian_person',
+            statement_simulation: 'https://drive.google.com/file/d/statement_simulation_indonesian_person',
+            statement_experience: 'https://drive.google.com/file/d/statement_experience_indonesian_person',
+            disclosure_statement: 'https://drive.google.com/file/d/disclosure_statement_indonesian_person',
+            account_opening: 'https://drive.google.com/file/d/account_opening_indonesian_person',
+            risk_disclosure: 'https://drive.google.com/file/d/risk_disclosure_indonesian_person',
+            mandate_agreement: 'https://drive.google.com/file/d/mandate_agreement_indonesian_person',
+            trading_rules: 'https://drive.google.com/file/d/trading_rules_indonesian_person',
+            personal_access_password: 'https://drive.google.com/file/d/personal_access_password_indonesian_person'
+        };
+        
+        debugLog(`=== INSERTING AGREEMENTS ===`);
+        for (const agreementType of agreementTypes) {
+            const isAgreed = formData[agreementType] === true;
+            const agreementParams = [
+                applicationId,
+                agreementType,
+                isAgreed,
+                isAgreed ? new Date() : null,
+                safeValue(agreementUrls[agreementType])
+            ];
+            
+            debugLog(`Agreement ${agreementType}: ${isAgreed}, params: ${JSON.stringify(agreementParams)}`);
+            await connection.execute(
+                `INSERT INTO kyc_agreements (
+                    application_id, agreement_type, agreed, agreed_at, document_url
+                ) VALUES (?, ?, ?, ?, ?)`,
+                agreementParams
+            );
+        }
+        
+        await connection.commit();
+        debugLog(`Successfully submitted Indonesian Person KYC application ${applicationId}`);
+        
+        res.json({
+            success: true,
+            data: {
+                applicationId,
+                applicationReference,
+                message: 'Indonesian Person KYC application submitted successfully',
+                documentsUploaded: documentUploads.length,
+                documentDetails: documentUploads
+            }
+        });
+        
+    } catch (error) {
+        await connection.rollback();
+        debugLog(`Error in Indonesian Person KYC submission: ${error.message}`);
+        debugLog(`Error stack: ${error.stack}`);
+        next(error);
+    } finally {
+        connection.release();
+        debugLog('=== INDONESIAN PERSON KYC SUBMISSION COMPLETED ===');
+    }
+};
+
+// Helper function to categorize documents based on field name for Indonesian Person
+const getIndonesianPersonDocumentCategoryAndType = (fieldName) => {
+    const documentMapping = {
+        // Personal Documents
+        'ktpFile': { category: 'Identity Documents', type: 'KTP (Identity Card)' },
+        'npwpFile': { category: 'Tax Documents', type: 'NPWP Document' },
+        'photoSelfieFile': { category: 'Identity Documents', type: 'Photo Selfie' },
+        
+        // Financial Documents
+        'bankStatementFile': { category: 'Financial Documents', type: 'Bank Account Statement' },
+        'creditCardBillFile': { category: 'Financial Documents', type: 'Credit Card Bill' },
+        
+        // Utility Documents
+        'electricityBillFile': { category: 'Utility Documents', type: 'Electricity Bill' },
+        'phoneBillFile': { category: 'Utility Documents', type: 'Phone Bill' },
+        
+        // Employment Documents
+        'employmentLetterFile': { category: 'Employment Documents', type: 'Employment Letter' },
+        'salarySlipFile': { category: 'Employment Documents', type: 'Salary Slip' },
+        
+        // Asset Documents
+        'assetDocumentFile': { category: 'Asset Documents', type: 'Asset Documentation' },
+        'propertyDocumentFile': { category: 'Asset Documents', type: 'Property Document' },
+        
+        // Generic fallback
+        default: { category: 'Other Documents', type: 'Supporting Document' }
+    };
+    
+    return documentMapping[fieldName] || documentMapping.default;
+};
+
 module.exports = {
     submitForeignCompanyKYC,
     submitForeignPersonKYC,
     submitIndonesianCompanyKYC,
+    submitIndonesianPersonKYC,
     getKYCApplicationStatus,
     getUserKYCApplications
 };

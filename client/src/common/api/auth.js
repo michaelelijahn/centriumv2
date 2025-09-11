@@ -104,6 +104,12 @@ function AuthService() {
         submitIndonesianCompanyKYC: (formData) => {
             return HttpClient.post('/kyc/indonesian-company/submit', formData);
         },
+        submitIndonesianPersonKYC: (formData) => {
+            return HttpClient.post('/kyc/indonesian-person/submit', formData);
+        },
+        submitRegulatedCompanyKYC: (formData) => {
+            return HttpClient.post('/kyc/regulated-company/submit', formData);
+        },
         getKYCApplications: () => {
             return HttpClient.get('/kyc/applications');
         },
