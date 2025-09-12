@@ -1690,11 +1690,304 @@ const getIndonesianPersonDocumentCategoryAndType = (fieldName) => {
     return documentMapping[fieldName] || documentMapping.default;
 };
 
+const submitRegulatedCompanyKYC = async (req, res, next) => {
+    const connection = await pool.getConnection();
+    
+    try {
+        debugLog('=== REGULATED COMPANY KYC SUBMISSION STARTED ===');
+        debugLog(`Authorization header: ${req.headers['authorization']}`);
+        debugLog(`req.user: ${JSON.stringify(req.user)}`);
+        
+        const user_id = req.user?.userId; // From authenticateToken middleware (JWT contains userId, not user_id)
+        
+        // Check if user is authenticated
+        if (!user_id) {
+            debugLog('ERROR: User not authenticated - req.user is undefined');
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required. Please log in again.'
+            });
+        }
+        const formData = req.body;
+        const files = req.files || []; // With upload.any(), files is an array
+        
+        // Parse JSON strings from FormData
+        Object.keys(formData).forEach(key => {
+            if (typeof formData[key] === 'string') {
+                try {
+                    // Try to parse as JSON (for bankAccounts array, etc.)
+                    formData[key] = JSON.parse(formData[key]);
+                } catch (e) {
+                    // Keep as string if not valid JSON
+                }
+            }
+        });
+        
+        debugLog(`User ID: ${user_id}, Form Data: ${JSON.stringify(formData)}`);
+        debugLog(`Files received: ${files.length}`);
+        
+        // Debug: Check for undefined values
+        const checkForUndefined = (obj, prefix = '') => {
+            Object.keys(obj).forEach(key => {
+                if (obj[key] === undefined) {
+                    debugLog(`WARNING: ${prefix}${key} is undefined`);
+                } else if (obj[key] === null) {
+                    debugLog(`INFO: ${prefix}${key} is null (OK)`);
+                } else if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+                    checkForUndefined(obj[key], `${prefix}${key}.`);
+                }
+            });
+        };
+        
+        debugLog('=== CHECKING FOR UNDEFINED VALUES ===');
+        checkForUndefined(formData);
+        
+        if (formData.bankAccounts && Array.isArray(formData.bankAccounts)) {
+            formData.bankAccounts.forEach((account, index) => {
+                debugLog(`=== CHECKING BANK ACCOUNT ${index + 1} ===`);
+                checkForUndefined(account, `bankAccount[${index}].`);
+            });
+        }
+        
+        await connection.beginTransaction();
+        
+        // 1. Create master KYC application
+        const applicationReference = `RC-${Date.now()}-${user_id}`;
+        const [applicationResult] = await connection.execute(
+            `INSERT INTO kyc_applications 
+             (user_id, form_type, status, current_step, total_steps, application_reference, submitted_at) 
+             VALUES (?, 'regulated_company', 'submitted', 6, 6, ?, NOW())`,
+            [user_id, applicationReference]
+        );
+        
+        const applicationId = applicationResult.insertId;
+        debugLog(`Created application with ID: ${applicationId}`);
+        
+        // 2. Insert email registration data
+        debugLog(`=== INSERTING EMAIL DATA ===`);
+        debugLog(`Email: ${formData.email}, Demo Account: ${formData.demoAccountNo}`);
+        await connection.execute(
+            `INSERT INTO kyc_regulated_company_email (application_id, email, demo_account_no) 
+             VALUES (?, ?, ?)`,
+            [applicationId, safeValue(formData.email), safeValue(formData.demoAccountNo)]
+        );
+        
+        // 3. Insert company details (ONLY fields that exist in the form)
+        debugLog(`=== INSERTING COMPANY DETAILS ===`);
+        const companyDetailsParams = [
+            applicationId,
+            safeValue(formData.companyRegistrationName),
+            safeValue(formData.companyLicenseNo),
+            safeValue(formData.natureOfBusiness),
+            safeValue(formData.companyLegalForm),
+            safeValue(formData.companyLegalFormOther),
+            safeValue(formData.streetAddress),
+            safeValue(formData.city),
+            safeValue(formData.postalCode),
+            safeValue(formData.country),
+            safeValue(formData.countryOther),
+            safeValue(formData.placeOfEstablishment),
+            safeValue(formData.dateOfEstablishment),
+            safeValue(formData.countryCode),
+            safeValue(formData.officeTelephoneNo),
+            safeValue(formData.beneficialOwnerName),
+            safeValue(formData.beneficialOwnerPassportNo),
+            safeValue(formData.sourceOfFunds),
+            safeValue(formData.sourceOfFundsOther),
+            safeValue(formData.tradingAccountPurpose),
+            safeValue(formData.tradingAccountPurposeOther)
+        ];
+        
+        debugLog(`Company details params: ${JSON.stringify(companyDetailsParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_regulated_company_details (
+                application_id, company_registration_name, company_license_no, nature_of_business,
+                company_legal_form, company_legal_form_other, street_address, city, postal_code,
+                country, country_other, place_of_establishment, date_of_establishment,
+                country_code, office_telephone_no, beneficial_owner_name, beneficial_owner_passport_no,
+                source_of_funds, source_of_funds_other, trading_account_purpose, trading_account_purpose_other
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            companyDetailsParams
+        );
+        
+        // 4. Insert authorized person details (ONLY fields that exist in the form)
+        debugLog(`=== INSERTING AUTHORIZED PERSON DATA ===`);
+        const authorizedPersonParams = [
+            applicationId,
+            safeValue(formData.authorizePersonTitle),
+            safeValue(formData.authorizePersonFullName),
+            safeValue(formData.authorizePersonPlaceOfBirth),
+            safeValue(formData.authorizePersonDateOfBirth),
+            safeValue(formData.authorizePersonPassportId),
+            safeValue(formData.authorizePersonEmail),
+            safeValue(formData.authorizePersonGender),
+            safeValue(formData.authorizePersonMaritalStatus),
+            safeValue(formData.authorizePersonCitizen),
+            safeValue(formData.authorizePersonCitizenOther),
+            safeValue(formData.authorizePersonCountryCode),
+            safeValue(formData.authorizePersonPhoneNumber),
+            safeValue(formData.authorizePersonStreetAddress),
+            safeValue(formData.authorizePersonCity),
+            safeValue(formData.authorizePersonPostalCode),
+            safeValue(formData.authorizePersonCountry),
+            safeValue(formData.authorizePersonCountryOther),
+            safeValue(formData.authorizePersonInvestmentExperience),
+            safeValue(formData.authorizePersonInvestmentExperienceDetails),
+            safeValue(formData.authorizePersonCompanyName),
+            safeValue(formData.authorizePersonBusinessNature),
+            safeValue(formData.authorizePersonJobPosition),
+            safeValue(formData.authorizePersonOfficeAddress),
+            safeValue(formData.authorizePersonOfficeCity),
+            safeValue(formData.authorizePersonOfficePostalCode),
+            safeValue(formData.authorizePersonOfficeCountry),
+            safeValue(formData.authorizePersonOfficeCountryOther)
+        ];
+        
+        debugLog(`Authorized person params: ${JSON.stringify(authorizedPersonParams)}`);
+        await connection.execute(
+            `INSERT INTO kyc_regulated_company_authorized_person (
+                application_id, title, full_name, place_of_birth, date_of_birth, passport_id,
+                email, gender, marital_status, citizen, citizen_other, country_code, phone_number,
+                street_address, city, postal_code, country, country_other, investment_experience,
+                investment_experience_details, company_name, business_nature, job_position,
+                office_address, office_city, office_postal_code, office_country, office_country_other
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            authorizedPersonParams
+        );
+
+        // 5. Handle bank accounts (shared table)
+        debugLog(`=== INSERTING BANK ACCOUNTS ===`);
+        if (formData.bankAccounts && Array.isArray(formData.bankAccounts)) {
+            for (let i = 0; i < formData.bankAccounts.length; i++) {
+                const account = formData.bankAccounts[i];
+                debugLog(`Inserting bank account ${i + 1}: ${JSON.stringify(account)}`);
+                
+                const bankAccountParams = [
+                    applicationId,
+                    safeValue(account.bankName),
+                    safeValue(account.accountName),
+                    safeValue(account.bankAddress),
+                    safeValue(account.bankCity),
+                    safeValue(account.bankCountry),
+                    safeValue(account.bankCountryOther),
+                    safeValue(account.swiftCode),
+                    safeValue(account.accountNo), // This should be encrypted before storage in production
+                    i + 1 // account_order
+                ];
+                
+                await connection.execute(
+                    `INSERT INTO kyc_bank_accounts (
+                        application_id, bank_name, account_name, bank_address, bank_city,
+                        bank_country, bank_country_other, swift_code, account_no, account_order
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    bankAccountParams
+                );
+                debugLog(`Bank account ${i + 1} inserted successfully`);
+            }
+        }
+        
+        // 6. Handle file uploads (shared table)
+        debugLog(`=== PROCESSING FILE UPLOADS ===`);
+        if (files && files.length > 0) {
+            for (const file of files) {
+                try {
+                    debugLog(`Processing file: ${file.originalname}, Field: ${file.fieldname}`);
+                    
+                    // Upload to S3
+                    const s3Result = await uploadToS3(file, 'kyc-documents');
+                    debugLog(`S3 upload result: ${JSON.stringify(s3Result)}`);
+                    
+                    // Get document category and type based on field name
+                    const docInfo = getDocumentInfo(file.fieldname);
+                    
+                    // Insert document record
+                    await connection.execute(
+                        `INSERT INTO kyc_documents (
+                            application_id, document_category, document_type, original_filename,
+                            stored_filename, file_path, file_size, mime_type
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            applicationId,
+                            docInfo.category,
+                            docInfo.type,
+                            file.originalname,
+                            s3Result.fileName,
+                            s3Result.fileUrl,
+                            file.size,
+                            file.mimetype
+                        ]
+                    );
+                    
+                    debugLog(`Document record inserted for: ${file.originalname}`);
+                } catch (fileError) {
+                    debugLog(`Error processing file ${file.originalname}: ${fileError.message}`);
+                    // Continue with other files, but log the error
+                }
+            }
+        }
+        
+        // 9. Handle agreements (shared table)
+        debugLog(`=== PROCESSING AGREEMENTS ===`);
+        const agreementTypes = [
+            'company_profile',
+            'statement_simulation',
+            'statement_experience',
+            'disclosure_statement',
+            'account_opening',
+            'risk_disclosure',
+            'mandate_agreement',
+            'trading_rules',
+            'personal_access_password'
+        ];
+        
+        for (const agreementType of agreementTypes) {
+            const agreedFieldName = `${agreementType.replace(/_/g, '')}Agreed`;
+            const isAgreed = formData[agreedFieldName] === true || formData[agreedFieldName] === 'true';
+            
+            if (isAgreed) {
+                await connection.execute(
+                    `INSERT INTO kyc_agreements (application_id, agreement_type, agreed, agreed_at)
+                     VALUES (?, ?, ?, NOW())`,
+                    [applicationId, agreementType, true]
+                );
+                debugLog(`Agreement recorded: ${agreementType}`);
+            }
+        }
+        
+        await connection.commit();
+        debugLog('=== REGULATED COMPANY KYC SUBMISSION COMPLETED SUCCESSFULLY ===');
+        
+        res.status(201).json({
+            success: true,
+            message: 'Regulated Company KYC application submitted successfully',
+            data: {
+                applicationId: applicationId,
+                applicationReference: applicationReference,
+                status: 'submitted'
+            }
+        });
+        
+    } catch (error) {
+        await connection.rollback();
+        debugLog(`ERROR in submitRegulatedCompanyKYC: ${error.message}`);
+        debugLog(`Error stack: ${error.stack}`);
+        
+        res.status(500).json({
+            success: false,
+            message: 'Failed to submit Regulated Company KYC application',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    } finally {
+        connection.release();
+    }
+};
+
 module.exports = {
     submitForeignCompanyKYC,
     submitForeignPersonKYC,
     submitIndonesianCompanyKYC,
     submitIndonesianPersonKYC,
+    submitRegulatedCompanyKYC,
     getKYCApplicationStatus,
     getUserKYCApplications
 };

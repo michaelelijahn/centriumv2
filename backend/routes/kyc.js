@@ -6,6 +6,7 @@ const {
     submitForeignPersonKYC,
     submitIndonesianCompanyKYC,
     submitIndonesianPersonKYC,
+    submitRegulatedCompanyKYC,
     getKYCApplicationStatus,
     getUserKYCApplications
 } = require('../controllers/kycController');
@@ -64,6 +65,12 @@ router.post('/indonesian-person/submit',
     authenticateToken, 
     upload.any(), // Accept any fields (both files and text)
     submitIndonesianPersonKYC
+);
+
+router.post('/regulated-company/submit', 
+    authenticateToken, 
+    upload.any(), // Accept any fields (both files and text)
+    submitRegulatedCompanyKYC
 );
 
 // Test endpoint removed - using secure authentication
