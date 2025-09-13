@@ -1,12 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
+import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
+import en from 'react-phone-number-input/locale/en';
 
 const ForeignCompanyForm = () => {
     const [formData, setFormData] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const { showNotification } = useNotificationContext();
+
+    // Function to clear specific field errors
+    const clearFieldError = (fieldName) => {
+        if (fieldErrors[fieldName]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[fieldName];
+                return newErrors;
+            });
+        }
+    };
 
     const steps = [
         {
@@ -70,13 +84,13 @@ const ForeignCompanyForm = () => {
             case 0:
                 return <RequirementsStep requirements={documentRequirements} />;
             case 1:
-                return <EmailRegistrationStep data={stepData} onChange={updateFormData} />;
+                return <EmailRegistrationStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 2:
-                return <CompanyDetailsStep data={stepData} onChange={updateFormData} />;
+                return <CompanyDetailsStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 3:
-                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} />;
+                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 4:
-                return <AuthorizePersonStep data={stepData} onChange={updateFormData} />;
+                return <AuthorizePersonStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 5:
                 return <ReviewStep data={stepData} onChange={updateFormData} allData={formData} />;
             default:
@@ -165,6 +179,14 @@ const ForeignCompanyForm = () => {
             }
         });
         
+        // Special validation for phone number - must have digits after country code
+        if (data.officeTelephoneNo && data.countryCode) {
+            const numberPart = data.officeTelephoneNo.substring(data.countryCode.length).trim();
+            if (!numberPart || numberPart.length === 0) {
+                errors.push('Please enter the phone number after the country code');
+            }
+        }
+        
         // Check conditional fields
         if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
             errors.push('Please specify the other legal form');
@@ -188,22 +210,24 @@ const ForeignCompanyForm = () => {
     const validateDocumentUploadStep = (data) => {
         const errors = [];
         
-        // For now, we'll assume documents are valid if the step data exists
-        // In a real implementation, you'd check if files are actually uploaded
+        // Check if all required documents are uploaded (excluding Authorize Person Passport which is in step 4)
         const requiredDocuments = [
-            'Certificate of Incorporation',
-            'Board of Resolution', 
-            'Address Proof',
-            'Bank Statement',
-            'Beneficial Owner Passport',
-            'Management Structure',
-            'Ownership Structure'
+            { key: '0_0', name: 'Certificate of Incorporation' },
+            { key: '0_1', name: 'Board of Resolution' },
+            { key: '0_2', name: 'Address Proof' },
+            { key: '1_0', name: 'Bank Statement' },
+            { key: '2_0', name: 'Beneficial Owner Passport' },
+            { key: '3_0', name: 'Management Structure' },
+            { key: '3_1', name: 'Ownership Structure' }
         ];
         
-        // This is a placeholder - in real implementation you'd check actual file uploads
-        if (!data.documentsUploaded) {
-            errors.push('Please upload all required documents before proceeding');
-        }
+        const uploadedDocs = data.uploadedDocuments || {};
+        
+        requiredDocuments.forEach(doc => {
+            if (!uploadedDocs[doc.key]) {
+                errors.push(`${doc.name} is required`);
+            }
+        });
         
         return { isValid: errors.length === 0, errors };
     };
@@ -216,6 +240,7 @@ const ForeignCompanyForm = () => {
             { field: 'authorizePersonPlaceOfBirth', label: 'Place of Birth' },
             { field: 'authorizePersonDateOfBirth', label: 'Date of Birth' },
             { field: 'authorizePersonPassportId', label: 'Passport ID Number' },
+            { field: 'authorizePersonPassport', label: 'Passport Upload' },
             { field: 'authorizePersonEmail', label: 'Authorize Person Email' },
             { field: 'authorizePersonGender', label: 'Gender' },
             { field: 'authorizePersonMaritalStatus', label: 'Marital Status' },
@@ -335,7 +360,74 @@ const ForeignCompanyForm = () => {
     const handleStepValidation = (stepIndex, stepData, allData) => {
         const validation = validateStep(stepIndex, stepData, allData);
         
+        // Create field error mapping for red border styling
+        const newFieldErrors = {};
         if (!validation.isValid) {
+            validation.errors.forEach(error => {
+                // Map error messages to field names for styling
+                if (error.includes('Company Registration Name')) newFieldErrors.companyRegistrationName = true;
+                if (error.includes('Company License Number')) newFieldErrors.companyLicenseNo = true;
+                if (error.includes('Nature of Business')) newFieldErrors.natureOfBusiness = true;
+                if (error.includes('Company Legal Form')) newFieldErrors.companyLegalForm = true;
+                if (error.includes('Street Address')) newFieldErrors.streetAddress = true;
+                if (error.includes('City')) newFieldErrors.city = true;
+                if (error.includes('Postal/Zip Code')) newFieldErrors.postalCode = true;
+                if (error.includes('Country')) newFieldErrors.country = true;
+                if (error.includes('Place of Establishment')) newFieldErrors.placeOfEstablishment = true;
+                if (error.includes('Date of Establishment')) newFieldErrors.dateOfEstablishment = true;
+                if (error.includes('Country Code') || error.includes('phone number after the country code')) newFieldErrors.countryCode = true;
+                if (error.includes('Office Telephone Number') || error.includes('phone number after the country code')) newFieldErrors.officeTelephoneNo = true;
+                if (error.includes('Beneficial Owner Name')) newFieldErrors.beneficialOwnerName = true;
+                if (error.includes('Beneficial Owner Passport Number')) newFieldErrors.beneficialOwnerPassportNo = true;
+                if (error.includes('Source of Funds')) newFieldErrors.sourceOfFunds = true;
+                if (error.includes('Trading Account Purpose')) newFieldErrors.tradingAccountPurpose = true;
+                if (error.includes('other legal form')) newFieldErrors.companyLegalFormOther = true;
+                if (error.includes('other country')) newFieldErrors.countryOther = true;
+                if (error.includes('other source of funds')) newFieldErrors.sourceOfFundsOther = true;
+                if (error.includes('other trading account purpose')) newFieldErrors.tradingAccountPurposeOther = true;
+                if (error.includes('Company email address') || error.includes('valid email address')) newFieldErrors.email = true;
+                if (error.includes('Demo account selection')) newFieldErrors.demoAccountNo = true;
+                // Document upload errors
+                if (error.includes('Certificate of Incorporation')) newFieldErrors['document_0_0'] = true;
+                if (error.includes('Board of Resolution')) newFieldErrors['document_0_1'] = true;
+                if (error.includes('Address Proof')) newFieldErrors['document_0_2'] = true;
+                if (error.includes('Bank Statement')) newFieldErrors['document_1_0'] = true;
+                if (error.includes('Beneficial Owner Passport')) newFieldErrors['document_2_0'] = true;
+                if (error.includes('Management Structure')) newFieldErrors['document_3_0'] = true;
+                if (error.includes('Ownership Structure')) newFieldErrors['document_3_1'] = true;
+                // Authorize Person Step errors
+                if (error.includes('Authorize Person Title')) newFieldErrors.authorizePersonTitle = true;
+                if (error.includes('Authorize Person Full Name')) newFieldErrors.authorizePersonFullName = true;
+                if (error.includes('Place of Birth')) newFieldErrors.authorizePersonPlaceOfBirth = true;
+                if (error.includes('Date of Birth')) newFieldErrors.authorizePersonDateOfBirth = true;
+                if (error.includes('Passport ID Number')) newFieldErrors.authorizePersonPassportId = true;
+                if (error.includes('Passport Upload')) newFieldErrors.authorizePersonPassport = true;
+                if (error.includes('Authorize Person Email')) newFieldErrors.authorizePersonEmail = true;
+                if (error.includes('Gender')) newFieldErrors.authorizePersonGender = true;
+                if (error.includes('Marital Status')) newFieldErrors.authorizePersonMaritalStatus = true;
+                if (error.includes('Citizenship')) newFieldErrors.authorizePersonCitizen = true;
+                if (error.includes('Phone Country Code')) newFieldErrors.authorizePersonCountryCode = true;
+                if (error.includes('Phone Number')) newFieldErrors.authorizePersonPhoneNumber = true;
+                if (error.includes('Street Address')) newFieldErrors.authorizePersonStreetAddress = true;
+                if (error.includes('City')) newFieldErrors.authorizePersonCity = true;
+                if (error.includes('Postal Code')) newFieldErrors.authorizePersonPostalCode = true;
+                if (error.includes('Country')) newFieldErrors.authorizePersonCountry = true;
+                if (error.includes('Investment Experience')) newFieldErrors.authorizePersonInvestmentExperience = true;
+                if (error.includes('other citizenship')) newFieldErrors.authorizePersonCitizenOther = true;
+                if (error.includes('other country')) newFieldErrors.authorizePersonCountryOther = true;
+                if (error.includes('other office country')) newFieldErrors.authorizePersonOfficeCountryOther = true;
+                if (error.includes('investment experience')) newFieldErrors.authorizePersonInvestmentExperienceDetails = true;
+                // Bank account errors
+                if (error.includes('Bank Name')) newFieldErrors.bankName = true;
+                if (error.includes('Bank Address')) newFieldErrors.bankAddress = true;
+                if (error.includes('Bank City')) newFieldErrors.bankCity = true;
+                if (error.includes('Bank Postal Code')) newFieldErrors.bankPostalCode = true;
+                if (error.includes('Bank Country')) newFieldErrors.bankCountry = true;
+                if (error.includes('SWIFT Code')) newFieldErrors.swiftCode = true;
+                if (error.includes('Account Number')) newFieldErrors.accountNo = true;
+                if (error.includes('Account Name')) newFieldErrors.accountName = true;
+            });
+            
             // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
@@ -348,6 +440,7 @@ const ForeignCompanyForm = () => {
             });
         }
         
+        setFieldErrors(newFieldErrors);
         return validation.isValid;
     };
 
@@ -494,7 +587,7 @@ const RequirementsStep = ({ requirements }) => {
     );
 };
 
-const EmailRegistrationStep = ({ data = {}, onChange }) => {
+const EmailRegistrationStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [email, setEmail] = useState(data.email || '');
     const [demoAccountNo, setDemoAccountNo] = useState(data.demoAccountNo || '');
     const [emailValid, setEmailValid] = useState(true);
@@ -511,6 +604,11 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
 
     const handleEmailChange = (field, value) => {
         const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError) {
+            clearFieldError(field);
+        }
         
         if (field === 'email') {
             setEmail(value);
@@ -553,15 +651,12 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                                 placeholder="Enter company email address"
                                 value={email}
                                 onChange={(e) => handleEmailChange('email', e.target.value)}
-                                isInvalid={!emailValid}
+                                isInvalid={!emailValid || fieldErrors.email}
                                 required
                             />
                             <Form.Control.Feedback type="invalid">
                                 Please enter a valid email address.
                             </Form.Control.Feedback>
-                            <Form.Text className="text-muted">
-                                This email will be used for all KYC-related communications.
-                            </Form.Text>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -571,6 +666,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
+                                isInvalid={fieldErrors.demoAccountNo}
                                 required
                             >
                                 <option value="">Select...</option>
@@ -580,17 +676,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                                 <option value="DEMO004">DEMO004 - Demo Account 4</option>
                                 <option value="DEMO005">DEMO005 - Demo Account 5</option>
                             </Form.Select>
-                            <Form.Text className="text-muted">
-                                Choose a demo account to practice trading before live trading.
-                            </Form.Text>
                         </Form.Group>
-
-                        {email && demoAccountNo && (
-                            <Alert variant="success" className="mt-3">
-                                <i className="mdi mdi-check-circle me-2"></i>
-                                Email and demo account selection completed successfully!
-                            </Alert>
-                        )}
                     </Form>
                 </Col>
             </Row>
@@ -598,7 +684,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
     );
 };
 
-const CompanyDetailsStep = ({ data = {}, onChange }) => {
+const CompanyDetailsStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
@@ -620,7 +706,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter company registration name"
                                 value={data.companyRegistrationName || ''}
-                                onChange={(e) => onChange({ ...data, companyRegistrationName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('companyRegistrationName');
+                                    onChange({ ...data, companyRegistrationName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.companyRegistrationName}
                                 required
                             />
                         </Form.Group>
@@ -632,7 +722,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter company license number"
                                 value={data.companyLicenseNo || ''}
-                                onChange={(e) => onChange({ ...data, companyLicenseNo: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('companyLicenseNo');
+                                    onChange({ ...data, companyLicenseNo: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.companyLicenseNo}
                                 required
                             />
                         </Form.Group>
@@ -647,7 +741,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter nature of business"
                                 value={data.natureOfBusiness || ''}
-                                onChange={(e) => onChange({ ...data, natureOfBusiness: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('natureOfBusiness');
+                                    onChange({ ...data, natureOfBusiness: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.natureOfBusiness}
                                 required
                             />
                         </Form.Group>
@@ -657,7 +755,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Company Legal Form <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.companyLegalForm || ''}
-                                onChange={(e) => onChange({ ...data, companyLegalForm: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('companyLegalForm');
+                                    onChange({ ...data, companyLegalForm: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.companyLegalForm}
                                 required
                             >
                                 <option value="">Select legal form</option>
@@ -672,7 +774,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify other legal form"
                                     value={data.companyLegalFormOther || ''}
-                                    onChange={(e) => onChange({ ...data, companyLegalFormOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('companyLegalFormOther');
+                                        onChange({ ...data, companyLegalFormOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.companyLegalFormOther}
                                     className="mt-2"
                                     required
                                 />
@@ -690,7 +796,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter street address"
                                 value={data.streetAddress || ''}
-                                onChange={(e) => onChange({ ...data, streetAddress: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('streetAddress');
+                                    onChange({ ...data, streetAddress: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.streetAddress}
                                 required
                             />
                         </Form.Group>
@@ -702,7 +812,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter city"
                                 value={data.city || ''}
-                                onChange={(e) => onChange({ ...data, city: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('city');
+                                    onChange({ ...data, city: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.city}
                                 required
                             />
                         </Form.Group>
@@ -717,7 +831,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter postal/zip code"
                                 value={data.postalCode || ''}
-                                onChange={(e) => onChange({ ...data, postalCode: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('postalCode');
+                                    onChange({ ...data, postalCode: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.postalCode}
                                 required
                             />
                         </Form.Group>
@@ -727,7 +845,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.country || ''}
-                                onChange={(e) => onChange({ ...data, country: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('country');
+                                    onChange({ ...data, country: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.country}
                                 required
                             >
                                 <option value="">Select country</option>
@@ -745,7 +867,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify other country"
                                     value={data.countryOther || ''}
-                                    onChange={(e) => onChange({ ...data, countryOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('countryOther');
+                                        onChange({ ...data, countryOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.countryOther}
                                     className="mt-2"
                                     required
                                 />
@@ -763,7 +889,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter place of establishment"
                                 value={data.placeOfEstablishment || ''}
-                                onChange={(e) => onChange({ ...data, placeOfEstablishment: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('placeOfEstablishment');
+                                    onChange({ ...data, placeOfEstablishment: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.placeOfEstablishment}
                                 required
                             />
                         </Form.Group>
@@ -774,7 +904,12 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Control
                                 type="date"
                                 value={data.dateOfEstablishment || ''}
-                                onChange={(e) => onChange({ ...data, dateOfEstablishment: e.target.value })}
+                                max={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('dateOfEstablishment');
+                                    onChange({ ...data, dateOfEstablishment: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.dateOfEstablishment}
                                 required
                             />
                         </Form.Group>
@@ -789,21 +924,42 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <Col md={4}>
                                     <Form.Select
                                         value={data.countryCode || ''}
-                                        onChange={(e) => onChange({ ...data, countryCode: e.target.value })}
+                                        isInvalid={fieldErrors.countryCode}
+                                        onChange={(e) => {
+                                            const selectedCode = e.target.value;
+                                            // Clear field errors when user makes a selection
+                                            clearFieldError && clearFieldError('countryCode');
+                                            clearFieldError && clearFieldError('officeTelephoneNo');
+                                            
+                                            // If no country is selected (back to "Select Country Code"), clear the phone number
+                                            if (!selectedCode) {
+                                                onChange({ 
+                                                    ...data, 
+                                                    countryCode: selectedCode,
+                                                    officeTelephoneNo: ''
+                                                });
+                                            }
+                                            // If a country is selected, set the phone number to just the country code
+                                            else {
+                                                onChange({ 
+                                                    ...data, 
+                                                    countryCode: selectedCode,
+                                                    officeTelephoneNo: selectedCode + ' '
+                                                });
+                                            }
+                                        }}
                                         required
                                     >
-                                        <option value="">Code</option>
-                                        <option value="+1">+1 (US/CA)</option>
-                                        <option value="+44">+44 (UK)</option>
-                                        <option value="+65">+65 (SG)</option>
-                                        <option value="+60">+60 (MY)</option>
-                                        <option value="+61">+61 (AU)</option>
-                                        <option value="+49">+49 (DE)</option>
-                                        <option value="+33">+33 (FR)</option>
-                                        <option value="+81">+81 (JP)</option>
-                                        <option value="+86">+86 (CN)</option>
-                                        <option value="+62">+62 (ID)</option>
-                                        <option value="+91">+91 (IN)</option>
+                                        <option value="">Select Country Code</option>
+                                        {getCountries().map((country) => {
+                                            const callingCode = `+${getCountryCallingCode(country)}`;
+                                            const countryName = en[country] || country;
+                                            return (
+                                                <option key={country} value={callingCode}>
+                                                    {callingCode} ({countryName})
+                                                </option>
+                                            );
+                                        })}
                                     </Form.Select>
                                 </Col>
                                 <Col md={8}>
@@ -811,7 +967,29 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                         type="tel"
                                         placeholder="Enter telephone number"
                                         value={data.officeTelephoneNo || ''}
-                                        onChange={(e) => onChange({ ...data, officeTelephoneNo: e.target.value })}
+                                        isInvalid={fieldErrors.officeTelephoneNo}
+                                        onChange={(e) => {
+                                            let value = e.target.value;
+                                            
+                                            // Clear field error when user starts typing
+                                            clearFieldError && clearFieldError('officeTelephoneNo');
+                                            
+                                            // If there's a country code, ensure it stays at the beginning
+                                            if (data.countryCode) {
+                                                if (!value.startsWith(data.countryCode)) {
+                                                    // If user deleted the country code, restore it
+                                                    value = data.countryCode + ' ' + value.replace(/^\+\d+\s?/, '');
+                                                } else {
+                                                    // Extract the number part after country code
+                                                    const numberPart = value.substring(data.countryCode.length).trim();
+                                                    // Only allow numbers in the phone number part
+                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
+                                                    value = data.countryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
+                                                }
+                                            }
+                                            
+                                            onChange({ ...data, officeTelephoneNo: value });
+                                        }}
                                         required
                                     />
                                 </Col>
@@ -829,7 +1007,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter beneficial owner name"
                                 value={data.beneficialOwnerName || ''}
-                                onChange={(e) => onChange({ ...data, beneficialOwnerName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('beneficialOwnerName');
+                                    onChange({ ...data, beneficialOwnerName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.beneficialOwnerName}
                                 required
                             />
                         </Form.Group>
@@ -841,7 +1023,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter beneficial owner passport number"
                                 value={data.beneficialOwnerPassportNo || ''}
-                                onChange={(e) => onChange({ ...data, beneficialOwnerPassportNo: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('beneficialOwnerPassportNo');
+                                    onChange({ ...data, beneficialOwnerPassportNo: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.beneficialOwnerPassportNo}
                                 required
                             />
                         </Form.Group>
@@ -855,7 +1041,18 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Source of Funds <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.sourceOfFunds || ''}
-                                onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    // Clear field error when user makes a selection
+                                    clearFieldError && clearFieldError('sourceOfFunds');
+                                    // Clear the "other" text field if switching away from "OTHER"
+                                    if (data.sourceOfFunds === 'OTHER' && newValue !== 'OTHER') {
+                                        onChange({ ...data, sourceOfFunds: newValue, sourceOfFundsOther: '' });
+                                    } else {
+                                        onChange({ ...data, sourceOfFunds: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.sourceOfFunds}
                                 required
                             >
                                 <option value="">Select source of funds</option>
@@ -871,7 +1068,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify other source of funds"
                                     value={data.sourceOfFundsOther || ''}
-                                    onChange={(e) => onChange({ ...data, sourceOfFundsOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('sourceOfFundsOther');
+                                        onChange({ ...data, sourceOfFundsOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.sourceOfFundsOther}
                                     className="mt-2"
                                     required
                                 />
@@ -883,7 +1084,18 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Opening Trading Account Purpose <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.tradingAccountPurpose || ''}
-                                onChange={(e) => onChange({ ...data, tradingAccountPurpose: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    // Clear field error when user makes a selection
+                                    clearFieldError && clearFieldError('tradingAccountPurpose');
+                                    // Clear the "other" text field if switching away from "OTHER"
+                                    if (data.tradingAccountPurpose === 'OTHER' && newValue !== 'OTHER') {
+                                        onChange({ ...data, tradingAccountPurpose: newValue, tradingAccountPurposeOther: '' });
+                                    } else {
+                                        onChange({ ...data, tradingAccountPurpose: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.tradingAccountPurpose}
                                 required
                             >
                                 <option value="">Select purpose</option>
@@ -898,7 +1110,11 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify other trading purpose"
                                     value={data.tradingAccountPurposeOther || ''}
-                                    onChange={(e) => onChange({ ...data, tradingAccountPurposeOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('tradingAccountPurposeOther');
+                                        onChange({ ...data, tradingAccountPurposeOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.tradingAccountPurposeOther}
                                     className="mt-2"
                                     required
                                 />
@@ -911,7 +1127,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
     );
 };
 
-const AuthorizePersonStep = ({ data = {}, onChange }) => {
+const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', bankCountryOther: '', swiftCode: '', accountNo: '', accountName: '' }]);
 
     useEffect(() => {
@@ -952,7 +1168,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Authorize Person Title <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonTitle || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonTitle: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonTitle');
+                                    onChange({ ...data, authorizePersonTitle: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonTitle}
                                 required
                             >
                                 <option value="">Select title</option>
@@ -970,7 +1190,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter full name"
                                 value={data.authorizePersonFullName || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonFullName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonFullName');
+                                    onChange({ ...data, authorizePersonFullName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonFullName}
                                 required
                             />
                         </Form.Group>
@@ -1011,7 +1235,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter passport ID number"
                                 value={data.authorizePersonPassportId || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonPassportId: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonPassportId');
+                                    onChange({ ...data, authorizePersonPassportId: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonPassportId}
                                 required
                             />
                         </Form.Group>
@@ -1023,7 +1251,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="email"
                                 placeholder="Enter email address"
                                 value={data.authorizePersonEmail || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonEmail: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonEmail');
+                                    onChange({ ...data, authorizePersonEmail: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonEmail}
                                 required
                             />
                         </Form.Group>
@@ -1036,7 +1268,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Gender <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonGender || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonGender: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonGender');
+                                    onChange({ ...data, authorizePersonGender: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonGender}
                                 required
                             >
                                 <option value="">Select gender</option>
@@ -1425,26 +1661,66 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     </Card.Header>
                     <Card.Body>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Authorize Person Passport <span className="text-danger">*</span></Form.Label>
-                            <Form.Control 
-                                type="file" 
-                                accept=".pdf,.jpg,.jpeg,.png" 
-                                onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                        onChange({ ...data, authorizePersonPassport: file });
-                                    }
-                                }}
-                                required 
-                            />
+                            <div className="d-flex justify-content-between align-items-center">
+                                <Form.Label className="text-muted mb-0">
+                                    Authorize Person Passport <span className="text-danger">*</span>
+                                    {data.authorizePersonPassport && (
+                                        <span className="text-success ms-2">
+                                            <i className="mdi mdi-check-circle"></i> Uploaded: {data.authorizePersonPassport.name}
+                                        </span>
+                                    )}
+                                </Form.Label>
+                                {data.authorizePersonPassport && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-danger"
+                                        onClick={() => {
+                                            // Clear the file input
+                                            const fileInput = document.querySelector('input[type="file"][accept*=".pdf"]');
+                                            if (fileInput) fileInput.value = '';
+                                            onChange({ ...data, authorizePersonPassport: null });
+                                        }}
+                                        title="Remove file"
+                                    >
+                                        <i className="mdi mdi-delete"></i> Remove
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {/* Show file input when no file uploaded */}
+                            {!data.authorizePersonPassport && (
+                                <Form.Control 
+                                    type="file" 
+                                    accept=".pdf,.jpg,.jpeg,.png" 
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            clearFieldError && clearFieldError('authorizePersonPassport');
+                                            onChange({ ...data, authorizePersonPassport: file });
+                                        }
+                                    }}
+                                    isInvalid={fieldErrors.authorizePersonPassport}
+                                    className="mt-2"
+                                    required 
+                                />
+                            )}
+                            
+                            {/* Show custom file display when file uploaded */}
+                            {data.authorizePersonPassport && (
+                                <div className="mt-2">
+                                    <div className={`form-control d-flex align-items-center ${fieldErrors.authorizePersonPassport ? 'is-invalid' : ''}`}>
+                                        <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                        <span className="flex-grow-1">{data.authorizePersonPassport.name}</span>
+                                        <span className="badge bg-success ms-2">
+                                            <i className="mdi mdi-check"></i> Uploaded
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                            
                             <Form.Text className="text-muted">
                                 Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                             </Form.Text>
-                            {data.authorizePersonPassport && (
-                                <Form.Text className="text-success">
-                                    File selected: {data.authorizePersonPassport.name}
-                                </Form.Text>
-                            )}
                         </Form.Group>
                     </Card.Body>
                 </Card>
@@ -1595,9 +1871,10 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {}, clearFieldError }) => {
     const [uploadedDocs, setUploadedDocs] = useState(data.uploadedDocuments || {});
     const [uploadedFiles, setUploadedFiles] = useState(data.uploadedFiles || {});
+    const fileInputRefs = useRef({});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1614,6 +1891,11 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
             ...uploadedFiles,
             [docKey]: file || null
         };
+        
+        // Clear field error when file is uploaded
+        if (file && clearFieldError) {
+            clearFieldError(`document_${docKey}`);
+        }
         
         setUploadedDocs(newUploadedDocs);
         setUploadedFiles(newUploadedFiles);
@@ -1634,12 +1916,59 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
             ...data,
             uploadedDocuments: newUploadedDocs,
             uploadedFiles: newUploadedFiles,
-            documentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
+            documentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null && doc !== undefined)
         };
         
         // Add the specific document file to the data using backend field names
         if (documentMappingByIndex[docKey] && file) {
             updatedData[documentMappingByIndex[docKey]] = file;
+        }
+        
+        onChange(updatedData);
+    };
+
+    const handleFileRemove = (categoryIndex, docIndex) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = {
+            ...uploadedDocs,
+            [docKey]: null
+        };
+        
+        const newUploadedFiles = {
+            ...uploadedFiles,
+            [docKey]: null
+        };
+        
+        // Clear the file input value
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
+        
+        setUploadedDocs(newUploadedDocs);
+        setUploadedFiles(newUploadedFiles);
+        
+        // Map document uploads to backend field names
+        const documentMappingByIndex = {
+            '0_0': 'certificateIncorporation',      // Certificate of Incorporation
+            '0_1': 'boardResolution',              // Board of Resolution  
+            '0_2': 'addressProof',                 // Address Proof
+            '1_0': 'bankStatement',                // Bank Statement
+            '2_0': 'beneficialOwnerPassport',      // Beneficial Owner Passport
+            '3_0': 'managementStructure',          // Management Structure
+            '3_1': 'ownershipStructure'            // Ownership Structure
+        };
+        
+        // Update parent component
+        const updatedData = {
+            ...data,
+            uploadedDocuments: newUploadedDocs,
+            uploadedFiles: newUploadedFiles,
+            documentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null && doc !== undefined)
+        };
+        
+        // Remove the specific document file from the data
+        if (documentMappingByIndex[docKey]) {
+            updatedData[documentMappingByIndex[docKey]] = null;
         }
         
         onChange(updatedData);
@@ -1664,27 +1993,56 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                             
                             return (
                                 <Form.Group key={docIndex} className="mb-3">
-                                    <Form.Label className="text-muted">
-                                        {doc} <span className="text-danger">*</span>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Form.Label className="text-muted mb-0">
+                                            {doc} <span className="text-danger">*</span>
+                                            {isUploaded && (
+                                                <span className="text-success ms-2">
+                                                    <i className="mdi mdi-check-circle"></i> Uploaded: {isUploaded}
+                                                </span>
+                                            )}
+                                        </Form.Label>
                                         {isUploaded && (
-                                            <span className="text-success ms-2">
-                                                <i className="mdi mdi-check-circle"></i> Uploaded
-                                            </span>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => handleFileRemove(categoryIndex, docIndex)}
+                                                title="Remove file"
+                                            >
+                                                <i className="mdi mdi-delete"></i> Remove
+                                            </button>
                                         )}
-                                    </Form.Label>
-                                    <Form.Control 
-                                        type="file" 
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
-                                    />
+                                    </div>
+                                    
+                                    {/* Show file input when no file uploaded */}
+                                    {!isUploaded && (
+                                        <Form.Control 
+                                            type="file" 
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                            isInvalid={fieldErrors[`document_${docKey}`]}
+                                            className="mt-2"
+                                            ref={(el) => {
+                                                if (el) {
+                                                    fileInputRefs.current[docKey] = el;
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Show custom file display when file uploaded */}
+                                    {isUploaded && (
+                                        <div className="mt-2">
+                                            <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
+                                                <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                                <span className="flex-grow-1">{isUploaded}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <Form.Text className="text-muted">
                                         Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG 
                                     </Form.Text>
-                                    {isUploaded && (
-                                        <Form.Text className="text-success">
-                                            File uploaded: {isUploaded}
-                                        </Form.Text>
-                                    )}
                                 </Form.Group>
                             );
                         })}
