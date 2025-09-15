@@ -1,12 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup, Button } from 'react-bootstrap';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
+import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
+import en from 'react-phone-number-input/locale/en';
 
 const RegulatedCompanyForm = () => {
     const [formData, setFormData] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const { showNotification } = useNotificationContext();
+
+    // Function to clear specific field errors
+    const clearFieldError = (fieldName) => {
+        if (fieldErrors[fieldName]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[fieldName];
+                return newErrors;
+            });
+        }
+    };
 
     const steps = [
         {
@@ -70,17 +84,17 @@ const RegulatedCompanyForm = () => {
             case 0:
                 return <RequirementsStep requirements={documentRequirements} />;
             case 1:
-                return <EmailRegistrationStep data={stepData} onChange={updateFormData} />;
+                return <EmailRegistrationStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 2:
-                return <CompanyDetailsStep data={stepData} onChange={updateFormData} demoAccountNo={allFormData.step_1?.demoAccountNo} />;
+                return <CompanyDetailsStep data={stepData} onChange={updateFormData} demoAccountNo={allFormData.step_1?.demoAccountNo} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 3:
-                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} />;
+                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 4:
-                return <AuthorizePersonStep data={stepData} onChange={updateFormData} />;
+                return <AuthorizePersonStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 5:
-                return <PassportUploadStep data={stepData} onChange={updateFormData} />;
+                return <PassportUploadStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 6:
-                return <DocumentAgreementsStep data={stepData} onChange={updateFormData} onSubmit={handleSubmit} allData={allFormData} />;
+                return <DocumentAgreementsStep data={stepData} onChange={updateFormData} onSubmit={handleSubmit} allData={allFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
@@ -183,10 +197,24 @@ const RegulatedCompanyForm = () => {
     const validateDocumentUploadStep = (data) => {
         const errors = [];
         
-        // Check if documents are uploaded
-        if (!data.documentsUploaded) {
-            errors.push('Please upload all required company documents before proceeding');
-        }
+        // Define required documents and their expected positions
+        const requiredDocuments = [
+            { name: 'Certificate of Incorporation', categoryIndex: 0, docIndex: 0 },
+            { name: 'Board of Resolution', categoryIndex: 0, docIndex: 1 },
+            { name: 'Bank Statement', categoryIndex: 1, docIndex: 0 },
+            { name: 'Address Proof', categoryIndex: 1, docIndex: 1 },
+            { name: 'Management Structure', categoryIndex: 2, docIndex: 0 },
+            { name: 'Ownership Structure', categoryIndex: 2, docIndex: 1 },
+            { name: 'Beneficial Owner Passport', categoryIndex: 2, docIndex: 2 }
+        ];
+        
+        // Check each required document individually
+        requiredDocuments.forEach(doc => {
+            const docKey = `${doc.categoryIndex}_${doc.docIndex}`;
+            if (!data.uploadedDocuments || !data.uploadedDocuments[docKey]) {
+                errors.push(`Please upload ${doc.name}`);
+            }
+        });
         
         return { isValid: errors.length === 0, errors };
     };
@@ -284,9 +312,9 @@ const RegulatedCompanyForm = () => {
     const validatePassportUploadStep = (data) => {
         const errors = [];
         
-        // Check if passport documents are uploaded
-        if (!data.passportDocumentsUploaded) {
-            errors.push('Please upload all required passport documents before proceeding');
+        // Check if authorize person passport document is uploaded
+        if (!data.uploadedDocuments || !data.uploadedDocuments.authorizePersonPassport) {
+            errors.push('Please upload Authorize Person Passport');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -331,7 +359,238 @@ const RegulatedCompanyForm = () => {
     const handleStepValidation = (stepIndex, stepData, allData) => {
         const validation = validateStep(stepIndex, stepData, allData);
         
+        // Create field error mapping for red border styling
+        const newFieldErrors = {};
         if (!validation.isValid) {
+            // Map validation errors to specific field names for styling
+            validation.errors.forEach(error => {
+                // Email step errors
+                if (error.includes('email address')) {
+                    newFieldErrors.email = true;
+                }
+                if (error.includes('Demo account')) {
+                    newFieldErrors.demoAccountNo = true;
+                }
+                
+                // Company details step errors
+                if (error.includes('Company Registration Name')) {
+                    newFieldErrors.companyRegistrationName = true;
+                }
+                if (error.includes('Company License Number')) {
+                    newFieldErrors.companyLicenseNo = true;
+                }
+                if (error.includes('Nature of Business')) {
+                    newFieldErrors.natureOfBusiness = true;
+                }
+                if (error.includes('Company Legal Form')) {
+                    newFieldErrors.companyLegalForm = true;
+                }
+                if (error.includes('other legal form')) {
+                    newFieldErrors.companyLegalFormOther = true;
+                }
+                if (error.includes('Street Address')) {
+                    newFieldErrors.streetAddress = true;
+                }
+                if (error.includes('City')) {
+                    newFieldErrors.city = true;
+                }
+                if (error.includes('Postal/Zip Code')) {
+                    newFieldErrors.postalCode = true;
+                }
+                if (error.includes('Country')) {
+                    newFieldErrors.country = true;
+                }
+                if (error.includes('other country')) {
+                    newFieldErrors.countryOther = true;
+                }
+                if (error.includes('Place of Establishment')) {
+                    newFieldErrors.placeOfEstablishment = true;
+                }
+                if (error.includes('Date of Establishment')) {
+                    newFieldErrors.dateOfEstablishment = true;
+                }
+                if (error.includes('Country Code')) {
+                    newFieldErrors.countryCode = true;
+                }
+                if (error.includes('Office Telephone Number')) {
+                    newFieldErrors.officeTelephoneNo = true;
+                }
+                if (error.includes('Beneficial Owner Name')) {
+                    newFieldErrors.beneficialOwnerName = true;
+                }
+                if (error.includes('Beneficial Owner Passport Number')) {
+                    newFieldErrors.beneficialOwnerPassportNo = true;
+                }
+                if (error.includes('Source of Funds')) {
+                    newFieldErrors.sourceOfFunds = true;
+                }
+                if (error.includes('other source of funds')) {
+                    newFieldErrors.sourceOfFundsOther = true;
+                }
+                if (error.includes('Trading Account Purpose')) {
+                    newFieldErrors.tradingAccountPurpose = true;
+                }
+                if (error.includes('other trading account purpose')) {
+                    newFieldErrors.tradingAccountPurposeOther = true;
+                }
+                
+                // Document upload step errors
+                if (error.includes('Please upload Certificate of Incorporation')) {
+                    newFieldErrors['document_0_0'] = true;
+                }
+                if (error.includes('Please upload Board of Resolution')) {
+                    newFieldErrors['document_0_1'] = true;
+                }
+                if (error.includes('Please upload Bank Statement')) {
+                    newFieldErrors['document_1_0'] = true;
+                }
+                if (error.includes('Please upload Address Proof')) {
+                    newFieldErrors['document_1_1'] = true;
+                }
+                if (error.includes('Please upload Management Structure')) {
+                    newFieldErrors['document_2_0'] = true;
+                }
+                if (error.includes('Please upload Ownership Structure')) {
+                    newFieldErrors['document_2_1'] = true;
+                }
+                if (error.includes('Please upload Beneficial Owner Passport')) {
+                    newFieldErrors['document_2_2'] = true;
+                }
+                
+                // Passport upload step errors
+                if (error.includes('Please upload Authorize Person Passport')) {
+                    newFieldErrors['document_authorizePersonPassport'] = true;
+                }
+                
+                // Authorize Person step errors
+                if (error.includes('Authorize Person Title')) {
+                    newFieldErrors.authorizePersonTitle = true;
+                }
+                if (error.includes('Authorize Person Full Name')) {
+                    newFieldErrors.authorizePersonFullName = true;
+                }
+                if (error.includes('Place of Birth')) {
+                    newFieldErrors.authorizePersonPlaceOfBirth = true;
+                }
+                if (error.includes('Date of Birth')) {
+                    newFieldErrors.authorizePersonDateOfBirth = true;
+                }
+                if (error.includes('Passport ID Number')) {
+                    newFieldErrors.authorizePersonPassportId = true;
+                }
+                if (error.includes('Email is required') || (error.includes('Email') && error.includes('Authorize Person'))) {
+                    newFieldErrors.authorizePersonEmail = true;
+                }
+                if (error.includes('Gender')) {
+                    newFieldErrors.authorizePersonGender = true;
+                }
+                if (error.includes('Marital Status')) {
+                    newFieldErrors.authorizePersonMaritalStatus = true;
+                }
+                if (error.includes('Citizenship')) {
+                    newFieldErrors.authorizePersonCitizen = true;
+                }
+                if (error.includes('other citizenship')) {
+                    newFieldErrors.authorizePersonCitizenOther = true;
+                }
+                if (error.includes('Country Code')) {
+                    newFieldErrors.authorizePersonCountryCode = true;
+                }
+                if (error.includes('Phone Number')) {
+                    newFieldErrors.authorizePersonPhoneNumber = true;
+                }
+                if ((error.includes('Street Address is required') || error.includes('Street Address')) && !error.includes('Office')) {
+                    newFieldErrors.authorizePersonStreetAddress = true;
+                }
+                if ((error.includes('City is required') || error.includes('City')) && !error.includes('Office')) {
+                    newFieldErrors.authorizePersonCity = true;
+                }
+                if ((error.includes('Postal Code is required') || error.includes('Postal Code')) && !error.includes('Office')) {
+                    newFieldErrors.authorizePersonPostalCode = true;
+                }
+                if ((error.includes('Country is required') || error.includes('Country')) && !error.includes('Office') && !error.includes('Code')) {
+                    newFieldErrors.authorizePersonCountry = true;
+                }
+                if (error.includes('other country') && !error.includes('Office')) {
+                    newFieldErrors.authorizePersonCountryOther = true;
+                }
+                if (error.includes('Investment Experience')) {
+                    newFieldErrors.authorizePersonInvestmentExperience = true;
+                }
+                if (error.includes('investment experience')) {
+                    newFieldErrors.authorizePersonInvestmentExperienceDetails = true;
+                }
+                if (error.includes('Family in BAPPEBTI')) {
+                    newFieldErrors.authorizePersonFamilyInBappebti = true;
+                }
+                if (error.includes('Bankruptcy Declaration')) {
+                    newFieldErrors.authorizePersonDeclaredBankrupt = true;
+                }
+                if (error.includes('Company Name is required') || error.includes('Company Name')) {
+                    newFieldErrors.authorizePersonCompanyName = true;
+                }
+                if (error.includes('Nature of Business is required') || (error.includes('Nature of Business') && error.includes('Authorize Person'))) {
+                    newFieldErrors.authorizePersonBusinessNature = true;
+                }
+                if (error.includes('Job Position is required') || error.includes('Job Position')) {
+                    newFieldErrors.authorizePersonJobPosition = true;
+                }
+                if (error.includes('Office Address is required') || error.includes('Office Address')) {
+                    newFieldErrors.authorizePersonOfficeAddress = true;
+                }
+                if (error.includes('Office City is required') || error.includes('Office City')) {
+                    newFieldErrors.authorizePersonOfficeCity = true;
+                }
+                if (error.includes('Office Postal Code is required') || error.includes('Office Postal Code')) {
+                    newFieldErrors.authorizePersonOfficePostalCode = true;
+                }
+                if (error.includes('Office Country is required') || error.includes('Office Country')) {
+                    newFieldErrors.authorizePersonOfficeCountry = true;
+                }
+                if (error.includes('other office country')) {
+                    newFieldErrors.authorizePersonOfficeCountryOther = true;
+                }
+                
+                // Bank Account errors - Handle indexed bank account errors
+                const bankFieldMappings = [
+                    { pattern: /Bank (\d+) - Bank Name is required/, field: 'bankName' },
+                    { pattern: /Bank (\d+) - Account Name is required/, field: 'accountName' },
+                    { pattern: /Bank (\d+) - Bank Address is required/, field: 'bankAddress' },
+                    { pattern: /Bank (\d+) - Bank City is required/, field: 'bankCity' },
+                    { pattern: /Bank (\d+) - Bank Country is required/, field: 'bankCountry' },
+                    { pattern: /Bank (\d+) - SWIFT Code is required/, field: 'swiftCode' },
+                    { pattern: /Bank (\d+) - Account Number is required/, field: 'accountNo' },
+                    { pattern: /Bank (\d+) - Please specify other country/, field: 'bankCountryOther' }
+                ];
+                
+                bankFieldMappings.forEach(({ pattern, field }) => {
+                    const match = error.match(pattern);
+                    if (match) {
+                        const index = parseInt(match[1]) - 1;
+                        newFieldErrors[`${field}_${index}`] = true;
+                    }
+                });
+                
+                // Document Agreements step errors
+                const agreementMappings = [
+                    { pattern: /Please agree to Company Profile/, field: 'companyProfile' },
+                    { pattern: /Please agree to Statement of Having Simulation/, field: 'statementSimulation' },
+                    { pattern: /Please agree to Statement of Having Experience/, field: 'statementExperience' },
+                    { pattern: /Please agree to Disclosure Statement/, field: 'disclosureStatement' },
+                    { pattern: /Please agree to Account Opening Application/, field: 'accountOpeningApplication' },
+                    { pattern: /Please agree to Risk Disclosure/, field: 'riskDisclosure' },
+                    { pattern: /Please agree to Mandate Agreement/, field: 'mandateAgreement' },
+                    { pattern: /Please agree to Trading Rules/, field: 'tradingRules' },
+                    { pattern: /Please agree to Personal Access Password/, field: 'personalAccessPassword' }
+                ];
+                
+                agreementMappings.forEach(({ pattern, field }) => {
+                    if (error.match(pattern)) {
+                        newFieldErrors[field] = true;
+                    }
+                });
+            });
+            
             // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
@@ -344,6 +603,7 @@ const RegulatedCompanyForm = () => {
             });
         }
         
+        setFieldErrors(newFieldErrors);
         return validation.isValid;
     };
 
@@ -493,14 +753,30 @@ const RequirementsStep = ({ requirements }) => {
     );
 };
 
-const EmailRegistrationStep = ({ data = {}, onChange }) => {
+const EmailRegistrationStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [email, setEmail] = useState(data.email || '');
     const [demoAccountNo, setDemoAccountNo] = useState(data.demoAccountNo || '');
+    const [emailValid, setEmailValid] = useState(true);
 
     const handleEmailChange = (field, value) => {
         const newData = { ...data, [field]: value };
-        if (field === 'email') setEmail(value);
-        if (field === 'demoAccountNo') setDemoAccountNo(value);
+        if (field === 'email') {
+            setEmail(value);
+            // Validate email format
+            const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            setEmailValid(isValidEmail);
+            // Clear field error when user starts typing
+            if (clearFieldError && fieldErrors.email) {
+                clearFieldError('email');
+            }
+        }
+        if (field === 'demoAccountNo') {
+            setDemoAccountNo(value);
+            // Clear field error when user makes selection
+            if (clearFieldError && fieldErrors.demoAccountNo) {
+                clearFieldError('demoAccountNo');
+            }
+        }
         onChange(newData);
     };
 
@@ -515,21 +791,30 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                 <Col lg={8}>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Register Company Email</Form.Label>
+                            <Form.Label className="text-muted">
+                                Register Company Email <span className="text-danger">*</span>
+                            </Form.Label>
                             <Form.Control
                                 type="email"
                                 placeholder="Enter company email address"
                                 value={email}
                                 onChange={(e) => handleEmailChange('email', e.target.value)}
+                                isInvalid={!emailValid || fieldErrors.email}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid email address.
+                            </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Select Demo Account No.</Form.Label>
+                            <Form.Label className="text-muted">
+                                Select Demo Account No. <span className="text-danger">*</span>
+                            </Form.Label>
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
+                                isInvalid={fieldErrors.demoAccountNo}
                                 required
                             >
                                 <option value="">Select...</option>
@@ -539,6 +824,9 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                                 <option value="DEMO004">DEMO004 - Demo Account 4</option>
                                 <option value="DEMO005">DEMO005 - Demo Account 5</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select a demo account.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 </Col>
@@ -547,7 +835,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
     );
 };
 
-const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
+const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
@@ -569,7 +857,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter company registration name"
                                 value={data.companyRegistrationName || ''}
-                                onChange={(e) => onChange({ ...data, companyRegistrationName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('companyRegistrationName');
+                                    onChange({ ...data, companyRegistrationName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.companyRegistrationName}
                                 required
                             />
                         </Form.Group>
@@ -581,7 +873,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter company license number"
                                 value={data.companyLicenseNo || ''}
-                                onChange={(e) => onChange({ ...data, companyLicenseNo: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('companyLicenseNo');
+                                    onChange({ ...data, companyLicenseNo: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.companyLicenseNo}
                                 required
                             />
                         </Form.Group>
@@ -596,7 +892,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter nature of business"
                                 value={data.natureOfBusiness || ''}
-                                onChange={(e) => onChange({ ...data, natureOfBusiness: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('natureOfBusiness');
+                                    onChange({ ...data, natureOfBusiness: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.natureOfBusiness}
                                 required
                             />
                         </Form.Group>
@@ -606,7 +906,17 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                             <Form.Label className="text-muted">Company Legal Form <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.companyLegalForm || ''}
-                                onChange={(e) => onChange({ ...data, companyLegalForm: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    clearFieldError && clearFieldError('companyLegalForm');
+                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
+                                    if (newValue === 'OTHER' || (data.companyLegalForm === 'OTHER' && newValue !== 'OTHER')) {
+                                        onChange({ ...data, companyLegalForm: newValue, companyLegalFormOther: '' });
+                                    } else {
+                                        onChange({ ...data, companyLegalForm: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.companyLegalForm}
                                 required
                             >
                                 <option value="">Select legal form</option>
@@ -622,7 +932,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                     type="text"
                                     placeholder="Please specify other legal form"
                                     value={data.companyLegalFormOther || ''}
-                                    onChange={(e) => onChange({ ...data, companyLegalFormOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('companyLegalFormOther');
+                                        onChange({ ...data, companyLegalFormOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.companyLegalFormOther}
                                     className="mt-2"
                                     required
                                 />
@@ -640,7 +954,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter street address"
                                 value={data.streetAddress || ''}
-                                onChange={(e) => onChange({ ...data, streetAddress: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('streetAddress');
+                                    onChange({ ...data, streetAddress: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.streetAddress}
                                 required
                             />
                         </Form.Group>
@@ -652,7 +970,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter city"
                                 value={data.city || ''}
-                                onChange={(e) => onChange({ ...data, city: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('city');
+                                    onChange({ ...data, city: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.city}
                                 required
                             />
                         </Form.Group>
@@ -667,7 +989,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter postal/zip code"
                                 value={data.postalCode || ''}
-                                onChange={(e) => onChange({ ...data, postalCode: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('postalCode');
+                                    onChange({ ...data, postalCode: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.postalCode}
                                 required
                             />
                         </Form.Group>
@@ -677,17 +1003,28 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                             <Form.Label className="text-muted">Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.country || ''}
-                                onChange={(e) => onChange({ ...data, country: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    clearFieldError && clearFieldError('country');
+                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
+                                    if (newValue === 'OTHER' || (data.country === 'OTHER' && newValue !== 'OTHER')) {
+                                        onChange({ ...data, country: newValue, countryOther: '' });
+                                    } else {
+                                        onChange({ ...data, country: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.country}
                                 required
                             >
                                 <option value="">Select country</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
-                                <option value="SG">Singapore</option>
-                                <option value="MY">Malaysia</option>
-                                <option value="AU">Australia</option>
-                                <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
+                                {getCountries().map((country) => {
+                                    const countryName = en[country] || country;
+                                    return (
+                                        <option key={country} value={country}>
+                                            {countryName}
+                                        </option>
+                                    );
+                                })}
                                 <option value="OTHER">Other</option>
                             </Form.Select>
                             {data.country === 'OTHER' && (
@@ -695,7 +1032,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                     type="text"
                                     placeholder="Please specify other country"
                                     value={data.countryOther || ''}
-                                    onChange={(e) => onChange({ ...data, countryOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('countryOther');
+                                        onChange({ ...data, countryOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.countryOther}
                                     className="mt-2"
                                     required
                                 />
@@ -713,7 +1054,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter place of establishment"
                                 value={data.placeOfEstablishment || ''}
-                                onChange={(e) => onChange({ ...data, placeOfEstablishment: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('placeOfEstablishment');
+                                    onChange({ ...data, placeOfEstablishment: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.placeOfEstablishment}
                                 required
                             />
                         </Form.Group>
@@ -724,34 +1069,62 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                             <Form.Control
                                 type="date"
                                 value={data.dateOfEstablishment || ''}
-                                onChange={(e) => onChange({ ...data, dateOfEstablishment: e.target.value })}
+                                max={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('dateOfEstablishment');
+                                    onChange({ ...data, dateOfEstablishment: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.dateOfEstablishment}
                                 required
                             />
                         </Form.Group>
                     </Col>
                 </Row>
 
+                <Row>
+                    <Col md={6}>
                 <Form.Group className="mb-3">
                     <Form.Label className="text-muted">Office Telephone No <span className="text-danger">*</span></Form.Label>
                     <Row>
                         <Col md={4}>
                             <Form.Select
                                 value={data.countryCode || ''}
-                                onChange={(e) => onChange({ ...data, countryCode: e.target.value })}
+                                        isInvalid={fieldErrors.countryCode}
+                                        onChange={(e) => {
+                                            const selectedCode = e.target.value;
+                                            // Clear field errors when user makes a selection
+                                            clearFieldError && clearFieldError('countryCode');
+                                            clearFieldError && clearFieldError('officeTelephoneNo');
+                                            
+                                            // If no country is selected (back to "Select Country Code"), clear the phone number
+                                            if (!selectedCode) {
+                                                onChange({ 
+                                                    ...data, 
+                                                    countryCode: selectedCode,
+                                                    officeTelephoneNo: ''
+                                                });
+                                            }
+                                            // If a country is selected, set the phone number to just the country code
+                                            else {
+                                                onChange({ 
+                                                    ...data, 
+                                                    countryCode: selectedCode,
+                                                    officeTelephoneNo: selectedCode + ' '
+                                                });
+                                            }
+                                        }}
                                 required
                             >
-                                <option value="">Code</option>
-                                <option value="+1">+1 (US/CA)</option>
-                                <option value="+44">+44 (UK)</option>
-                                <option value="+65">+65 (SG)</option>
-                                <option value="+60">+60 (MY)</option>
-                                <option value="+61">+61 (AU)</option>
-                                <option value="+49">+49 (DE)</option>
-                                <option value="+33">+33 (FR)</option>
-                                <option value="+81">+81 (JP)</option>
-                                <option value="+86">+86 (CN)</option>
-                                <option value="+62">+62 (ID)</option>
-                                <option value="+91">+91 (IN)</option>
+                                        <option value="">Select Country Code</option>
+                                        {getCountries().map((country) => {
+                                            const callingCode = `+${getCountryCallingCode(country)}`;
+                                            const countryName = en[country] || country;
+                                            return (
+                                                <option key={country} value={callingCode}>
+                                                    {callingCode} ({countryName})
+                                                </option>
+                                            );
+                                        })}
                             </Form.Select>
                         </Col>
                         <Col md={8}>
@@ -759,12 +1132,36 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="tel"
                                 placeholder="Enter telephone number"
                                 value={data.officeTelephoneNo || ''}
-                                onChange={(e) => onChange({ ...data, officeTelephoneNo: e.target.value })}
+                                        isInvalid={fieldErrors.officeTelephoneNo}
+                                        onChange={(e) => {
+                                            let value = e.target.value;
+                                            
+                                            // Clear field error when user starts typing
+                                            clearFieldError && clearFieldError('officeTelephoneNo');
+                                            
+                                            // If there's a country code, ensure it stays at the beginning
+                                            if (data.countryCode) {
+                                                if (!value.startsWith(data.countryCode)) {
+                                                    // If user deleted the country code, restore it
+                                                    value = data.countryCode + ' ' + value.replace(/^\+\d+\s?/, '');
+                                                } else {
+                                                    // Extract the number part after country code
+                                                    const numberPart = value.substring(data.countryCode.length).trim();
+                                                    // Only allow numbers in the phone number part
+                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
+                                                    value = data.countryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
+                                                }
+                                            }
+                                            
+                                            onChange({ ...data, officeTelephoneNo: value });
+                                        }}
                                 required
                             />
                         </Col>
                     </Row>
                 </Form.Group>
+                    </Col>
+                </Row>
 
                 {/* Beneficial Owner Information */}
                 <Row>
@@ -775,7 +1172,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter beneficial owner name"
                                 value={data.beneficialOwnerName || ''}
-                                onChange={(e) => onChange({ ...data, beneficialOwnerName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('beneficialOwnerName');
+                                    onChange({ ...data, beneficialOwnerName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.beneficialOwnerName}
                                 required
                             />
                         </Form.Group>
@@ -787,7 +1188,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                 type="text"
                                 placeholder="Enter beneficial owner passport number"
                                 value={data.beneficialOwnerPassportNo || ''}
-                                onChange={(e) => onChange({ ...data, beneficialOwnerPassportNo: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('beneficialOwnerPassportNo');
+                                    onChange({ ...data, beneficialOwnerPassportNo: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.beneficialOwnerPassportNo}
                                 required
                             />
                         </Form.Group>
@@ -801,7 +1206,18 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                             <Form.Label className="text-muted">Source of Funds <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.sourceOfFunds || ''}
-                                onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    // Clear field error when user makes a selection
+                                    clearFieldError && clearFieldError('sourceOfFunds');
+                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
+                                    if (newValue === 'OTHER' || (data.sourceOfFunds === 'OTHER' && newValue !== 'OTHER')) {
+                                        onChange({ ...data, sourceOfFunds: newValue, sourceOfFundsOther: '' });
+                                    } else {
+                                        onChange({ ...data, sourceOfFunds: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.sourceOfFunds}
                                 required
                             >
                                 <option value="">Select source of funds</option>
@@ -818,7 +1234,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                     type="text"
                                     placeholder="Please specify other source of funds"
                                     value={data.sourceOfFundsOther || ''}
-                                    onChange={(e) => onChange({ ...data, sourceOfFundsOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('sourceOfFundsOther');
+                                        onChange({ ...data, sourceOfFundsOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.sourceOfFundsOther}
                                     className="mt-2"
                                     required
                                 />
@@ -830,7 +1250,18 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                             <Form.Label className="text-muted">Opening Trading Account Purpose <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.tradingAccountPurpose || ''}
-                                onChange={(e) => onChange({ ...data, tradingAccountPurpose: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    // Clear field error when user makes a selection
+                                    clearFieldError && clearFieldError('tradingAccountPurpose');
+                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
+                                    if (newValue === 'OTHER' || (data.tradingAccountPurpose === 'OTHER' && newValue !== 'OTHER')) {
+                                        onChange({ ...data, tradingAccountPurpose: newValue, tradingAccountPurposeOther: '' });
+                                    } else {
+                                        onChange({ ...data, tradingAccountPurpose: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.tradingAccountPurpose}
                                 required
                             >
                                 <option value="">Select trading account purpose</option>
@@ -846,7 +1277,11 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                                     type="text"
                                     placeholder="Please specify other trading account purpose"
                                     value={data.tradingAccountPurposeOther || ''}
-                                    onChange={(e) => onChange({ ...data, tradingAccountPurposeOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('tradingAccountPurposeOther');
+                                        onChange({ ...data, tradingAccountPurposeOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.tradingAccountPurposeOther}
                                     className="mt-2"
                                     required
                                 />
@@ -854,23 +1289,14 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo }) => {
                         </Form.Group>
                     </Col>
                 </Row>
-
-                <Form.Group className="mb-3">
-                    <Form.Label className="text-muted">Demo Account Number</Form.Label>
-                    <Form.Control
-                        type="text"
-                        value={demoAccountNo || 'Not selected'}
-                        disabled
-                        className="bg-light"
-                    />
-                </Form.Group>
             </Form>
         </div>
     );
 };
 
-const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {}, clearFieldError }) => {
     const [uploadedDocuments, setUploadedDocuments] = useState(data.uploadedDocuments || {});
+    const fileInputRefs = useRef({});
 
     // Check if all required documents are uploaded on component mount
     useEffect(() => {
@@ -900,12 +1326,18 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
         }
     }, []); // Only run on mount
 
-    const handleFileUpload = (documentName, files) => {
+    const handleFileUpload = (categoryIndex, docIndex, file) => {
+        if (!file) return;
+        
+        const docKey = `${categoryIndex}_${docIndex}`;
         const updatedDocs = {
             ...uploadedDocuments,
-            [documentName]: files
+            [docKey]: file.name
         };
         setUploadedDocuments(updatedDocs);
+        
+        // Clear validation error for this document
+        clearFieldError && clearFieldError(`document_${docKey}`);
         
         // Check if all required documents are uploaded
         const requiredDocuments = [
@@ -918,10 +1350,17 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
             'Beneficial Owner Passport'
         ];
         
-        // Check if all required documents are uploaded by looking for document keys that contain the document name
+        // Check if all required documents are uploaded
         const allDocsUploaded = requiredDocuments.every(doc => {
-            return Object.keys(updatedDocs).some(key => 
-                key.includes(doc) && updatedDocs[key] && updatedDocs[key].length > 0
+            return requirements.some(category => 
+                category.documents.some((categoryDoc, index) => {
+                    if (categoryDoc === doc) {
+                        const categoryIdx = requirements.indexOf(category);
+                        const key = `${categoryIdx}_${index}`;
+                        return updatedDocs[key];
+                    }
+                    return false;
+                })
             );
         });
         
@@ -932,10 +1371,19 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
         });
     };
 
-    const removeDocument = (documentName) => {
+    const handleFileRemove = (categoryIndex, docIndex) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
         const updatedDocs = { ...uploadedDocuments };
-        delete updatedDocs[documentName];
+        delete updatedDocs[docKey];
         setUploadedDocuments(updatedDocs);
+        
+        // Clear the file input
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
+        
+        // Clear validation error for this document
+        clearFieldError && clearFieldError(`document_${docKey}`);
         
         // Re-check if all required documents are still uploaded after removal
         const requiredDocuments = [
@@ -949,8 +1397,15 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
         ];
         
         const allDocsUploaded = requiredDocuments.every(doc => {
-            return Object.keys(updatedDocs).some(key => 
-                key.includes(doc) && updatedDocs[key] && updatedDocs[key].length > 0
+            return requirements.some(category => 
+                category.documents.some((categoryDoc, index) => {
+                    if (categoryDoc === doc) {
+                        const categoryIdx = requirements.indexOf(category);
+                        const key = `${categoryIdx}_${index}`;
+                        return updatedDocs[key];
+                    }
+                    return false;
+                })
             );
         });
         
@@ -960,6 +1415,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
             documentsUploaded: allDocsUploaded
         });
     };
+
 
     return (
         <div>
@@ -981,44 +1437,74 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 </ul>
             </Alert>
 
-            {requirements.map((category, categoryIndex) => 
-                category.documents.map((doc, docIndex) => {
-                    const documentKey = `${categoryIndex}-${docIndex}-${doc}`;
-                    const hasUploaded = uploadedDocuments[documentKey] && uploadedDocuments[documentKey].length > 0;
-                    
-                    return (
-                        <Card key={documentKey} className="mb-4 border-0 shadow-sm">
-                            <Card.Header className="bg-light border-0 py-2">
-                                <h6 className="mb-0 text-primary">{doc}</h6>
+            {requirements.map((category, categoryIndex) => (
+                <Card key={categoryIndex} className="mb-4 border-0 shadow-sm">
+                    <Card.Header className="bg-light border-0">
+                        <h6 className="mb-0 text-primary">{category.category}</h6>
                             </Card.Header>
                             <Card.Body>
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="text-muted">{doc} <span className="text-danger">*</span></Form.Label>
+                        {category.documents.map((doc, docIndex) => {
+                            const docKey = `${categoryIndex}_${docIndex}`;
+                            const isUploaded = uploadedDocuments[docKey];
+                            
+                            return (
+                                <Form.Group key={docIndex} className="mb-3">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Form.Label className="text-muted mb-0">
+                                            {doc} <span className="text-danger">*</span>
+                                            {isUploaded && (
+                                                <span className="text-success ms-2">
+                                                    <i className="mdi mdi-check-circle"></i> Uploaded: {isUploaded}
+                                                </span>
+                                            )}
+                                        </Form.Label>
+                                        {isUploaded && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => handleFileRemove(categoryIndex, docIndex)}
+                                                title="Remove file"
+                                            >
+                                                <i className="mdi mdi-delete"></i> Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Show file input when no file uploaded */}
+                                    {!isUploaded && (
                                     <Form.Control 
                                         type="file" 
                                         accept=".pdf,.jpg,.jpeg,.png" 
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (file) {
-                                                handleFileUpload(documentKey, [file]);
-                                            }
-                                        }}
-                                        required 
-                                    />
+                                            onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                            isInvalid={fieldErrors[`document_${docKey}`]}
+                                            className="mt-2"
+                                            ref={(el) => {
+                                                if (el) {
+                                                    fileInputRefs.current[docKey] = el;
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Show custom file display when file uploaded */}
+                                    {isUploaded && (
+                                        <div className="mt-2">
+                                            <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
+                                                <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                                <span className="flex-grow-1">{isUploaded}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <Form.Text className="text-muted">
                                         Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                                     </Form.Text>
-                                    {hasUploaded && (
-                                        <Form.Text className="text-success">
-                                            File selected: {uploadedDocuments[documentKey][0]?.name || 'Document uploaded'}
-                                        </Form.Text>
-                                    )}
                                 </Form.Group>
+                            );
+                        })}
                             </Card.Body>
                         </Card>
-                    );
-                })
-            )}
+            ))}
 
             <Alert variant="warning" className="mt-4">
                 <h6 className="mb-2">
@@ -1036,12 +1522,27 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
     );
 };
 
-const AuthorizePersonStep = ({ data = {}, onChange }) => {
+const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', bankCountryOther: '', swiftCode: '', accountNo: '', accountName: '' }]);
+    const [emailValid, setEmailValid] = useState(true);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    // Sync bank accounts with parent data
+    useEffect(() => {
+        if (data.bankAccounts && JSON.stringify(data.bankAccounts) !== JSON.stringify(bankAccounts)) {
+            setBankAccounts(data.bankAccounts);
+        }
+    }, [data.bankAccounts]);
+
+    // Ensure parent data always has current bank accounts
+    useEffect(() => {
+        if (JSON.stringify(data.bankAccounts) !== JSON.stringify(bankAccounts)) {
+            onChange({ ...data, bankAccounts });
+        }
+    }, [bankAccounts, data, onChange]);
 
     const addBankAccount = () => {
         const newAccounts = [...bankAccounts, { bankName: '', bankAddress: '', bankCity: '', bankPostalCode: '', bankCountry: '', bankCountryOther: '', swiftCode: '', accountNo: '', accountName: '' }];
@@ -1076,7 +1577,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Title <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonTitle || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonTitle: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonTitle');
+                                    onChange({ ...data, authorizePersonTitle: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonTitle}
                                 required
                             >
                                 <option value="">Select title</option>
@@ -1094,7 +1599,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter full name"
                                 value={data.authorizePersonFullName || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonFullName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonFullName');
+                                    onChange({ ...data, authorizePersonFullName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonFullName}
                                 required
                             />
                         </Form.Group>
@@ -1109,9 +1618,21 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="email"
                                 placeholder="Enter email address"
                                 value={data.authorizePersonEmail || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonEmail: e.target.value })}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Validate email format
+                                    const isValidEmail = value === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+                                    setEmailValid(isValidEmail);
+                                    // Clear field error when user starts typing
+                                    clearFieldError && clearFieldError('authorizePersonEmail');
+                                    onChange({ ...data, authorizePersonEmail: value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonEmail || (data.authorizePersonEmail && !emailValid)}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid email address.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -1121,7 +1642,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter place of birth"
                                 value={data.authorizePersonPlaceOfBirth || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonPlaceOfBirth: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonPlaceOfBirth');
+                                    onChange({ ...data, authorizePersonPlaceOfBirth: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonPlaceOfBirth}
                                 required
                             />
                         </Form.Group>
@@ -1135,7 +1660,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Control
                                 type="date"
                                 value={data.authorizePersonDateOfBirth || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonDateOfBirth: e.target.value })}
+                                max={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonDateOfBirth');
+                                    onChange({ ...data, authorizePersonDateOfBirth: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonDateOfBirth}
                                 required
                             />
                         </Form.Group>
@@ -1147,7 +1677,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter passport ID number"
                                 value={data.authorizePersonPassportId || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonPassportId: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonPassportId');
+                                    onChange({ ...data, authorizePersonPassportId: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonPassportId}
                                 required
                             />
                         </Form.Group>
@@ -1160,17 +1694,28 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Citizen <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonCitizen || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonCitizen: e.target.value })}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    clearFieldError && clearFieldError('authorizePersonCitizen');
+                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
+                                    if (newValue === 'OTHER' || (data.authorizePersonCitizen === 'OTHER' && newValue !== 'OTHER')) {
+                                        onChange({ ...data, authorizePersonCitizen: newValue, authorizePersonCitizenOther: '' });
+                                    } else {
+                                        onChange({ ...data, authorizePersonCitizen: newValue });
+                                    }
+                                }}
+                                isInvalid={fieldErrors.authorizePersonCitizen}
                                 required
                             >
                                 <option value="">Select citizenship</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
-                                <option value="SG">Singapore</option>
-                                <option value="MY">Malaysia</option>
-                                <option value="AU">Australia</option>
-                                <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
+                                {getCountries().map((country) => {
+                                    const countryName = en[country] || country;
+                                    return (
+                                        <option key={country} value={country}>
+                                            {countryName}
+                                        </option>
+                                    );
+                                })}
                                 <option value="OTHER">Other</option>
                             </Form.Select>
                             {data.authorizePersonCitizen === 'OTHER' && (
@@ -1178,7 +1723,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify other citizenship"
                                     value={data.authorizePersonCitizenOther || ''}
-                                    onChange={(e) => onChange({ ...data, authorizePersonCitizenOther: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('authorizePersonCitizenOther');
+                                        onChange({ ...data, authorizePersonCitizenOther: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.authorizePersonCitizenOther}
                                     className="mt-2"
                                     required
                                 />
@@ -1190,7 +1739,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Gender <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonGender || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonGender: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonGender');
+                                    onChange({ ...data, authorizePersonGender: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonGender}
                                 required
                             >
                                 <option value="">Select gender</option>
@@ -1204,7 +1757,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Marital Status <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonMaritalStatus || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonMaritalStatus: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonMaritalStatus');
+                                    onChange({ ...data, authorizePersonMaritalStatus: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonMaritalStatus}
                                 required
                             >
                                 <option value="">Select marital status</option>
@@ -1225,17 +1782,42 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 <Col md={3}>
                                     <Form.Select
                                         value={data.authorizePersonCountryCode || ''}
-                                        onChange={(e) => onChange({ ...data, authorizePersonCountryCode: e.target.value })}
+                                        isInvalid={fieldErrors.authorizePersonCountryCode}
+                                        onChange={(e) => {
+                                            const selectedCode = e.target.value;
+                                            // Clear field errors when user makes a selection
+                                            clearFieldError && clearFieldError('authorizePersonCountryCode');
+                                            clearFieldError && clearFieldError('authorizePersonPhoneNumber');
+                                            
+                                            // If no country is selected (back to "Select Country Code"), clear the phone number
+                                            if (!selectedCode) {
+                                                onChange({ 
+                                                    ...data, 
+                                                    authorizePersonCountryCode: selectedCode,
+                                                    authorizePersonPhoneNumber: ''
+                                                });
+                                            }
+                                            // If a country is selected, set the phone number to just the country code
+                                            else {
+                                                onChange({ 
+                                                    ...data, 
+                                                    authorizePersonCountryCode: selectedCode,
+                                                    authorizePersonPhoneNumber: selectedCode + ' '
+                                                });
+                                            }
+                                        }}
                                         required
                                     >
-                                        <option value="">Code</option>
-                                        <option value="+1">+1 (US/CA)</option>
-                                        <option value="+44">+44 (UK)</option>
-                                        <option value="+65">+65 (SG)</option>
-                                        <option value="+60">+60 (MY)</option>
-                                        <option value="+61">+61 (AU)</option>
-                                        <option value="+62">+62 (ID)</option>
-                                        <option value="+91">+91 (IN)</option>
+                                        <option value="">Select Country Code</option>
+                                        {getCountries().map((country) => {
+                                            const callingCode = `+${getCountryCallingCode(country)}`;
+                                            const countryName = en[country] || country;
+                                            return (
+                                                <option key={country} value={callingCode}>
+                                                    {callingCode} ({countryName})
+                                                </option>
+                                            );
+                                        })}
                                     </Form.Select>
                                 </Col>
                                 <Col md={9}>
@@ -1243,7 +1825,29 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                         type="tel"
                                         placeholder="Enter phone number"
                                         value={data.authorizePersonPhoneNumber || ''}
-                                        onChange={(e) => onChange({ ...data, authorizePersonPhoneNumber: e.target.value })}
+                                        isInvalid={fieldErrors.authorizePersonPhoneNumber}
+                                        onChange={(e) => {
+                                            let value = e.target.value;
+                                            
+                                            // Clear field error when user starts typing
+                                            clearFieldError && clearFieldError('authorizePersonPhoneNumber');
+                                            
+                                            // If there's a country code, ensure it stays at the beginning
+                                            if (data.authorizePersonCountryCode) {
+                                                if (!value.startsWith(data.authorizePersonCountryCode)) {
+                                                    // If user deleted the country code, restore it
+                                                    value = data.authorizePersonCountryCode + ' ' + value.replace(/^\+\d+\s?/, '');
+                                                } else {
+                                                    // Extract the number part after country code
+                                                    const numberPart = value.substring(data.authorizePersonCountryCode.length).trim();
+                                                    // Only allow numbers in the phone number part
+                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
+                                                    value = data.authorizePersonCountryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
+                                                }
+                                            }
+                                            
+                                            onChange({ ...data, authorizePersonPhoneNumber: value });
+                                        }}
                                         required
                                     />
                                 </Col>
@@ -1262,7 +1866,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter street address"
                                 value={data.authorizePersonStreetAddress || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonStreetAddress: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonStreetAddress');
+                                    onChange({ ...data, authorizePersonStreetAddress: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonStreetAddress}
                                 required
                             />
                         </Form.Group>
@@ -1274,7 +1882,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter city"
                                 value={data.authorizePersonCity || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonCity: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonCity');
+                                    onChange({ ...data, authorizePersonCity: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonCity}
                                 required
                             />
                         </Form.Group>
@@ -1289,7 +1901,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter postal/zip code"
                                 value={data.authorizePersonPostalCode || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonPostalCode: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonPostalCode');
+                                    onChange({ ...data, authorizePersonPostalCode: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonPostalCode}
                                 required
                             />
                         </Form.Group>
@@ -1299,17 +1915,22 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonCountry || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonCountry: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonCountry');
+                                    onChange({ ...data, authorizePersonCountry: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonCountry}
                                 required
                             >
                                 <option value="">Select country</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
-                                <option value="SG">Singapore</option>
-                                <option value="MY">Malaysia</option>
-                                <option value="AU">Australia</option>
-                                <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
+                                {getCountries().map((country) => {
+                                    const countryName = en[country] || country;
+                                    return (
+                                        <option key={country} value={country}>
+                                            {countryName}
+                                        </option>
+                                    );
+                                })}
                                 <option value="OTHER">Other</option>
                             </Form.Select>
                             {data.authorizePersonCountry === 'OTHER' && (
@@ -1332,7 +1953,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted">Do you have investment experience? <span className="text-danger">*</span></Form.Label>
-                            <div>
+                            <div className={`${fieldErrors.authorizePersonInvestmentExperience ? 'border border-danger rounded p-2' : ''}`}>
                                 <Form.Check
                                     inline
                                     type="radio"
@@ -1340,7 +1961,16 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     name="investmentExperience"
                                     value="YES"
                                     checked={data.authorizePersonInvestmentExperience === 'YES'}
-                                    onChange={(e) => onChange({ ...data, authorizePersonInvestmentExperience: e.target.value })}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value;
+                                        clearFieldError && clearFieldError('authorizePersonInvestmentExperience');
+                                        // Clear the details field when switching to "YES" or away from "YES"
+                                        if (newValue === 'YES' || (data.authorizePersonInvestmentExperience === 'YES' && newValue !== 'YES')) {
+                                            onChange({ ...data, authorizePersonInvestmentExperience: newValue, authorizePersonInvestmentExperienceDetails: '' });
+                                        } else {
+                                            onChange({ ...data, authorizePersonInvestmentExperience: newValue });
+                                        }
+                                    }}
                                 />
                                 <Form.Check
                                     inline
@@ -1349,7 +1979,16 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     name="investmentExperience"
                                     value="NO"
                                     checked={data.authorizePersonInvestmentExperience === 'NO'}
-                                    onChange={(e) => onChange({ ...data, authorizePersonInvestmentExperience: e.target.value })}
+                                    onChange={(e) => {
+                                        const newValue = e.target.value;
+                                        clearFieldError && clearFieldError('authorizePersonInvestmentExperience');
+                                        // Clear the details field when switching to "NO" or away from "YES"
+                                        if (newValue === 'NO' || (data.authorizePersonInvestmentExperience === 'YES' && newValue !== 'YES')) {
+                                            onChange({ ...data, authorizePersonInvestmentExperience: newValue, authorizePersonInvestmentExperienceDetails: '' });
+                                        } else {
+                                            onChange({ ...data, authorizePersonInvestmentExperience: newValue });
+                                        }
+                                    }}
                                 />
                             </div>
                         </Form.Group>
@@ -1361,7 +2000,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     rows={3}
                                     placeholder="Please describe your investment experience in detail..."
                                     value={data.authorizePersonInvestmentExperienceDetails || ''}
-                                    onChange={(e) => onChange({ ...data, authorizePersonInvestmentExperienceDetails: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('authorizePersonInvestmentExperienceDetails');
+                                        onChange({ ...data, authorizePersonInvestmentExperienceDetails: e.target.value });
+                                    }}
+                                    isInvalid={fieldErrors.authorizePersonInvestmentExperienceDetails}
                                     required
                                 />
                             </Form.Group>
@@ -1373,7 +2016,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted">Do you have any family who working in BAPPEBTI / Bursa Berjangka / Kliring Berjangka? <span className="text-danger">*</span></Form.Label>
-                            <div>
+                            <div className={`${fieldErrors.authorizePersonFamilyInBappebti ? 'border border-danger rounded p-2' : ''}`}>
                                 <Form.Check
                                     inline
                                     type="radio"
@@ -1381,7 +2024,10 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     name="familyInBappebti"
                                     value="YES"
                                     checked={data.authorizePersonFamilyInBappebti === 'YES'}
-                                    onChange={(e) => onChange({ ...data, authorizePersonFamilyInBappebti: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('authorizePersonFamilyInBappebti');
+                                        onChange({ ...data, authorizePersonFamilyInBappebti: e.target.value });
+                                    }}
                                 />
                                 <Form.Check
                                     inline
@@ -1390,7 +2036,10 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     name="familyInBappebti"
                                     value="NO"
                                     checked={data.authorizePersonFamilyInBappebti === 'NO'}
-                                    onChange={(e) => onChange({ ...data, authorizePersonFamilyInBappebti: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('authorizePersonFamilyInBappebti');
+                                        onChange({ ...data, authorizePersonFamilyInBappebti: e.target.value });
+                                    }}
                                 />
                             </div>
                         </Form.Group>
@@ -1401,7 +2050,7 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted">Have you declared bankrupt by the Court? <span className="text-danger">*</span></Form.Label>
-                            <div>
+                            <div className={`${fieldErrors.authorizePersonDeclaredBankrupt ? 'border border-danger rounded p-2' : ''}`}>
                                 <Form.Check
                                     inline
                                     type="radio"
@@ -1409,7 +2058,10 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     name="declaredBankrupt"
                                     value="YES"
                                     checked={data.authorizePersonDeclaredBankrupt === 'YES'}
-                                    onChange={(e) => onChange({ ...data, authorizePersonDeclaredBankrupt: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('authorizePersonDeclaredBankrupt');
+                                        onChange({ ...data, authorizePersonDeclaredBankrupt: e.target.value });
+                                    }}
                                 />
                                 <Form.Check
                                     inline
@@ -1418,7 +2070,10 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                     name="declaredBankrupt"
                                     value="NO"
                                     checked={data.authorizePersonDeclaredBankrupt === 'NO'}
-                                    onChange={(e) => onChange({ ...data, authorizePersonDeclaredBankrupt: e.target.value })}
+                                    onChange={(e) => {
+                                        clearFieldError && clearFieldError('authorizePersonDeclaredBankrupt');
+                                        onChange({ ...data, authorizePersonDeclaredBankrupt: e.target.value });
+                                    }}
                                 />
                             </div>
                         </Form.Group>
@@ -1435,7 +2090,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter company name"
                                 value={data.authorizePersonCompanyName || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonCompanyName: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonCompanyName');
+                                    onChange({ ...data, authorizePersonCompanyName: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonCompanyName}
                                 required
                             />
                         </Form.Group>
@@ -1447,7 +2106,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter nature of business"
                                 value={data.authorizePersonBusinessNature || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonBusinessNature: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonBusinessNature');
+                                    onChange({ ...data, authorizePersonBusinessNature: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonBusinessNature}
                                 required
                             />
                         </Form.Group>
@@ -1462,7 +2125,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter job/position"
                                 value={data.authorizePersonJobPosition || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonJobPosition: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonJobPosition');
+                                    onChange({ ...data, authorizePersonJobPosition: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonJobPosition}
                                 required
                             />
                         </Form.Group>
@@ -1479,7 +2146,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter office street address"
                                 value={data.authorizePersonOfficeAddress || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonOfficeAddress: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonOfficeAddress');
+                                    onChange({ ...data, authorizePersonOfficeAddress: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonOfficeAddress}
                                 required
                             />
                         </Form.Group>
@@ -1491,7 +2162,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter office city"
                                 value={data.authorizePersonOfficeCity || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonOfficeCity: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonOfficeCity');
+                                    onChange({ ...data, authorizePersonOfficeCity: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonOfficeCity}
                                 required
                             />
                         </Form.Group>
@@ -1506,7 +2181,11 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter office postal/zip code"
                                 value={data.authorizePersonOfficePostalCode || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonOfficePostalCode: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonOfficePostalCode');
+                                    onChange({ ...data, authorizePersonOfficePostalCode: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonOfficePostalCode}
                                 required
                             />
                         </Form.Group>
@@ -1516,17 +2195,22 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Authorize Person Country <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.authorizePersonOfficeCountry || ''}
-                                onChange={(e) => onChange({ ...data, authorizePersonOfficeCountry: e.target.value })}
+                                onChange={(e) => {
+                                    clearFieldError && clearFieldError('authorizePersonOfficeCountry');
+                                    onChange({ ...data, authorizePersonOfficeCountry: e.target.value });
+                                }}
+                                isInvalid={fieldErrors.authorizePersonOfficeCountry}
                                 required
                             >
                                 <option value="">Select country</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
-                                <option value="SG">Singapore</option>
-                                <option value="MY">Malaysia</option>
-                                <option value="AU">Australia</option>
-                                <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
+                                {getCountries().map((country) => {
+                                    const countryName = en[country] || country;
+                                    return (
+                                        <option key={country} value={country}>
+                                            {countryName}
+                                        </option>
+                                    );
+                                })}
                                 <option value="OTHER">Other</option>
                             </Form.Select>
                             {data.authorizePersonOfficeCountry === 'OTHER' && (
@@ -1569,7 +2253,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             type="text"
                                             placeholder="Enter bank name"
                                             value={account.bankName}
-                                            onChange={(e) => updateBankAccount(index, 'bankName', e.target.value)}
+                                            isInvalid={fieldErrors.bankName || fieldErrors[`bankName_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('bankName');
+                                                clearFieldError && clearFieldError(`bankName_${index}`);
+                                                updateBankAccount(index, 'bankName', e.target.value);
+                                            }}
                                             required
                                         />
                                     </Form.Group>
@@ -1581,7 +2270,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             type="text"
                                             placeholder="Enter account holder name"
                                             value={account.accountName}
-                                            onChange={(e) => updateBankAccount(index, 'accountName', e.target.value)}
+                                            isInvalid={fieldErrors.accountName || fieldErrors[`accountName_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('accountName');
+                                                clearFieldError && clearFieldError(`accountName_${index}`);
+                                                updateBankAccount(index, 'accountName', e.target.value);
+                                            }}
                                             required
                                         />
                                     </Form.Group>
@@ -1595,7 +2289,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             type="text"
                                             placeholder="Enter bank street address"
                                             value={account.bankAddress}
-                                            onChange={(e) => updateBankAccount(index, 'bankAddress', e.target.value)}
+                                            isInvalid={fieldErrors.bankAddress || fieldErrors[`bankAddress_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('bankAddress');
+                                                clearFieldError && clearFieldError(`bankAddress_${index}`);
+                                                updateBankAccount(index, 'bankAddress', e.target.value);
+                                            }}
                                             required
                                         />
                                     </Form.Group>
@@ -1607,7 +2306,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             type="text"
                                             placeholder="Enter bank city"
                                             value={account.bankCity}
-                                            onChange={(e) => updateBankAccount(index, 'bankCity', e.target.value)}
+                                            isInvalid={fieldErrors.bankCity || fieldErrors[`bankCity_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('bankCity');
+                                                clearFieldError && clearFieldError(`bankCity_${index}`);
+                                                updateBankAccount(index, 'bankCity', e.target.value);
+                                            }}
                                             required
                                         />
                                     </Form.Group>
@@ -1619,17 +2323,23 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                         <Form.Label className="text-muted">Bank Country <span className="text-danger">*</span></Form.Label>
                                         <Form.Select
                                             value={account.bankCountry}
-                                            onChange={(e) => updateBankAccount(index, 'bankCountry', e.target.value)}
+                                            isInvalid={fieldErrors.bankCountry || fieldErrors[`bankCountry_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('bankCountry');
+                                                clearFieldError && clearFieldError(`bankCountry_${index}`);
+                                                updateBankAccount(index, 'bankCountry', e.target.value);
+                                            }}
                                             required
                                         >
                                             <option value="">Select country</option>
-                                            <option value="US">United States</option>
-                                            <option value="UK">United Kingdom</option>
-                                            <option value="SG">Singapore</option>
-                                            <option value="MY">Malaysia</option>
-                                            <option value="AU">Australia</option>
-                                            <option value="CA">Canada</option>
-                                            <option value="ID">Indonesia</option>
+                                            {getCountries().map((country) => {
+                                                const countryName = en[country] || country;
+                                                return (
+                                                    <option key={country} value={country}>
+                                                        {countryName}
+                                                    </option>
+                                                );
+                                            })}
                                             <option value="OTHER">Other</option>
                                         </Form.Select>
                                         {account.bankCountry === 'OTHER' && (
@@ -1637,7 +2347,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                                 type="text"
                                                 placeholder="Please specify other country"
                                                 value={account.bankCountryOther || ''}
-                                                onChange={(e) => updateBankAccount(index, 'bankCountryOther', e.target.value)}
+                                                isInvalid={fieldErrors.bankCountryOther || fieldErrors[`bankCountryOther_${index}`]}
+                                                onChange={(e) => {
+                                                    clearFieldError && clearFieldError('bankCountryOther');
+                                                    clearFieldError && clearFieldError(`bankCountryOther_${index}`);
+                                                    updateBankAccount(index, 'bankCountryOther', e.target.value);
+                                                }}
                                                 className="mt-2"
                                                 required
                                             />
@@ -1651,7 +2366,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             type="text"
                                             placeholder="Enter SWIFT code"
                                             value={account.swiftCode}
-                                            onChange={(e) => updateBankAccount(index, 'swiftCode', e.target.value)}
+                                            isInvalid={fieldErrors.swiftCode || fieldErrors[`swiftCode_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('swiftCode');
+                                                clearFieldError && clearFieldError(`swiftCode_${index}`);
+                                                updateBankAccount(index, 'swiftCode', e.target.value);
+                                            }}
                                             required
                                         />
                                     </Form.Group>
@@ -1665,7 +2385,12 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
                                             type="text"
                                             placeholder="Enter IBAN/Account number"
                                             value={account.accountNo}
-                                            onChange={(e) => updateBankAccount(index, 'accountNo', e.target.value)}
+                                            isInvalid={fieldErrors.accountNo || fieldErrors[`accountNo_${index}`]}
+                                            onChange={(e) => {
+                                                clearFieldError && clearFieldError('accountNo');
+                                                clearFieldError && clearFieldError(`accountNo_${index}`);
+                                                updateBankAccount(index, 'accountNo', e.target.value);
+                                            }}
                                             required
                                         />
                                     </Form.Group>
@@ -1690,30 +2415,51 @@ const AuthorizePersonStep = ({ data = {}, onChange }) => {
     );
 };
 
-const PassportUploadStep = ({ data = {}, onChange }) => {
-    const [passportFile, setPassportFile] = useState(data.passportFile || null);
+const PassportUploadStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
+    const [uploadedDocuments, setUploadedDocuments] = useState(data.uploadedDocuments || {});
+    const fileInputRefs = useRef({});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const handleFileUpload = (files) => {
-        if (files && files.length > 0) {
-            const file = files[0];
-            setPassportFile(file);
+    const handleFileUpload = (file) => {
+        if (!file) return;
+        
+        const docKey = 'authorizePersonPassport';
+        const updatedDocs = {
+            ...uploadedDocuments,
+            [docKey]: file.name
+        };
+        setUploadedDocuments(updatedDocs);
+        
+        // Clear validation error for this document
+        clearFieldError && clearFieldError(`document_${docKey}`);
+        
             onChange({ 
                 ...data, 
-                passportFile: file,
+            uploadedDocuments: updatedDocs,
                 passportDocumentsUploaded: true
             });
-        }
     };
 
-    const removeFile = () => {
-        setPassportFile(null);
+    const handleFileRemove = () => {
+        const docKey = 'authorizePersonPassport';
+        const updatedDocs = { ...uploadedDocuments };
+        delete updatedDocs[docKey];
+        setUploadedDocuments(updatedDocs);
+        
+        // Clear the file input
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
+        
+        // Clear validation error for this document
+        clearFieldError && clearFieldError(`document_${docKey}`);
+        
         onChange({ 
             ...data, 
-            passportFile: null,
+            uploadedDocuments: updatedDocs,
             passportDocumentsUploaded: false
         });
     };
@@ -1738,32 +2484,64 @@ const PassportUploadStep = ({ data = {}, onChange }) => {
                 </ul>
             </Alert>
 
-            <Card className="border-0 shadow-sm">
-                <Card.Header className="bg-light border-0 py-2">
+            <Card className="mb-4 border-0 shadow-sm">
+                <Card.Header className="bg-light border-0">
                     <h6 className="mb-0 text-primary">Authorize Person Passport</h6>
                 </Card.Header>
                 <Card.Body>
                     <Form.Group className="mb-3">
-                        <Form.Label className="text-muted">Authorize Person Passport <span className="text-danger">*</span></Form.Label>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <Form.Label className="text-muted mb-0">
+                                Authorize Person Passport <span className="text-danger">*</span>
+                                {uploadedDocuments.authorizePersonPassport && (
+                                    <span className="text-success ms-2">
+                                        <i className="mdi mdi-check-circle"></i> Uploaded: {uploadedDocuments.authorizePersonPassport}
+                                    </span>
+                                )}
+                            </Form.Label>
+                            {uploadedDocuments.authorizePersonPassport && (
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={handleFileRemove}
+                                    title="Remove file"
+                                >
+                                    <i className="mdi mdi-delete"></i> Remove
+                                </button>
+                            )}
+                        </div>
+                        
+                        {/* Show file input when no file uploaded */}
+                        {!uploadedDocuments.authorizePersonPassport && (
                         <Form.Control 
                             type="file" 
                             accept=".pdf,.jpg,.jpeg,.png" 
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    handleFileUpload([file]);
-                                }
-                            }}
-                            required 
-                        />
-                        <Form.Text className="text-muted">
+                                onChange={(e) => handleFileUpload(e.target.files[0])}
+                                isInvalid={fieldErrors['document_authorizePersonPassport']}
+                                className="mt-2"
+                                ref={(el) => {
+                                    if (el) {
+                                        fileInputRefs.current['authorizePersonPassport'] = el;
+                                    }
+                                }}
+                            />
+                        )}
+                        
+                        {/* Show custom file display when file uploaded */}
+                        {uploadedDocuments.authorizePersonPassport && (
+                            <div className="mt-2">
+                                <div className={`form-control d-flex align-items-center ${fieldErrors['document_authorizePersonPassport'] ? 'is-invalid' : ''}`}>
+                                    <i className="mdi mdi-file-document text-primary me-2"></i>
+                                    <span className="text-truncate">
+                                        {uploadedDocuments.authorizePersonPassport}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <Form.Text className="text-muted mt-2">
                             Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                         </Form.Text>
-                        {passportFile && (
-                            <Form.Text className="text-success">
-                                File selected: {passportFile.name}
-                            </Form.Text>
-                        )}
                     </Form.Group>
                 </Card.Body>
             </Card>
@@ -1784,12 +2562,17 @@ const PassportUploadStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData }) => {
+const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
     const handleCheckboxChange = (fieldName, checked) => {
+        // Clear field error when checkbox is checked
+        if (checked && clearFieldError) {
+            clearFieldError(fieldName);
+        }
+        
         onChange({ ...data, [fieldName]: checked });
     };
 
@@ -1903,6 +2686,7 @@ const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData }) => {
                                 id={agreement.field}
                                 checked={data[agreement.field] || false}
                                 onChange={(e) => handleCheckboxChange(agreement.field, e.target.checked)}
+                                isInvalid={fieldErrors[agreement.field]}
                                 label={
                                     <span>
                                         {agreement.text}
