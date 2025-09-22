@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
@@ -10,6 +11,7 @@ const RegulatedCompanyForm = () => {
     const [formData, setFormData] = useState({});
     const [fieldErrors, setFieldErrors] = useState({});
     const { showNotification } = useNotificationContext();
+    const navigate = useNavigate();
 
     // Function to clear specific field errors
     const clearFieldError = (fieldName) => {
@@ -615,6 +617,13 @@ const RegulatedCompanyForm = () => {
         console.log('Submitting Regulated Company KYC (raw data):', data);
         
         try {
+            // Show processing notification
+            showNotification({
+                title: 'Processing',
+                message: 'Submitting your KYC application...',
+                type: 'info'
+            });
+            
             // Flatten the nested step data structure
             const flattenedData = {};
             Object.keys(data).forEach(stepKey => {
@@ -654,12 +663,17 @@ const RegulatedCompanyForm = () => {
             if (response.success) {
                 showNotification({
                     title: 'Success',
-                    message: `Regulated Company KYC submitted successfully! Application Reference: ${response.data.applicationReference}`,
+                    message: `Regulated Company KYC submitted successfully! Application Reference: ${response.data.applicationReference || response.data.applicationId || 'N/A'}`,
                     type: 'success'
                 });
                 
-                // Optionally, redirect to a success page or clear the form
+                // Clear the form
                 setFormData({});
+                
+                // Navigate to accounts page after successful submission
+                setTimeout(() => {
+                    navigate('/dashboard/accounts');
+                }, 2000); // Give time for user to read the success message
             } else {
                 throw new Error(response.message || 'Submission failed');
             }

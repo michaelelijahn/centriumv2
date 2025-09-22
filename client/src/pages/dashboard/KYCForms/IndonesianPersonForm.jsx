@@ -3170,7 +3170,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                             const isUploaded = uploadedDocs[docKey];
                             
                             return (
-                                <Form.Group key={docIndex} className="mb-3">
+                            <Form.Group key={docIndex} className="mb-3">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <Form.Label className="text-muted mb-0">
                                             {doc}
@@ -3195,9 +3195,9 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                     
                                     {/* Show file input when no file uploaded */}
                                     {!isUploaded && (
-                                        <Form.Control 
-                                            type="file" 
-                                            accept=".pdf,.jpg,.jpeg,.png"
+                                <Form.Control 
+                                    type="file" 
+                                    accept=".pdf,.jpg,.jpeg,.png"
                                             onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
                                             isInvalid={fieldErrors[`document_${docKey}`]}
                                             className="mt-2"
@@ -3215,7 +3215,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                             <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
                                                 <i className="mdi mdi-file-document me-2 text-primary"></i>
                                                 <span className="flex-grow-1">{isUploaded.name}</span>
-                                            </div>
+            </div>
                                         </div>
                                     )}
                                     
@@ -3226,13 +3226,13 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                     {fieldErrors[`document_${docKey}`] && (
                                         <div className="invalid-feedback d-block">
                                             This document is required.
-                                        </div>
-                                    )}
+                            </div>
+                    )}
                                 </Form.Group>
                             );
                         })}
-                    </Card.Body>
-                </Card>
+                </Card.Body>
+            </Card>
             ))}
         </div>
     );
@@ -4693,19 +4693,19 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {}, fieldError
                             {fieldErrors.verificationAcceptance && (
                                 <div className="invalid-feedback d-block">
                                     You must select "Ya" to continue
-                                </div>
+                        </div>
                             )}
                             {data.verificationAcceptance === 'no' && !fieldErrors.verificationAcceptance && (
-                                <div className="mt-2">
-                                    <small className="text-danger">You must select "Ya" to continue</small>
-                                </div>
-                            )}
+                            <div className="mt-2">
+                                <small className="text-danger">You must select "Ya" to continue</small>
+                            </div>
+                        )}
                         </div>
 
-                        <Form.Group className="mb-3">
+                    <Form.Group className="mb-3">
                             <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal: <span className="text-danger">*</span></strong></Form.Label>
-                            <Form.Control
-                                type="datetime-local"
+                        <Form.Control
+                            type="datetime-local"
                                 value={data.verificationDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
                                 onChange={(e) => {
                                     onChange({ ...data, verificationDate: e.target.value });
@@ -4714,12 +4714,12 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {}, fieldError
                                     }
                                 }}
                                 isInvalid={fieldErrors.verificationDate}
-                                required
-                            />
+                            required
+                        />
                             <Form.Control.Feedback type="invalid">
                                 Process verification date is required
                             </Form.Control.Feedback>
-                        </Form.Group>
+                    </Form.Group>
                     </div>
                 </Card.Body>
             </Card>

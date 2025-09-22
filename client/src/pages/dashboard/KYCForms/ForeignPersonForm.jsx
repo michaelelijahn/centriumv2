@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
@@ -10,6 +11,7 @@ const ForeignPersonForm = () => {
     const [formData, setFormData] = useState({});
     const [fieldErrors, setFieldErrors] = useState({});
     const { showNotification } = useNotificationContext();
+    const navigate = useNavigate();
 
     // Function to clear specific field errors
     const clearFieldError = (fieldName) => {
@@ -571,6 +573,13 @@ const ForeignPersonForm = () => {
 
     const handleSubmit = async (data) => {
         try {
+            // Show processing notification
+            showNotification({
+                title: 'Processing',
+                message: 'Submitting your KYC application...',
+                type: 'info'
+            });
+            
             console.log('Submitting Foreign Person KYC:', data);
             
             // Flatten step data into a single object
@@ -619,9 +628,17 @@ const ForeignPersonForm = () => {
             if (response.success) {
                 showNotification({
                     title: 'Success',
-                    message: 'Foreign Person KYC submitted successfully!',
+                    message: `Foreign Person KYC submitted successfully! Application Reference: ${response.data.applicationReference || response.data.applicationId || 'N/A'}`,
                     type: 'success'
                 });
+                
+                // Clear the form
+                setFormData({});
+                
+                // Navigate to accounts page after successful submission
+                setTimeout(() => {
+                    navigate('/dashboard/accounts');
+                }, 2000); // Give time for user to read the success message
                 
                 console.log('KYC Application submitted:', response.data);
             } else {
@@ -639,8 +656,8 @@ const ForeignPersonForm = () => {
                 });
             } else {
                 showNotification({
-                    title: 'Error',
-                    message: error.message || 'Failed to submit KYC application. Please try again.',
+                    title: 'Submission Failed',
+                    message: error.message || 'An error occurred while submitting your KYC application. Please try again.',
                     type: 'error'
                 });
             }
@@ -2371,7 +2388,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                     <div className="d-flex justify-content-between align-items-center">
                                         <Form.Label className="text-muted mb-0">
                                             {doc}
-                                            {!category.optional && <span className="text-danger">*</span>}
+                                            {!category.optional && <span className="text-danger"> *</span>}
                                             {isUploaded && (
                                                 <span className="text-success ms-2">
                                                     <i className="mdi mdi-check-circle"></i> Uploaded: {isUploaded}
