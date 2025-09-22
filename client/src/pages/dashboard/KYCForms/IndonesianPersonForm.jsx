@@ -1,12 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
 
 const IndonesianPersonForm = () => {
     const [formData, setFormData] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const { showNotification } = useNotificationContext();
+    const navigate = useNavigate();
+
+    // Function to clear specific field errors
+    const clearFieldError = (fieldName) => {
+        if (fieldErrors[fieldName]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[fieldName];
+                return newErrors;
+            });
+        }
+    };
+
+    // Function to set specific field errors
+    const setFieldError = (fieldName) => {
+        setFieldErrors(prev => ({
+            ...prev,
+            [fieldName]: true
+        }));
+    };
 
     // Steps for actual rendering logic
     const steps = [
@@ -128,16 +150,15 @@ const IndonesianPersonForm = () => {
         }
     ];
 
-    // Document requirements for Indonesian Person registration
     const documentRequirements = [
         {
             category: "Dokumen yang dilampirkan",
             documents: [
-                "Rekening Koran / Tagihan Kartu Kredit",
-                "Rekening Listrik / Telepon", 
-                "Foto Terkini",
-                "Identify No. (KTP)",
-                "NPWP"
+                "Rekening Koran / Tagihan Kartu Kredit ",
+                "Rekening Listrik / Telepon ", 
+                "Foto Terkini ",
+                "Identify No. (KTP) ",
+                "NPWP "
             ]
         }
     ];
@@ -152,41 +173,41 @@ const IndonesianPersonForm = () => {
             case 0:
                 return <RequirementsStep requirements={documentRequirements} />;
             case 1:
-                return <AccountInformationStep data={stepData} onChange={updateFormData} />;
+                return <AccountInformationStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 2:
-                return <DataPribadiStep data={stepData} onChange={updateFormData} />;
+                return <DataPribadiStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 3:
-                return <EmergencyContactStep data={stepData} onChange={updateFormData} />;
+                return <EmergencyContactStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 4:
-                return <DataPekerjaanStep data={stepData} onChange={updateFormData} />;
+                return <DataPekerjaanStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 5:
-                return <DaftarKekayaanStep data={stepData} onChange={updateFormData} />;
+                return <DaftarKekayaanStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 6:
-                return <RekeningBankStep data={stepData} onChange={updateFormData} />;
+                return <RekeningBankStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 7:
-                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} />;
+                return <DocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 8:
-                return <DeclarationStep data={stepData} onChange={updateFormData} />;
+                return <DeclarationStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 9:
-                return <TradingSimulationDeclaration data={stepData} onChange={updateFormData} allData={allFormData} />;
+                return <TradingSimulationDeclaration data={stepData} onChange={updateFormData} allData={allFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 10:
-                return <DisclosureStatementStep data={stepData} onChange={updateFormData} />;
+                return <DisclosureStatementStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 11:
-                return <RiskDisclosureDocumentStep data={stepData} onChange={updateFormData} />; 
+                return <RiskDisclosureDocumentStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />; 
             case 12:
-                return <AdditionalDisclosureStatementStep data={stepData} onChange={updateFormData} />;
+                return <AdditionalDisclosureStatementStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 13:
-                return <ElectronicAgreementStep data={stepData} onChange={updateFormData} />;
+                return <ElectronicAgreementStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 14:
-                return <TradingRulesStep data={stepData} onChange={updateFormData} />;
+                return <TradingRulesStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 15:
-                return <NewFundDeclarationStep data={stepData} onChange={updateFormData} allData={allFormData} />;
+                return <NewFundDeclarationStep data={stepData} onChange={updateFormData} allData={allFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 16:
-                return <AccessCodeResponsibilityStep data={stepData} onChange={updateFormData} allData={allFormData} />;
+                return <AccessCodeResponsibilityStep data={stepData} onChange={updateFormData} allData={allFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 17:
-                return <FundDeclarationStep data={stepData} onChange={updateFormData} allData={allFormData} />;
+                return <FundDeclarationStep data={stepData} onChange={updateFormData} allData={allFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 18:
-                return <ProcessVerificationStep data={stepData} onChange={updateFormData} allData={allFormData} />;
+                return <ProcessVerificationStep data={stepData} onChange={updateFormData} allData={allFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             default:
                 return <RequirementsStep requirements={documentRequirements} />;
         }
@@ -301,6 +322,22 @@ const IndonesianPersonForm = () => {
             }
         });
         
+        // Validate age (must be at least 21 years old)
+        if (data.tanggalLahir) {
+            const birthDate = new Date(data.tanggalLahir);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
+                ? age - 1
+                : age;
+                
+            if (actualAge < 21) {
+                errors.push('Minimum 21 years old is required');
+            }
+        }
+        
         // Check conditional fields
         if (data.statusPerkawinan === 'Married' && !data.namaIstriSuami?.trim()) {
             errors.push('Nama Istri/Suami is required when married');
@@ -314,7 +351,7 @@ const IndonesianPersonForm = () => {
             errors.push('Please specify other account opening purpose');
         }
         
-        if (data.pengalamanInvestasi === 'Ya, di bidang' && !data.pengalamanInvestasiBidang?.trim()) {
+        if (data.pengalamanInvestasi === 'Yes' && !data.pengalamanInvestasiBidang?.trim()) {
             errors.push('Please provide details about your investment experience');
         }
         
@@ -388,12 +425,21 @@ const IndonesianPersonForm = () => {
     const validateDaftarKekayaanStep = (data) => {
         const errors = [];
         
-        // Only check required field: penghasilanPertahun (annual income)
-        if (!data.penghasilanPertahun?.trim()) {
-            errors.push('Penghasilan Pertahun is required');
-        }
+        const requiredFields = [
+            { field: 'penghasilanPertahun', label: 'Penghasilan Pertahun' },
+            { field: 'lokasiRumah', label: 'Lokasi Rumah' },
+            { field: 'nilaiNJOP', label: 'Nilai NJOP' },
+            { field: 'bankDeposit', label: 'Bank Deposit' },
+            { field: 'jumlah', label: 'Jumlah' }
+        ];
         
-        // Other fields (lokasiRumah, nilaiNJOP, bankDeposit, jumlah, lainnya) are optional
+        requiredFields.forEach(({ field, label }) => {
+            if (!data[field]?.trim()) {
+                errors.push(`${label} is required`);
+            }
+        });
+        
+        // lainnya is optional - no validation needed
         
         return { isValid: errors.length === 0, errors };
     };
@@ -410,6 +456,7 @@ const IndonesianPersonForm = () => {
                     { field: 'cabang', label: `Bank ${index + 1} - Cabang` },
                     { field: 'noRekening', label: `Bank ${index + 1} - No. Rekening` },
                     { field: 'namaPemilikRekening', label: `Bank ${index + 1} - Nama Pemilik Rekening` },
+                    { field: 'noTeleponBank', label: `Bank ${index + 1} - No. Telepon Bank` },
                     { field: 'bankAccountType', label: `Bank ${index + 1} - Jenis Rekening Bank` }
                 ];
                 
@@ -432,32 +479,19 @@ const IndonesianPersonForm = () => {
     const validateDocumentUploadStep = (data) => {
         const errors = [];
         
-        // List of required documents for Indonesian Person
-        const requiredDocuments = [
-            "Rekening Koran / Tagihan Kartu Kredit",
-            "Rekening Listrik / Telepon", 
-            "Foto Terkini",
-            "Identify No. (KTP)",
-            "NPWP"
-        ];
-        
-        // Check if uploadedFiles exists
-        if (!data.uploadedFiles) {
-            errors.push('Please upload all required documents before proceeding');
-            return { isValid: false, errors };
-        }
-        
-        // Check each required document
-        const missingDocuments = [];
-        requiredDocuments.forEach(docName => {
-            if (!data.uploadedFiles[docName] || !data.uploadedFiles[docName].name) {
-                missingDocuments.push(docName);
+        // Get document requirements and check each one
+        documentRequirements.forEach((category, categoryIndex) => {
+            if (!category.optional) {
+                category.documents.forEach((doc, docIndex) => {
+                    const docKey = `${categoryIndex}_${docIndex}`;
+                    const hasFile = data.uploadedFiles && data.uploadedFiles[docKey] && data.uploadedFiles[docKey].name;
+                    
+                    if (!hasFile) {
+                        errors.push(`Missing required document: ${doc}`);
+                    }
+                });
             }
         });
-        
-        if (missingDocuments.length > 0) {
-            errors.push(`Missing required documents: ${missingDocuments.join(', ')}`);
-        }
         
         return { isValid: errors.length === 0, errors };
     };
@@ -465,9 +499,11 @@ const IndonesianPersonForm = () => {
     const validateDeclarationStep = (data) => {
         const errors = [];
         
-        // Check if the declaration radio button is set to "ya" (Yes)
+        // Check if the declaration radio button is selected
         if (!data.declaration) {
             errors.push('Please acknowledge the company profile agreement by selecting "Ya"');
+        } else if (data.declaration === 'tidak') {
+            errors.push('You must select "Ya" to continue');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -479,12 +515,15 @@ const IndonesianPersonForm = () => {
         // Check if the trading simulation radio button is set to "ya" (Yes)
         if (!data.tradingSimulation) {
             errors.push('Please acknowledge the trading simulation agreement by selecting "Ya"');
+        } else if (data.tradingSimulation === 'tidak') {
+            errors.push('You must select "Ya" to continue for trading simulation');
         }
         
         // Check if trading experience is selected
         if (!data.tradingExperience) {
             errors.push('Trading experience information is required');
         }
+        // Note: Trading experience can be "tidak" - users are not required to have previous experience
         
         // If has experience, validate additional fields
         if (data.tradingExperience === 'ya') {
@@ -505,6 +544,8 @@ const IndonesianPersonForm = () => {
         // Check if the disclosure statement radio button is set to "ya" (Yes)
         if (!data.disclosureStatement) {
             errors.push('Please acknowledge the disclosure statement by selecting "Ya"');
+        } else if (data.disclosureStatement === 'tidak') {
+            errors.push('You must select "Ya" to continue for disclosure statement');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -525,6 +566,13 @@ const IndonesianPersonForm = () => {
             }
         });
         
+        // Check final acceptance radio button
+        if (!data.finalAcceptance) {
+            errors.push('Please acknowledge the risk disclosure by selecting "Ya"');
+        } else if (data.finalAcceptance === 'tidak') {
+            errors.push('You must select "Ya" to continue for risk disclosure');
+        }
+        
         return { isValid: errors.length === 0, errors };
     };
 
@@ -533,6 +581,8 @@ const IndonesianPersonForm = () => {
         
         if (!data.additionalDisclosureStatement) {
             errors.push('Please acknowledge the additional disclosure statement');
+        } else if (data.additionalDisclosureStatement === 'tidak') {
+            errors.push('You must select "Ya" to continue for additional disclosure statement');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -543,6 +593,12 @@ const IndonesianPersonForm = () => {
         
         if (!data.electronicAgreement) {
             errors.push('Please acknowledge the electronic power of attorney agreement');
+        } else if (data.electronicAgreement === 'tidak') {
+            errors.push('You must select "Ya" to continue for electronic agreement');
+        }
+        
+        if (!data.disputeResolutionBappebti || !data.disputeResolutionJakarta) {
+            errors.push('Please select both dispute resolution methods');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -553,6 +609,8 @@ const IndonesianPersonForm = () => {
         
         if (!data.tradingRulesAcceptance) {
             errors.push('Please acknowledge the PALN trading rules');
+        } else if (data.tradingRulesAcceptance === 'no') {
+            errors.push('You must select "Ya" to continue for trading rules');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -561,8 +619,10 @@ const IndonesianPersonForm = () => {
     const validateNewFundDeclarationStep = (data) => {
         const errors = [];
         
-        if (data.newFundDeclarationAcceptance !== 'yes') {
+        if (!data.newFundDeclarationAcceptance) {
             errors.push('Please acknowledge the personal fund ownership declaration by selecting "Ya"');
+        } else if (data.newFundDeclarationAcceptance === 'no') {
+            errors.push('You must select "Ya" to continue for fund declaration');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -571,8 +631,10 @@ const IndonesianPersonForm = () => {
     const validateFundDeclarationStep = (data) => {
         const errors = [];
         
-        if (data.fundDeclarationAcceptance !== 'yes') {
+        if (!data.fundDeclarationAcceptance) {
             errors.push('Please acknowledge the fund declaration by selecting "Ya"');
+        } else if (data.fundDeclarationAcceptance === 'no') {
+            errors.push('You must select "Ya" to continue for fund declaration');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -583,6 +645,8 @@ const IndonesianPersonForm = () => {
         
         if (!data.accessCodeResponsibilityAcceptance) {
             errors.push('Please acknowledge the personal access password responsibility statement');
+        } else if (data.accessCodeResponsibilityAcceptance === 'no') {
+            errors.push('You must select "Ya" to continue for access code responsibility');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -591,8 +655,14 @@ const IndonesianPersonForm = () => {
     const validateProcessVerificationStep = (data) => {
         const errors = [];
         
-        if (!data.processVerificationAgreement) {
+        if (!data.verificationAcceptance) {
             errors.push('Please acknowledge the electronic customer acceptance process verification');
+        } else if (data.verificationAcceptance === 'no') {
+            errors.push('You must select "Ya" to continue for process verification');
+        }
+        
+        if (!data.verificationDate?.trim()) {
+            errors.push('Process verification date is required');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -601,7 +671,186 @@ const IndonesianPersonForm = () => {
     const handleStepValidation = (stepIndex, stepData, allData) => {
         const validation = validateStep(stepIndex, stepData, allData);
         
+        // Create field error mapping for red border styling
+        const newFieldErrors = {};
         if (!validation.isValid) {
+            validation.errors.forEach(error => {
+                // Account Information Step errors
+                if (error.includes('Email address is required') || error.includes('valid email address')) newFieldErrors.email = true;
+                if (error.includes('Demo account selection is required')) newFieldErrors.demoAccountNo = true;
+                
+                // Data Pribadi Step errors
+                if (error.includes('Nama Lengkap')) newFieldErrors.namaLengkap = true;
+                if (error.includes('Tempat Lahir')) newFieldErrors.tempatLahir = true;
+                if (error.includes('Tanggal Lahir')) newFieldErrors.tanggalLahir = true;
+                if (error.includes('Minimum 21 years old is required')) newFieldErrors.tanggalLahir = true;
+                if (error.includes('No. KTP')) newFieldErrors.noKTP = true;
+                if (error.includes('No. NPWP')) newFieldErrors.noNPWP = true;
+                if (error.includes('Jenis Kelamin')) newFieldErrors.jenisKelamin = true;
+                if (error.includes('Nama Ibu Kandung')) newFieldErrors.namaIbuKandung = true;
+                if (error.includes('Status Perkawinan')) newFieldErrors.statusPerkawinan = true;
+                if (error.includes('Street Address')) newFieldErrors.streetAddress = true;
+                if (error.includes('City')) newFieldErrors.city = true;
+                if (error.includes('Postal Code')) newFieldErrors.postalCode = true;
+                if (error.includes('Country')) newFieldErrors.country = true;
+                if (error.includes('Province')) newFieldErrors.province = true;
+                if (error.includes('No. Handphone')) newFieldErrors.noHandphone = true;
+                if (error.includes('Email')) newFieldErrors.contactEmail = true;
+                if (error.includes('Status Kepemilikan Rumah')) newFieldErrors.statusKepemilikanRumah = true;
+                if (error.includes('Tujuan Pembukaan Rekening')) newFieldErrors.tujuanPembukaanRekening = true;
+                if (error.includes('Pengalaman Investasi')) newFieldErrors.pengalamanInvestasi = true;
+                if (error.includes('Anggota Keluarga BAPPEBTI')) newFieldErrors.anggotaKeluargaBAPPEBTI = true;
+                if (error.includes('Pernah Pailit')) newFieldErrors.pernahPailit = true;
+                if (error.includes('WNI Tinggal di Luar Negeri')) newFieldErrors.wniLuarNegeri = true;
+                
+                // Conditional field errors
+                if (error.includes('Please specify other home ownership status')) newFieldErrors.statusKepemilikanRumahOther = true;
+                if (error.includes('Please specify other account opening purpose')) newFieldErrors.tujuanPembukaanRekeningOther = true;
+                if (error.includes('Please provide details about your investment experience')) newFieldErrors.pengalamanInvestasiBidang = true;
+                if (error.includes('Nama Istri/Suami is required when married')) newFieldErrors.namaIstriSuami = true;
+                
+                // Emergency Contact Step errors
+                if (error.includes('Emergency Contact Name')) newFieldErrors.emergencyContactName = true;
+                if (error.includes('Emergency Contact Phone')) newFieldErrors.emergencyContactPhone = true;
+                if (error.includes('Emergency Contact Street Address')) newFieldErrors.emergencyContactStreetAddress = true;
+                if (error.includes('Emergency Contact City')) newFieldErrors.emergencyContactCity = true;
+                if (error.includes('Emergency Contact Postal Code')) newFieldErrors.emergencyContactPostalCode = true;
+                if (error.includes('Emergency Contact Relationship')) newFieldErrors.emergencyContactRelationship = true;
+                if (error.includes('Please specify other relationship')) newFieldErrors.emergencyContactRelationshipOther = true;
+                
+                // Data Pekerjaan Step errors
+                if (error.includes('Jenis Pekerjaan')) newFieldErrors.jenisPekerjaan = true;
+                if (error.includes('Please specify other employment type')) newFieldErrors.jenisPekerjaanOther = true;
+                if (error.includes('Nama Perusahaan')) newFieldErrors.namaPerusahaan = true;
+                if (error.includes('Bidang Usaha')) newFieldErrors.bidangUsaha = true;
+                if (error.includes('Jabatan')) newFieldErrors.jabatan = true;
+                if (error.includes('Lama Bekerja')) newFieldErrors.lamaBekerja = true;
+                if (error.includes('Kantor Sebelumnya')) newFieldErrors.kantorSebelumnya = true;
+                if (error.includes('Alamat Kantor')) newFieldErrors.alamatKantor = true;
+                if (error.includes('Kota Kantor')) newFieldErrors.kotaKantor = true;
+                if (error.includes('Postal Code Kantor')) newFieldErrors.postalCodeKantor = true;
+                if (error.includes('No. Telepon Kantor')) newFieldErrors.noTeleponKantor = true;
+                
+                // Daftar Kekayaan Step errors
+                if (error.includes('Penghasilan Pertahun')) newFieldErrors.penghasilanPertahun = true;
+                if (error.includes('Lokasi Rumah')) newFieldErrors.lokasiRumah = true;
+                if (error.includes('Nilai NJOP')) newFieldErrors.nilaiNJOP = true;
+                if (error.includes('Bank Deposit')) newFieldErrors.bankDeposit = true;
+                if (error.includes('Jumlah')) newFieldErrors.jumlah = true;
+                if (error.includes('Account Type')) newFieldErrors.accountType = true;
+            });
+            
+            // Bank Account Step errors - using pattern matching like Foreign Person form
+            const bankFieldMappings = [
+                { pattern: /Bank (\d+) - Nama Bank is required/, field: 'namaBank' },
+                { pattern: /Bank (\d+) - Cabang is required/, field: 'cabang' },
+                { pattern: /Bank (\d+) - No\. Rekening is required/, field: 'noRekening' },
+                { pattern: /Bank (\d+) - Nama Pemilik Rekening is required/, field: 'namaPemilikRekening' },
+                { pattern: /Bank (\d+) - No\. Telepon Bank is required/, field: 'noTeleponBank' },
+                { pattern: /Bank (\d+) - Jenis Rekening Bank is required/, field: 'bankAccountType' },
+                { pattern: /Bank (\d+) - Please specify other account type/, field: 'bankAccountTypeOther' }
+            ];
+
+            // Check for bank field errors
+            validation.errors.forEach(error => {
+                bankFieldMappings.forEach(({ pattern, field }) => {
+                    const match = error.match(pattern);
+                    if (match) {
+                        const bankIndex = parseInt(match[1]) - 1;
+                        newFieldErrors[field] = true;
+                        newFieldErrors[`${field}_${bankIndex}`] = true;
+                    }
+                });
+            });
+            
+            // Document Upload Step errors
+            validation.errors.forEach(error => {
+                if (error.includes('Missing required document:')) {
+                    // Extract document name and find its position in requirements
+                    const docName = error.replace('Missing required document: ', '');
+                    documentRequirements.forEach((category, categoryIndex) => {
+                        category.documents.forEach((doc, docIndex) => {
+                            if (doc === docName) {
+                                const docKey = `${categoryIndex}_${docIndex}`;
+                                newFieldErrors[`document_${docKey}`] = true;
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // Declaration Step errors
+            validation.errors.forEach(error => {
+                if (error.includes('company profile agreement') || error.includes('You must select "Ya" to continue')) {
+                    newFieldErrors.declaration = true;
+                }
+                if (error.includes('trading simulation') || error.includes('You must select "Ya" to continue for trading simulation')) {
+                    newFieldErrors.tradingSimulation = true;
+                }
+                if (error.includes('Trading experience information is required')) {
+                    newFieldErrors.tradingExperience = true;
+                }
+                if (error.includes('Previous broker company name is required')) {
+                    newFieldErrors.brokerCompany = true;
+                }
+                if (error.includes('Previous demo account number is required')) {
+                    newFieldErrors.demoAccountNumber = true;
+                }
+                if (error.includes('disclosure statement') || error.includes('You must select "Ya" to continue for disclosure statement')) {
+                    newFieldErrors.disclosureStatement = true;
+                }
+                if (error.includes('risk disclosure') || error.includes('You must select "Ya" to continue for risk disclosure')) {
+                    newFieldErrors.finalAcceptance = true;
+                }
+                if (error.includes('fund declaration') || error.includes('You must select "Ya" to continue for fund declaration') || error.includes('personal fund ownership declaration')) {
+                    newFieldErrors.newFundDeclarationAcceptance = true;
+                    newFieldErrors.fundDeclarationAcceptance = true;
+                }
+                
+                // Risk disclosure checkbox errors
+                if (error.includes('Please acknowledge risk statement')) {
+                    const match = error.match(/Please acknowledge risk statement (\d+)/);
+                    if (match) {
+                        const statementNumber = parseInt(match[1]);
+                        newFieldErrors[`point${statementNumber}`] = true;
+                    }
+                }
+                
+                // Additional disclosure statement errors
+                if (error.includes('additional disclosure statement') || error.includes('You must select "Ya" to continue for additional disclosure statement')) {
+                    newFieldErrors.additionalDisclosureStatement = true;
+                }
+                
+                // Electronic agreement errors
+                if (error.includes('electronic power of attorney agreement') || error.includes('You must select "Ya" to continue for electronic agreement')) {
+                    newFieldErrors.electronicAgreement = true;
+                }
+                if (error.includes('Please select both dispute resolution methods')) {
+                    newFieldErrors.disputeResolution = true;
+                }
+                
+                // Trading rules errors
+                if (error.includes('PALN trading rules') || error.includes('You must select "Ya" to continue for trading rules')) {
+                    newFieldErrors.tradingRulesAcceptance = true;
+                }
+                
+                // Access code responsibility errors
+                if (error.includes('personal access password responsibility') || error.includes('You must select "Ya" to continue for access code responsibility')) {
+                    newFieldErrors.accessCodeResponsibilityAcceptance = true;
+                }
+                
+                // Process verification errors
+                if (error.includes('electronic customer acceptance process verification') || error.includes('You must select "Ya" to continue for process verification')) {
+                    newFieldErrors.verificationAcceptance = true;
+                }
+                if (error.includes('Process verification date is required')) {
+                    newFieldErrors.verificationDate = true;
+                }
+            });
+            
+            // Set the field errors
+            setFieldErrors(newFieldErrors);
+            
             // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
@@ -612,19 +861,20 @@ const IndonesianPersonForm = () => {
                 message: errorMessage,
                 type: 'error'
             });
+        } else {
+            // Clear field errors if validation passes
+            setFieldErrors({});
         }
         
         return validation.isValid;
     };
 
     const handleStepChange = (step, data) => {
-        console.log(`Moving to step ${step}`, data);
+        // Step change handled by MultiStepFormWrapper
     };
 
     const handleSubmit = async (allFormData) => {
         try {
-            console.log('Submitting Indonesian Person KYC:', allFormData);
-            
             // Show loading notification
             showNotification({
                 title: 'Processing',
@@ -636,8 +886,6 @@ const IndonesianPersonForm = () => {
             const flattenedData = Object.values(allFormData).reduce((acc, curr) => {
                 return { ...acc, ...curr };
             }, {});
-            
-            console.log('Flattened data before submission:', flattenedData);
             
             // Create FormData object to handle file uploads
             const formData = new FormData();
@@ -668,11 +916,6 @@ const IndonesianPersonForm = () => {
                 }
             });
             
-            // Log FormData contents for debugging
-            for (let [key, value] of formData.entries()) {
-                console.log(`FormData: ${key}:`, value);
-            }
-            
             // Submit using AuthService (same pattern as other forms)
             const response = await AuthService.submitIndonesianPersonKYC(formData);
             
@@ -683,10 +926,13 @@ const IndonesianPersonForm = () => {
                     type: 'success'
                 });
                 
-                console.log('Submission successful:', response);
-                
-                // Optionally clear the form
+                // Clear the form
                 setFormData({});
+                
+                // Navigate to accounts page after successful submission
+                setTimeout(() => {
+                    navigate('/dashboard/accounts');
+                }, 2000); // Give time for user to read the success message
             } else {
                 throw new Error(response.message || 'Submission failed');
             }
@@ -775,18 +1021,47 @@ const RequirementsStep = ({ requirements }) => (
     </div>
 );
 
-const AccountInformationStep = ({ data = {}, onChange }) => {
+const AccountInformationStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [email, setEmail] = useState(data.email || '');
     const [demoAccountNo, setDemoAccountNo] = useState(data.demoAccountNo || '');
+    const [emailValid, setEmailValid] = useState(true);
+    const { showNotification } = useNotificationContext();
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleChange = (field, value) => {
         const newData = { ...data, [field]: value };
-        if (field === 'email') setEmail(value);
-        if (field === 'demoAccountNo') setDemoAccountNo(value);
+        
+        // Clear field error when user starts typing
+        if (clearFieldError) {
+            clearFieldError(field);
+        }
+        
+        if (field === 'email') {
+            setEmail(value);
+            const isValid = value.trim() === '' || validateEmail(value);
+            setEmailValid(isValid);
+            
+            if (value.trim() !== '' && !isValid) {
+                showNotification({
+                    title: 'Invalid Email',
+                    message: 'Please enter a valid email address',
+                    type: 'error'
+                });
+            }
+        }
+        
+        if (field === 'demoAccountNo') {
+            setDemoAccountNo(value);
+        }
+        
         onChange(newData);
     };
 
@@ -807,8 +1082,12 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
                                 placeholder="Enter your email address"
                                 value={email}
                                 onChange={(e) => handleChange('email', e.target.value)}
+                                isInvalid={!emailValid || fieldErrors.email}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid email address.
+                            </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -816,6 +1095,7 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleChange('demoAccountNo', e.target.value)}
+                                isInvalid={fieldErrors.demoAccountNo}
                                 required
                             >
                                 <option value="">Select demo account...</option>
@@ -825,6 +1105,9 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
                                 <option value="DEMO004">DEMO004 - Demo Account 4</option>
                                 <option value="DEMO005">DEMO005 - Demo Account 5</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select a demo account.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Form>
                 </Col>
@@ -833,10 +1116,74 @@ const AccountInformationStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DataPribadiStep = ({ data = {}, onChange }) => {
+const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
+    const { showNotification } = useNotificationContext();
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Real-time age validation for date of birth
+        if (field === 'tanggalLahir' && value) {
+            const birthDate = new Date(value);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
+                ? age - 1
+                : age;
+                
+            if (actualAge < 21) {
+                showNotification({
+                    title: 'Age Requirement',
+                    message: 'You must be at least 21 years old to register',
+                    type: 'error'
+                });
+                // Set field error to make border red immediately
+                if (setFieldError) {
+                    setFieldError('tanggalLahir');
+                }
+            } else {
+                // Clear field error when age is valid
+                if (clearFieldError) {
+                    clearFieldError(field);
+                }
+            }
+        } else {
+            // Clear field error when user starts typing (for non-date fields)
+            if (clearFieldError) {
+                clearFieldError(field);
+            }
+        }
+        
+        // Clear conditional fields when switching options
+        if (field === 'statusKepemilikanRumah' && value !== 'Lainnya') {
+            newData.statusKepemilikanRumahOther = '';
+            if (clearFieldError) {
+                clearFieldError('statusKepemilikanRumahOther');
+            }
+        }
+        
+        if (field === 'tujuanPembukaanRekening' && value !== 'Lainnya') {
+            newData.tujuanPembukaanRekeningOther = '';
+            if (clearFieldError) {
+                clearFieldError('tujuanPembukaanRekeningOther');
+            }
+        }
+        
+        if (field === 'pengalamanInvestasi' && value !== 'Yes') {
+            newData.pengalamanInvestasiBidang = '';
+            if (clearFieldError) {
+                clearFieldError('pengalamanInvestasiBidang');
+            }
+        }
+        
+        onChange(newData);
+    };
 
     return (
         <div>
@@ -855,9 +1202,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter your full name"
                                 value={data.namaLengkap || ''}
-                                onChange={(e) => onChange({ ...data, namaLengkap: e.target.value })}
+                                onChange={(e) => handleChange('namaLengkap', e.target.value)}
+                                isInvalid={fieldErrors.namaLengkap}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your full name.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -867,9 +1218,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Place of birth"
                                 value={data.tempatLahir || ''}
-                                onChange={(e) => onChange({ ...data, tempatLahir: e.target.value })}
+                                onChange={(e) => handleChange('tempatLahir', e.target.value)}
+                                isInvalid={fieldErrors.tempatLahir}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your place of birth.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -881,9 +1236,14 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Control
                                 type="date"
                                 value={data.tanggalLahir || ''}
-                                onChange={(e) => onChange({ ...data, tanggalLahir: e.target.value })}
+                                max={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => handleChange('tanggalLahir', e.target.value)}
+                                isInvalid={fieldErrors.tanggalLahir}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please select a valid date of birth. You must be at least 21 years old.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -893,9 +1253,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter your KTP number"
                                 value={data.noKTP || ''}
-                                onChange={(e) => onChange({ ...data, noKTP: e.target.value })}
+                                onChange={(e) => handleChange('noKTP', e.target.value)}
+                                isInvalid={fieldErrors.noKTP}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your KTP number.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -908,9 +1272,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter your NPWP number"
                                 value={data.noNPWP || ''}
-                                onChange={(e) => onChange({ ...data, noNPWP: e.target.value })}
+                                onChange={(e) => handleChange('noNPWP', e.target.value)}
+                                isInvalid={fieldErrors.noNPWP}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your NPWP number.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -918,13 +1286,17 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Jenis Kelamin <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jenisKelamin || ''}
-                                onChange={(e) => onChange({ ...data, jenisKelamin: e.target.value })}
+                                onChange={(e) => handleChange('jenisKelamin', e.target.value)}
+                                isInvalid={fieldErrors.jenisKelamin}
                                 required
                             >
                                 <option value="">Select Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select your gender.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -937,9 +1309,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Mother's full name"
                                 value={data.namaIbuKandung || ''}
-                                onChange={(e) => onChange({ ...data, namaIbuKandung: e.target.value })}
+                                onChange={(e) => handleChange('namaIbuKandung', e.target.value)}
+                                isInvalid={fieldErrors.namaIbuKandung}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your mother's full name.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -947,7 +1323,8 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Status Perkawinan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.statusPerkawinan || ''}
-                                onChange={(e) => onChange({ ...data, statusPerkawinan: e.target.value })}
+                                onChange={(e) => handleChange('statusPerkawinan', e.target.value)}
+                                isInvalid={fieldErrors.statusPerkawinan}
                                 required
                             >
                                 <option value="">Select Marital Status</option>
@@ -956,6 +1333,9 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 <option value="Divorced">Divorced</option>
                                 <option value="Widowed">Widowed</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select your marital status.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -970,9 +1350,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Spouse's full name"
                                     value={data.namaIstriSuami || ''}
-                                    onChange={(e) => onChange({ ...data, namaIstriSuami: e.target.value })}
+                                    onChange={(e) => handleChange('namaIstriSuami', e.target.value)}
+                                    isInvalid={fieldErrors.namaIstriSuami}
                                     required
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Please enter your spouse's full name.
+                                </Form.Control.Feedback>
                             </Form.Group>
                         </Col>
                     </Row>
@@ -987,9 +1371,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Street address"
                                 value={data.streetAddress || ''}
-                                onChange={(e) => onChange({ ...data, streetAddress: e.target.value })}
+                                onChange={(e) => handleChange('streetAddress', e.target.value)}
+                                isInvalid={fieldErrors.streetAddress}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your street address.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={4}>
@@ -999,9 +1387,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="City"
                                 value={data.city || ''}
-                                onChange={(e) => onChange({ ...data, city: e.target.value })}
+                                onChange={(e) => handleChange('city', e.target.value)}
+                                isInvalid={fieldErrors.city}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your city.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1014,9 +1406,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Postal code"
                                 value={data.postalCode || ''}
-                                onChange={(e) => onChange({ ...data, postalCode: e.target.value })}
+                                onChange={(e) => handleChange('postalCode', e.target.value)}
+                                isInvalid={fieldErrors.postalCode}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your postal code.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1041,9 +1437,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 type="tel"
                                 placeholder="Mobile phone number"
                                 value={data.noHandphone || ''}
-                                onChange={(e) => onChange({ ...data, noHandphone: e.target.value })}
+                                onChange={(e) => handleChange('noHandphone', e.target.value)}
+                                isInvalid={fieldErrors.noHandphone}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter your mobile phone number.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1065,7 +1465,8 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Status Kepemilikan Rumah <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.statusKepemilikanRumah || ''}
-                                onChange={(e) => onChange({ ...data, statusKepemilikanRumah: e.target.value })}
+                                onChange={(e) => handleChange('statusKepemilikanRumah', e.target.value)}
+                                isInvalid={fieldErrors.statusKepemilikanRumah}
                                 required
                             >
                                 <option value="">Select House Ownership Status</option>
@@ -1074,15 +1475,24 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 <option value="Sewa/Kontrak">Sewa/Kontrak</option>
                                 <option value="Lainnya">Lainnya</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select house ownership status.
+                            </Form.Control.Feedback>
                             {data.statusKepemilikanRumah === 'Lainnya' && (
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Sebutkan status kepemilikan rumah lainnya"
-                                    value={data.statusKepemilikanRumahOther || ''}
-                                    onChange={(e) => onChange({ ...data, statusKepemilikanRumahOther: e.target.value })}
-                                    className="mt-2"
-                                    required
-                                />
+                                <>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Sebutkan status kepemilikan rumah lainnya"
+                                        value={data.statusKepemilikanRumahOther || ''}
+                                        onChange={(e) => handleChange('statusKepemilikanRumahOther', e.target.value)}
+                                        isInvalid={fieldErrors.statusKepemilikanRumahOther}
+                                        className="mt-2"
+                                        required
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please specify other house ownership status.
+                                    </Form.Control.Feedback>
+                                </>
                             )}
                         </Form.Group>
                     </Col>
@@ -1095,7 +1505,8 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Tujuan Pembukaan Rekening <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.tujuanPembukaanRekening || ''}
-                                onChange={(e) => onChange({ ...data, tujuanPembukaanRekening: e.target.value })}
+                                onChange={(e) => handleChange('tujuanPembukaanRekening', e.target.value)}
+                                isInvalid={fieldErrors.tujuanPembukaanRekening}
                                 required
                             >
                                 <option value="">Select Account Purpose</option>
@@ -1104,15 +1515,24 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                 <option value="Spekulasi">Spekulasi</option>
                                 <option value="Lainnya">Lainnya</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select account opening purpose.
+                            </Form.Control.Feedback>
                             {data.tujuanPembukaanRekening === 'Lainnya' && (
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Sebutkan tujuan pembukaan rekening lainnya"
-                                    value={data.tujuanPembukaanRekeningOther || ''}
-                                    onChange={(e) => onChange({ ...data, tujuanPembukaanRekeningOther: e.target.value })}
-                                    className="mt-2"
-                                    required
-                                />
+                                <>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Sebutkan tujuan pembukaan rekening lainnya"
+                                        value={data.tujuanPembukaanRekeningOther || ''}
+                                        onChange={(e) => handleChange('tujuanPembukaanRekeningOther', e.target.value)}
+                                        isInvalid={fieldErrors.tujuanPembukaanRekeningOther}
+                                        className="mt-2"
+                                        required
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please specify other account opening purpose.
+                                    </Form.Control.Feedback>
+                                </>
                             )}
                         </Form.Group>
                     </Col>
@@ -1121,13 +1541,17 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Pengalaman Investasi <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.pengalamanInvestasi || ''}
-                                onChange={(e) => onChange({ ...data, pengalamanInvestasi: e.target.value })}
+                                onChange={(e) => handleChange('pengalamanInvestasi', e.target.value)}
+                                isInvalid={fieldErrors.pengalamanInvestasi}
                                 required
                             >
                                 <option value="">Select Investment Experience</option>
                                 <option value="Yes">Yes</option>
                                 <option value="None">None</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select your investment experience.
+                            </Form.Control.Feedback>
                             {data.pengalamanInvestasi === 'Yes' && (
                                 <div className="mt-2">
                                     <Form.Label className="text-muted">Pengalaman Investasi Bidang <span className="text-danger">*</span></Form.Label>
@@ -1135,9 +1559,13 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Explain Investment Experience"
                                         value={data.pengalamanInvestasiBidang || ''}
-                                        onChange={(e) => onChange({ ...data, pengalamanInvestasiBidang: e.target.value })}
+                                        onChange={(e) => handleChange('pengalamanInvestasiBidang', e.target.value)}
+                                        isInvalid={fieldErrors.pengalamanInvestasiBidang}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please explain your investment experience.
+                                    </Form.Control.Feedback>
                                 </div>
                             )}
                         </Form.Group>
@@ -1151,13 +1579,17 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Apakah Anda memiliki anggota keluarga yang bekerja di BAPPEBTI / Bursa Berjangka / Kliring Berjangka? <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.anggotaKeluargaBAPPEBTI || ''}
-                                onChange={(e) => onChange({ ...data, anggotaKeluargaBAPPEBTI: e.target.value })}
+                                onChange={(e) => handleChange('anggotaKeluargaBAPPEBTI', e.target.value)}
+                                isInvalid={fieldErrors.anggotaKeluargaBAPPEBTI}
                                 required
                             >
                                 <option value="">Select</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select an answer for BAPPEBTI family question.
+                            </Form.Control.Feedback>
                             {data.anggotaKeluargaBAPPEBTI === 'Yes' && (
                                 <div className="mt-2">
                                     <small className="text-danger">Anda tidak dapat melanjutkan jika pilih Ya (Yes)</small>
@@ -1170,13 +1602,17 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Apakah Anda telah dinyatakan pailit oleh Pengadilan? <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.pernahPailit || ''}
-                                onChange={(e) => onChange({ ...data, pernahPailit: e.target.value })}
+                                onChange={(e) => handleChange('pernahPailit', e.target.value)}
+                                isInvalid={fieldErrors.pernahPailit}
                                 required
                             >
                                 <option value="">Select</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select an answer for bankruptcy question.
+                            </Form.Control.Feedback>
                             {data.pernahPailit === 'Yes' && (
                                 <div className="mt-2">
                                     <small className="text-danger">Anda tidak dapat melanjutkan jika pilih Ya (Yes)</small>
@@ -1190,10 +1626,31 @@ const DataPribadiStep = ({ data = {}, onChange }) => {
     );
 };
 
-const EmergencyContactStep = ({ data = {}, onChange }) => {
+const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
+    const { showNotification } = useNotificationContext();
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError) {
+            clearFieldError(field);
+        }
+        
+        // Clear conditional fields when switching options
+        if (field === 'emergencyContactRelationship' && value !== 'Lainnya') {
+            newData.emergencyContactRelationshipOther = '';
+            if (clearFieldError) {
+                clearFieldError('emergencyContactRelationshipOther');
+            }
+        }
+        
+        onChange(newData);
+    };
 
     return (
         <div>
@@ -1211,9 +1668,13 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Emergency contact full name"
                                 value={data.emergencyContactName || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactName: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactName', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactName}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter emergency contact full name.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -1223,9 +1684,13 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                                 type="tel"
                                 placeholder="Emergency contact phone number"
                                 value={data.emergencyContactPhone || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactPhone: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactPhone', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactPhone}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter emergency contact phone number.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1238,9 +1703,13 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Emergency contact street address"
                                 value={data.emergencyContactStreetAddress || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactStreetAddress: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactStreetAddress', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactStreetAddress}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter emergency contact street address.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={4}>
@@ -1250,9 +1719,13 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="City"
                                 value={data.emergencyContactCity || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactCity: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactCity', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactCity}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter emergency contact city.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1265,9 +1738,13 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Postal code"
                                 value={data.emergencyContactPostalCode || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactPostalCode: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactPostalCode', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactPostalCode}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter emergency contact postal code.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={8}>
@@ -1275,7 +1752,8 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Hubungan dengan Anda <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.emergencyContactRelationship || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactRelationship: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactRelationship', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactRelationship}
                                 required
                             >
                                 <option value="">Select Relationship</option>
@@ -1284,15 +1762,24 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
                                 <option value="Anak">Anak (Child)</option>
                                 <option value="Lainnya">Lainnya (Other)</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select relationship.
+                            </Form.Control.Feedback>
                             {data.emergencyContactRelationship === 'Lainnya' && (
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Sebutkan hubungan lainnya"
-                                    value={data.emergencyContactRelationshipOther || ''}
-                                    onChange={(e) => onChange({ ...data, emergencyContactRelationshipOther: e.target.value })}
-                                    className="mt-2"
-                                    required
-                                />
+                                <>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Sebutkan hubungan lainnya"
+                                        value={data.emergencyContactRelationshipOther || ''}
+                                        onChange={(e) => handleChange('emergencyContactRelationshipOther', e.target.value)}
+                                        isInvalid={fieldErrors.emergencyContactRelationshipOther}
+                                        className="mt-2"
+                                        required
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please specify other relationship.
+                                    </Form.Control.Feedback>
+                                </>
                             )}
                         </Form.Group>
                     </Col>
@@ -1302,10 +1789,49 @@ const EmergencyContactStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DataPekerjaanStep = ({ data = {}, onChange }) => {
+const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
+    const { showNotification } = useNotificationContext();
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError) {
+            clearFieldError(field);
+        }
+        
+        // Clear conditional fields when switching employment type
+        if (field === 'jenisPekerjaan') {
+            // Clear all employment-related fields when changing job type
+            if (value !== 'Swasta' && value !== 'Wiraswasta' && value !== 'Profesional' && value !== 'ASN') {
+                const fieldsToeClear = [
+                    'namaPerusahaan', 'bidangUsaha', 'jabatan', 'lamaBekerja', 
+                    'kantorSebelumnya', 'alamatKantor', 'kotaKantor', 'postalCodeKantor', 
+                    'noTeleponKantor', 'noFaksimiliKantor'
+                ];
+                fieldsToeClear.forEach(fieldName => {
+                    newData[fieldName] = '';
+                    if (clearFieldError) {
+                        clearFieldError(fieldName);
+                    }
+                });
+            }
+            
+            // Clear "other" field when not selecting "Lainnya"
+            if (value !== 'Lainnya') {
+                newData.jenisPekerjaanOther = '';
+                if (clearFieldError) {
+                    clearFieldError('jenisPekerjaanOther');
+                }
+            }
+        }
+        
+        onChange(newData);
+    };
 
     return (
         <div>
@@ -1321,7 +1847,8 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Jenis Pekerjaan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jenisPekerjaan || ''}
-                                onChange={(e) => onChange({ ...data, jenisPekerjaan: e.target.value })}
+                                onChange={(e) => handleChange('jenisPekerjaan', e.target.value)}
+                                isInvalid={fieldErrors.jenisPekerjaan}
                                 required
                             >
                                 <option value="">Select Employment Type</option>
@@ -1333,15 +1860,24 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                 <option value="Mahasiswa">Mahasiswa (Student)</option>
                                 <option value="Lainnya">Lainnya (Other)</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select employment type.
+                            </Form.Control.Feedback>
                             {data.jenisPekerjaan === 'Lainnya' && (
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Sebutkan jenis pekerjaan lainnya"
-                                    value={data.jenisPekerjaanOther || ''}
-                                    onChange={(e) => onChange({ ...data, jenisPekerjaanOther: e.target.value })}
-                                    className="mt-2"
-                                    required
-                                />
+                                <>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Sebutkan jenis pekerjaan lainnya"
+                                        value={data.jenisPekerjaanOther || ''}
+                                        onChange={(e) => handleChange('jenisPekerjaanOther', e.target.value)}
+                                        isInvalid={fieldErrors.jenisPekerjaanOther}
+                                        className="mt-2"
+                                        required
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please specify other employment type.
+                                    </Form.Control.Feedback>
+                                </>
                             )}
                         </Form.Group>
                     </Col>
@@ -1358,9 +1894,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Enter Company Name"
                                         value={data.namaPerusahaan || ''}
-                                        onChange={(e) => onChange({ ...data, namaPerusahaan: e.target.value })}
+                                        onChange={(e) => handleChange('namaPerusahaan', e.target.value)}
+                                        isInvalid={fieldErrors.namaPerusahaan}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter company name.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
@@ -1370,9 +1910,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Nature of Business"
                                         value={data.bidangUsaha || ''}
-                                        onChange={(e) => onChange({ ...data, bidangUsaha: e.target.value })}
+                                        onChange={(e) => handleChange('bidangUsaha', e.target.value)}
+                                        isInvalid={fieldErrors.bidangUsaha}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter nature of business.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -1385,9 +1929,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Position"
                                         value={data.jabatan || ''}
-                                        onChange={(e) => onChange({ ...data, jabatan: e.target.value })}
+                                        onChange={(e) => handleChange('jabatan', e.target.value)}
+                                        isInvalid={fieldErrors.jabatan}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter your position.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
@@ -1397,9 +1945,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Length of Work"
                                         value={data.lamaBekerja || ''}
-                                        onChange={(e) => onChange({ ...data, lamaBekerja: e.target.value })}
+                                        onChange={(e) => handleChange('lamaBekerja', e.target.value)}
+                                        isInvalid={fieldErrors.lamaBekerja}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter length of work.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -1412,9 +1964,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Enter Previous Company"
                                         value={data.kantorSebelumnya || ''}
-                                        onChange={(e) => onChange({ ...data, kantorSebelumnya: e.target.value })}
+                                        onChange={(e) => handleChange('kantorSebelumnya', e.target.value)}
+                                        isInvalid={fieldErrors.kantorSebelumnya}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter previous company.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -1428,9 +1984,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Office street address"
                                         value={data.alamatKantor || ''}
-                                        onChange={(e) => onChange({ ...data, alamatKantor: e.target.value })}
+                                        onChange={(e) => handleChange('alamatKantor', e.target.value)}
+                                        isInvalid={fieldErrors.alamatKantor}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter office address.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                             <Col md={4}>
@@ -1440,9 +2000,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="City"
                                         value={data.kotaKantor || ''}
-                                        onChange={(e) => onChange({ ...data, kotaKantor: e.target.value })}
+                                        onChange={(e) => handleChange('kotaKantor', e.target.value)}
+                                        isInvalid={fieldErrors.kotaKantor}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter office city.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -1455,9 +2019,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Postal code"
                                         value={data.postalCodeKantor || ''}
-                                        onChange={(e) => onChange({ ...data, postalCodeKantor: e.target.value })}
+                                        onChange={(e) => handleChange('postalCodeKantor', e.target.value)}
+                                        isInvalid={fieldErrors.postalCodeKantor}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter office postal code.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -1471,9 +2039,13 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="tel"
                                         placeholder="Office Phone No"
                                         value={data.noTeleponKantor || ''}
-                                        onChange={(e) => onChange({ ...data, noTeleponKantor: e.target.value })}
+                                        onChange={(e) => handleChange('noTeleponKantor', e.target.value)}
+                                        isInvalid={fieldErrors.noTeleponKantor}
                                         required
                                     />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter office phone number.
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
@@ -1483,7 +2055,7 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
                                         type="tel"
                                         placeholder="Office Fax No"
                                         value={data.noFaksimiliKantor || ''}
-                                        onChange={(e) => onChange({ ...data, noFaksimiliKantor: e.target.value })}
+                                        onChange={(e) => handleChange('noFaksimiliKantor', e.target.value)}
                                     />
                                 </Form.Group>
                             </Col>
@@ -1495,10 +2067,36 @@ const DataPekerjaanStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DaftarKekayaanStep = ({ data = {}, onChange }) => {
+const DaftarKekayaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
+    const { showNotification } = useNotificationContext();
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleChange = (field, value) => {
+        // Validate numeric fields
+        if (['nilaiNJOP', 'bankDeposit', 'jumlah'].includes(field)) {
+            // Allow empty string or valid numbers (including decimals)
+            if (value !== '' && (isNaN(value) || value < 0)) {
+                showNotification({
+                    title: 'Invalid Input',
+                    message: 'Please enter a valid positive number',
+                    type: 'error'
+                });
+                return; // Don't update if invalid
+            }
+        }
+        
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError) {
+            clearFieldError(field);
+        }
+        
+        onChange(newData);
+    };
 
     return (
         <div>
@@ -1514,7 +2112,8 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Penghasilan Pertahun <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.penghasilanPertahun || ''}
-                                onChange={(e) => onChange({ ...data, penghasilanPertahun: e.target.value })}
+                                onChange={(e) => handleChange('penghasilanPertahun', e.target.value)}
+                                isInvalid={fieldErrors.penghasilanPertahun}
                                 required
                             >
                                 <option value="">Select Annual Income</option>
@@ -1522,17 +2121,25 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                                 <option value="Antara 250 - 500 juta rupiah">Antara 250 - 500 juta rupiah (Between 250 - 500 million rupiah)</option>
                                 <option value="Di atas 500 juta rupiah">Di atas 500 juta rupiah (Above 500 million rupiah)</option>
                             </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Please select annual income.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Lokasi Rumah</Form.Label>
+                            <Form.Label className="text-muted">Lokasi Rumah <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Home location"
                                 value={data.lokasiRumah || ''}
-                                onChange={(e) => onChange({ ...data, lokasiRumah: e.target.value })}
+                                onChange={(e) => handleChange('lokasiRumah', e.target.value)}
+                                isInvalid={fieldErrors.lokasiRumah}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter home location.
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1540,24 +2147,38 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Nilai NJOP</Form.Label>
+                            <Form.Label className="text-muted">Nilai NJOP <span className="text-danger">*</span></Form.Label>
                             <Form.Control
-                                type="text"
+                                type="number"
+                                min="0"
+                                step="0.01"
                                 placeholder="Sales Value of Taxable Object"
                                 value={data.nilaiNJOP || ''}
-                                onChange={(e) => onChange({ ...data, nilaiNJOP: e.target.value })}
+                                onChange={(e) => handleChange('nilaiNJOP', e.target.value)}
+                                isInvalid={fieldErrors.nilaiNJOP}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid NJOP value (numbers only).
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Bank Deposit</Form.Label>
+                            <Form.Label className="text-muted">Bank Deposit <span className="text-danger">*</span></Form.Label>
                             <Form.Control
-                                type="text"
+                                type="number"
+                                min="0"
+                                step="0.01"
                                 placeholder="Deposit Bank"
                                 value={data.bankDeposit || ''}
-                                onChange={(e) => onChange({ ...data, bankDeposit: e.target.value })}
+                                onChange={(e) => handleChange('bankDeposit', e.target.value)}
+                                isInvalid={fieldErrors.bankDeposit}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid bank deposit amount (numbers only).
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1565,13 +2186,20 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">Jumlah</Form.Label>
+                            <Form.Label className="text-muted">Jumlah <span className="text-danger">*</span></Form.Label>
                             <Form.Control
-                                type="text"
+                                type="number"
+                                min="0"
+                                step="0.01"
                                 placeholder="Total amount"
                                 value={data.jumlah || ''}
-                                onChange={(e) => onChange({ ...data, jumlah: e.target.value })}
+                                onChange={(e) => handleChange('jumlah', e.target.value)}
+                                isInvalid={fieldErrors.jumlah}
+                                required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Please enter a valid total amount (numbers only).
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
@@ -1581,7 +2209,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Other assets"
                                 value={data.lainnya || ''}
-                                onChange={(e) => onChange({ ...data, lainnya: e.target.value })}
+                                onChange={(e) => handleChange('lainnya', e.target.value)}
                             />
                         </Form.Group>
                 </Col>
@@ -1591,7 +2219,7 @@ const DaftarKekayaanStep = ({ data = {}, onChange }) => {
     );
 };
 
-const RekeningBankStep = ({ data = {}, onChange }) => {
+const RekeningBankStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
     const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ 
         namaBank: '', 
         cabang: '', 
@@ -1602,12 +2230,22 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
         bankAccountTypeOther: ''
     }]);
 
-    // Debug: Log current bank accounts state
-    console.log('Current bank accounts:', bankAccounts);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Ensure bank accounts are initialized in parent data if not present
+        if (!data.bankAccounts && bankAccounts.length > 0) {
+            onChange({ ...data, bankAccounts: bankAccounts });
+        }
     }, []);
+
+    // Update parent data when bank accounts change
+    useEffect(() => {
+        if (bankAccounts.length > 0) {
+            onChange({ ...data, bankAccounts: bankAccounts });
+        }
+    }, [bankAccounts]);
 
     const addBankAccount = () => {
         const newAccounts = [...bankAccounts, { 
@@ -1630,12 +2268,16 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
     };
 
     const updateBankAccount = (index, field, value) => {
-        console.log(`Updating bank account ${index}, field: ${field}, value: ${value}`);
         const newAccounts = [...bankAccounts];
         newAccounts[index] = { ...newAccounts[index], [field]: value };
-        console.log('Updated accounts:', newAccounts);
         setBankAccounts(newAccounts);
         onChange({ ...data, bankAccounts: newAccounts });
+        
+        // Clear field errors when user starts typing - using pattern from Foreign Person form
+        if (clearFieldError) {
+            clearFieldError(field);
+            clearFieldError(`${field}_${index}`);
+        }
     };
 
     return (
@@ -1671,8 +2313,12 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                             placeholder="Bank name"
                                             value={account.namaBank || ''}
                                             onChange={(e) => updateBankAccount(index, 'namaBank', e.target.value)}
+                                            isInvalid={fieldErrors.namaBank || fieldErrors[`namaBank_${index}`]}
                                             required
                                         />
+                                        <Form.Control.Feedback type="invalid">
+                                            Nama Bank is required.
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
@@ -1683,8 +2329,12 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                             placeholder="Bank branch"
                                             value={account.cabang || ''}
                                             onChange={(e) => updateBankAccount(index, 'cabang', e.target.value)}
+                                            isInvalid={fieldErrors.cabang || fieldErrors[`cabang_${index}`]}
                                             required
                                         />
+                                        <Form.Control.Feedback type="invalid">
+                                            Cabang is required.
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -1698,8 +2348,12 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                             placeholder="IBAN / Account number"
                                             value={account.noRekening || ''}
                                             onChange={(e) => updateBankAccount(index, 'noRekening', e.target.value)}
+                                            isInvalid={fieldErrors.noRekening || fieldErrors[`noRekening_${index}`]}
                                             required
                                         />
+                                        <Form.Control.Feedback type="invalid">
+                                            No. Rekening is required.
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
@@ -1710,8 +2364,12 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                             placeholder="Account name"
                                             value={account.namaPemilikRekening || ''}
                                             onChange={(e) => updateBankAccount(index, 'namaPemilikRekening', e.target.value)}
+                                            isInvalid={fieldErrors.namaPemilikRekening || fieldErrors[`namaPemilikRekening_${index}`]}
                                             required
                                         />
+                                        <Form.Control.Feedback type="invalid">
+                                            Nama Pemilik Rekening is required.
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -1719,13 +2377,18 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="text-muted">No. Telepon Bank</Form.Label>
+                                        <Form.Label className="text-muted">No. Telepon Bank <span className="text-danger">*</span></Form.Label>
                                         <Form.Control
                                             type="tel"
                                             placeholder="Bank phone number"
                                             value={account.noTeleponBank || ''}
                                             onChange={(e) => updateBankAccount(index, 'noTeleponBank', e.target.value)}
+                                            isInvalid={fieldErrors.noTeleponBank || fieldErrors[`noTeleponBank_${index}`]}
+                                            required
                                         />
+                                        <Form.Control.Feedback type="invalid">
+                                            No. Telepon Bank is required.
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
@@ -1734,7 +2397,6 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                         <Form.Select
                                             value={account.bankAccountType || ''}
                                             onChange={(e) => {
-                                                console.log('Bank account type changed:', e.target.value);
                                                 const newValue = e.target.value;
                                                 
                                                 // Update both fields in a single operation to avoid state conflicts
@@ -1746,7 +2408,14 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                                 };
                                                 setBankAccounts(newAccounts);
                                                 onChange({ ...data, bankAccounts: newAccounts });
+                                                
+                                                // Clear field error when user makes selection
+                                                if (clearFieldError) {
+                                                    clearFieldError('bankAccountType');
+                                                    clearFieldError(`bankAccountType_${index}`);
+                                                }
                                             }}
+                                            isInvalid={fieldErrors.bankAccountType || fieldErrors[`bankAccountType_${index}`]}
                                             required
                                         >
                                             <option value="">Select Account Type</option>
@@ -1754,15 +2423,24 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
                                             <option value="TABUNGAN">Tabungan</option>
                                             <option value="LAINNYA">Lainnya</option>
                                         </Form.Select>
+                                        <Form.Control.Feedback type="invalid">
+                                            Jenis Rekening Bank is required.
+                                        </Form.Control.Feedback>
                                         {account.bankAccountType === 'LAINNYA' && (
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Sebutkan jenis rekening bank lainnya"
                                                 value={account.bankAccountTypeOther || ''}
                                                 onChange={(e) => updateBankAccount(index, 'bankAccountTypeOther', e.target.value)}
+                                                isInvalid={fieldErrors.bankAccountTypeOther || fieldErrors[`bankAccountTypeOther_${index}`]}
                                                 className="mt-2"
                                                 required
                                             />
+                                        )}
+                                        {account.bankAccountType === 'LAINNYA' && (fieldErrors.bankAccountTypeOther || fieldErrors[`bankAccountTypeOther_${index}`]) && (
+                                            <div className="invalid-feedback d-block">
+                                                Please specify other account type.
+                                            </div>
                                         )}
                                     </Form.Group>
                                 </Col>
@@ -1786,15 +2464,15 @@ const RekeningBankStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DeclarationStep = ({ data = {}, onChange }) => {
+const DeclarationStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    return <CompanyProfileDeclaration data={data} onChange={onChange} />;
+    return <CompanyProfileDeclaration data={data} onChange={onChange} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
 };
 
-const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
+const CompanyProfileDeclaration = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     return (
         <div>
             <div className="text-center mb-4">
@@ -2045,7 +2723,7 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
                     
                     <Form.Group className="mb-3">
                         <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
+                        <div className={`d-flex gap-4 ${fieldErrors.declaration ? 'is-invalid' : ''}`}>
                             <Form.Check
                                 type="radio"
                                 id="declaration-ya"
@@ -2053,7 +2731,12 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
                                 label="Ya"
                                 value="ya"
                                 checked={data.declaration === 'ya'}
-                                onChange={(e) => onChange({ ...data, declaration: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, declaration: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('declaration');
+                                    }
+                                }}
                                 required
                             />
                             <Form.Check
@@ -2063,13 +2746,23 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
                                 label="Tidak"
                                 value="tidak"
                                 checked={data.declaration === 'tidak'}
-                                onChange={(e) => onChange({ ...data, declaration: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, declaration: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('declaration');
+                                    }
+                                }}
                                 required
                             />
                         </div>
                         {data.declaration === 'tidak' && (
                             <div className="mt-2">
                                 <small className="text-danger">You must select "Ya" to continue</small>
+                            </div>
+                        )}
+                        {fieldErrors.declaration && data.declaration !== 'tidak' && (
+                            <div className="invalid-feedback d-block">
+                                Please acknowledge the company profile agreement by selecting "Ya"
                             </div>
                         )}
                     </Form.Group>
@@ -2089,7 +2782,7 @@ const CompanyProfileDeclaration = ({ data = {}, onChange }) => {
     );
 };
 
-const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => {
+const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
     // Flatten all form data from all steps into a single object
     const flattenedData = Object.values(allData).reduce((acc, curr) => {
         return { ...acc, ...curr };
@@ -2149,7 +2842,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                     
                     <Form.Group className="mb-3">
                         <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
+                        <div className={`d-flex gap-4 ${fieldErrors.tradingSimulation ? 'is-invalid' : ''}`}>
                             <Form.Check
                                 type="radio"
                                 id="trading-simulation-ya"
@@ -2157,7 +2850,12 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                                 label="Ya"
                                 value="ya"
                                 checked={data.tradingSimulation === 'ya'}
-                                onChange={(e) => onChange({ ...data, tradingSimulation: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, tradingSimulation: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('tradingSimulation');
+                                    }
+                                }}
                                 required
                             />
                             <Form.Check
@@ -2167,13 +2865,23 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                                 label="Tidak"
                                 value="tidak"
                                 checked={data.tradingSimulation === 'tidak'}
-                                onChange={(e) => onChange({ ...data, tradingSimulation: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, tradingSimulation: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('tradingSimulation');
+                                    }
+                                }}
                                 required
                             />
                         </div>
                         {data.tradingSimulation === 'tidak' && (
                             <div className="mt-2">
                                 <small className="text-danger">You must select "Ya" to continue</small>
+                            </div>
+                        )}
+                        {fieldErrors.tradingSimulation && data.tradingSimulation !== 'tidak' && (
+                            <div className="invalid-feedback d-block">
+                                Please acknowledge the trading simulation by selecting "Ya"
                             </div>
                         )}
                     </Form.Group>
@@ -2190,7 +2898,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
 
                     <Form.Group className="mb-3">
                         <Form.Label className="text-muted"><strong>Pengalaman Transaksi Perdagangan Berjangka <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
+                        <div className={`d-flex gap-4 ${fieldErrors.tradingExperience && !data.tradingExperience ? 'is-invalid' : ''}`}>
                             <Form.Check
                                 type="radio"
                                 id="trading-experience-ya"
@@ -2198,7 +2906,12 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                                 label="Ya"
                                 value="ya"
                                 checked={data.tradingExperience === 'ya'}
-                                onChange={(e) => onChange({ ...data, tradingExperience: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, tradingExperience: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('tradingExperience');
+                                    }
+                                }}
                                 required
                             />
                             <Form.Check
@@ -2208,10 +2921,20 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                                 label="Tidak"
                                 value="tidak"
                                 checked={data.tradingExperience === 'tidak'}
-                                onChange={(e) => onChange({ ...data, tradingExperience: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, tradingExperience: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('tradingExperience');
+                                    }
+                                }}
                                 required
                             />
                         </div>
+                        {fieldErrors.tradingExperience && (
+                            <div className="invalid-feedback d-block">
+                                Please select your trading experience
+                            </div>
+                        )}
                     </Form.Group>
 
                     {data.tradingExperience === 'ya' && (
@@ -2222,9 +2945,18 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                                     type="text"
                                     placeholder="Enter Broker Company Name"
                                     value={data.brokerCompany || ''}
-                                    onChange={(e) => onChange({ ...data, brokerCompany: e.target.value })}
+                                    onChange={(e) => {
+                                        onChange({ ...data, brokerCompany: e.target.value });
+                                        if (clearFieldError) {
+                                            clearFieldError('brokerCompany');
+                                        }
+                                    }}
+                                    isInvalid={fieldErrors.brokerCompany}
                                     required
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Previous broker company name is required
+                                </Form.Control.Feedback>
                             </Form.Group>
 
                             <Form.Group className="mb-3">
@@ -2233,9 +2965,18 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
                                     type="text"
                                     placeholder="Enter Demo Account Number"
                                     value={data.demoAccountNumber || ''}
-                                    onChange={(e) => onChange({ ...data, demoAccountNumber: e.target.value })}
+                                    onChange={(e) => {
+                                        onChange({ ...data, demoAccountNumber: e.target.value });
+                                        if (clearFieldError) {
+                                            clearFieldError('demoAccountNumber');
+                                        }
+                                    }}
+                                    isInvalid={fieldErrors.demoAccountNumber}
                                     required
                                 />
+                                <Form.Control.Feedback type="invalid">
+                                    Previous demo account number is required
+                                </Form.Control.Feedback>
                             </Form.Group>
                         </>
                     )}
@@ -2245,7 +2986,7 @@ const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {} }) => 
     );
 };
 
-const DisclosureStatementStep = ({ data = {}, onChange }) => {
+const DisclosureStatementStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
@@ -2298,7 +3039,7 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
 
                     <Form.Group className="mb-3">
                         <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
+                        <div className={`d-flex gap-4 ${fieldErrors.disclosureStatement ? 'is-invalid' : ''}`}>
                             <Form.Check
                                 type="radio"
                                 id="disclosure-ya"
@@ -2306,7 +3047,12 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
                                 label="Ya"
                                 value="ya"
                                 checked={data.disclosureStatement === 'ya'}
-                                onChange={(e) => onChange({ ...data, disclosureStatement: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, disclosureStatement: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('disclosureStatement');
+                                    }
+                                }}
                                 required
                             />
                             <Form.Check
@@ -2316,13 +3062,23 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
                                 label="Tidak"
                                 value="tidak"
                                 checked={data.disclosureStatement === 'tidak'}
-                                onChange={(e) => onChange({ ...data, disclosureStatement: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, disclosureStatement: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('disclosureStatement');
+                                    }
+                                }}
                                 required
                             />
                         </div>
                         {data.disclosureStatement === 'tidak' && (
                             <div className="mt-2">
                                 <small className="text-danger">You must select "Ya" to continue</small>
+                            </div>
+                        )}
+                        {fieldErrors.disclosureStatement && data.disclosureStatement !== 'tidak' && (
+                            <div className="invalid-feedback d-block">
+                                Please acknowledge the disclosure statement by selecting "Ya"
                             </div>
                         )}
                     </Form.Group>
@@ -2342,20 +3098,55 @@ const DisclosureStatementStep = ({ data = {}, onChange }) => {
     );
 };
 
-const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
+const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {}, clearFieldError }) => {
+    const [uploadedDocs, setUploadedDocs] = useState(data.uploadedFiles || {});
+    const fileInputRefs = useRef({});
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const handleFileChange = (docName, file) => {
-        const uploadedFiles = data.uploadedFiles || {};
-        uploadedFiles[docName] = {
-            name: file ? file.name : null,
-            size: file ? file.size : null,
-            type: file ? file.type : null,
-            lastModified: file ? file.lastModified : null
+    const handleFileUpload = (categoryIndex, docIndex, file) => {
+        if (!file) return;
+
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = {
+            ...uploadedDocs,
+            [docKey]: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+                file: file
+            }
         };
-        onChange({ ...data, uploadedFiles });
+
+        setUploadedDocs(newUploadedDocs);
+        onChange({ ...data, uploadedFiles: newUploadedDocs });
+
+        // Clear field error when file is uploaded
+        if (clearFieldError) {
+            clearFieldError(`document_${docKey}`);
+        }
+
+        // Clear the file input
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
+    };
+
+    const handleFileRemove = (categoryIndex, docIndex) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = { ...uploadedDocs };
+        delete newUploadedDocs[docKey];
+
+        setUploadedDocs(newUploadedDocs);
+        onChange({ ...data, uploadedFiles: newUploadedDocs });
+
+        // Clear the file input value
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
     };
 
     return (
@@ -2365,32 +3156,81 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
                 <p className="text-muted fs-5">Upload all required documents</p>
             </div>
 
-            {requirements.map((category, index) => (
-                <Card key={index} className="mb-4 border-0 shadow-sm">
+            {requirements.map((category, categoryIndex) => (
+                <Card key={categoryIndex} className="mb-4 border-0 shadow-sm">
                     <Card.Header className="bg-light border-0">
-                        <h6 className="mb-0 text-primary">{category.category}</h6>
+                        <h6 className="mb-0 text-primary">
+                            {category.category}
+                            {category.optional && <span className="text-muted ms-2">(Optional)</span>}
+                        </h6>
                     </Card.Header>
                     <Card.Body>
-                        {category.documents.map((doc, docIndex) => (
-                            <Form.Group key={docIndex} className="mb-3">
-                                <Form.Label className="text-muted">{doc} <span className="text-danger">*</span></Form.Label>
-                                <Form.Control 
-                                    type="file" 
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                    onChange={(e) => handleFileChange(doc, e.target.files[0])}
-                                />
-                                <Form.Text className="text-muted">
-                                    Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
-                                </Form.Text>
-                                {data.uploadedFiles && data.uploadedFiles[doc] && data.uploadedFiles[doc].name && (
-                                    <div className="mt-2">
-                                        <small className="text-success">
-                                            ✓ Uploaded: {data.uploadedFiles[doc].name}
-                                        </small>
+                        {category.documents.map((doc, docIndex) => {
+                            const docKey = `${categoryIndex}_${docIndex}`;
+                            const isUploaded = uploadedDocs[docKey];
+                            
+                            return (
+                                <Form.Group key={docIndex} className="mb-3">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Form.Label className="text-muted mb-0">
+                                            {doc}
+                                            {!category.optional && <span className="text-danger">*</span>}
+                                            {isUploaded && (
+                                                <span className="text-success ms-2">
+                                                    <i className="mdi mdi-check-circle"></i> Uploaded: {isUploaded.name}
+                                                </span>
+                                            )}
+                                        </Form.Label>
+                                        {isUploaded && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => handleFileRemove(categoryIndex, docIndex)}
+                                                title="Remove file"
+                                            >
+                                                <i className="mdi mdi-delete"></i> Remove
+                                            </button>
+                                        )}
                                     </div>
-                                )}
-                            </Form.Group>
-                        ))}
+                                    
+                                    {/* Show file input when no file uploaded */}
+                                    {!isUploaded && (
+                                        <Form.Control 
+                                            type="file" 
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
+                                            isInvalid={fieldErrors[`document_${docKey}`]}
+                                            className="mt-2"
+                                            ref={(el) => {
+                                                if (el) {
+                                                    fileInputRefs.current[docKey] = el;
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Show custom file display when file uploaded */}
+                                    {isUploaded && (
+                                        <div className="mt-2">
+                                            <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
+                                                <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                                <span className="flex-grow-1">{isUploaded.name}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <Form.Text className="text-muted">
+                                        Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG 
+                                    </Form.Text>
+
+                                    {fieldErrors[`document_${docKey}`] && (
+                                        <div className="invalid-feedback d-block">
+                                            This document is required.
+                                        </div>
+                                    )}
+                                </Form.Group>
+                            );
+                        })}
                     </Card.Body>
                 </Card>
             ))}
@@ -2398,245 +3238,15 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements }) => {
     );
 };
 
-const ReviewStep = ({ allData }) => {
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
 
-    return (
-        <div>
-            <div className="text-center mb-4">
-                <h4 className="text-primary mb-3">Review & Submit</h4>
-                <p className="text-muted fs-5">Please review your information before submitting</p>
-            </div>
-
-            {/* Account Information Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Account Information</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Email:</strong> {allData.email || 'Not provided'}</p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Demo Account:</strong> {allData.demoAccountNo || 'Not provided'}</p>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Data Pribadi Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Data Pribadi</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Nama Lengkap:</strong> {allData.namaLengkap || 'Not provided'}</p>
-                            <p><strong>Tempat Lahir:</strong> {allData.tempatLahir || 'Not provided'}</p>
-                            <p><strong>Tanggal Lahir:</strong> {allData.tanggalLahir || 'Not provided'}</p>
-                            <p><strong>No. KTP:</strong> {allData.noKTP || 'Not provided'}</p>
-                            <p><strong>No. NPWP:</strong> {allData.noNPWP || 'Not provided'}</p>
-                            <p><strong>Jenis Kelamin:</strong> {allData.jenisKelamin || 'Not provided'}</p>
-                            <p><strong>Status Perkawinan:</strong> {allData.statusPerkawinan || 'Not provided'}</p>
-                            {allData.statusPerkawinan === 'Married' && allData.namaIstriSuami && (
-                                <p><strong>Nama Istri / Suami:</strong> {allData.namaIstriSuami}</p>
-                            )}
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Nama Ibu Kandung:</strong> {allData.namaIbuKandung || 'Not provided'}</p>
-                            <p><strong>No. Handphone:</strong> {allData.noHandphone || 'Not provided'}</p>
-                            <p><strong>Alamat:</strong> {`${allData.streetAddress || ''}, ${allData.city || ''}, ${allData.postalCode || ''}`.trim() || 'Not provided'}</p>
-                            <p><strong>Status Kepemilikan Rumah:</strong> {allData.statusKepemilikanRumah || 'Not provided'}</p>
-                            <p><strong>Tujuan Pembukaan Rekening:</strong> {allData.tujuanPembukaanRekening || 'Not provided'}</p>
-                            <p><strong>Pengalaman Investasi:</strong> {allData.pengalamanInvestasi || 'Not provided'}</p>
-                            {allData.pengalamanInvestasiBidang && (
-                                <p><strong>Pengalaman Investasi Bidang:</strong> {allData.pengalamanInvestasiBidang}</p>
-                            )}
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Emergency Contact Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Emergency Contact</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Nama Lengkap:</strong> {allData.emergencyContactName || 'Not provided'}</p>
-                            <p><strong>No. Handphone:</strong> {allData.emergencyContactPhone || 'Not provided'}</p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Alamat:</strong> {`${allData.emergencyContactStreetAddress || ''}, ${allData.emergencyContactCity || ''}, ${allData.emergencyContactPostalCode || ''}`.trim() || 'Not provided'}</p>
-                            <p><strong>Hubungan:</strong> {allData.emergencyContactRelationship || 'Not provided'}</p>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Employment Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Data Pekerjaan</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Jenis Pekerjaan:</strong> {allData.jenisPekerjaan || 'Not provided'}</p>
-                            {allData.namaPerusahaan && (
-                                <p><strong>Nama Perusahaan:</strong> {allData.namaPerusahaan}</p>
-                            )}
-                            {allData.bidangUsaha && (
-                                <p><strong>Bidang Usaha:</strong> {allData.bidangUsaha}</p>
-                            )}
-                            {allData.jabatan && (
-                                <p><strong>Jabatan:</strong> {allData.jabatan}</p>
-                            )}
-                            {allData.lamaBekerja && (
-                                <p><strong>Lama Bekerja:</strong> {allData.lamaBekerja}</p>
-                            )}
-                        </Col>
-                        <Col md={6}>
-                            {allData.kantorSebelumnya && (
-                                <p><strong>Kantor Sebelumnya:</strong> {allData.kantorSebelumnya}</p>
-                            )}
-                            {allData.alamatKantor && (
-                                <p><strong>Alamat Kantor:</strong> {`${allData.alamatKantor || ''}, ${allData.kotaKantor || ''}, ${allData.postalCodeKantor || ''}`.trim()}</p>
-                            )}
-                            {allData.noTeleponKantor && (
-                                <p><strong>No. Telepon Kantor:</strong> {allData.noTeleponKantor}</p>
-                            )}
-                            {allData.noFaksimiliKantor && (
-                                <p><strong>No. Faksimili Kantor:</strong> {allData.noFaksimiliKantor}</p>
-                            )}
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Wealth Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Daftar Kekayaan</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Penghasilan Pertahun:</strong> {allData.penghasilanPertahun || 'Not provided'}</p>
-                            <p><strong>Lokasi Rumah:</strong> {allData.lokasiRumah || 'Not provided'}</p>
-                            <p><strong>Nilai NJOP:</strong> {allData.nilaiNJOP || 'Not provided'}</p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Bank Deposit:</strong> {allData.bankDeposit || 'Not provided'}</p>
-                            <p><strong>Jumlah:</strong> {allData.jumlah || 'Not provided'}</p>
-                            <p><strong>Lainnya:</strong> {allData.lainnya || 'Not provided'}</p>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Bank Account Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Rekening Bank</h6>
-                </Card.Header>
-                <Card.Body>
-                    {allData.bankAccounts && allData.bankAccounts.length > 0 ? (
-                        allData.bankAccounts.map((account, index) => (
-                            <div key={index} className={index > 0 ? 'mt-4 pt-3 border-top' : ''}>
-                                <h6 className="text-primary mb-3">Bank Account {index + 1}</h6>
-                                <Row>
-                                    <Col md={6}>
-                                        <p><strong>Nama Bank:</strong> {account.namaBank || 'Not provided'}</p>
-                                        <p><strong>Cabang:</strong> {account.cabang || 'Not provided'}</p>
-                                        <p><strong>No. Rekening:</strong> {account.noRekening || 'Not provided'}</p>
-                                    </Col>
-                                    <Col md={6}>
-                                        <p><strong>Nama Pemilik Rekening:</strong> {account.namaPemilikRekening || 'Not provided'}</p>
-                                        <p><strong>Jenis Rekening:</strong> {account.bankAccountType || 'Not provided'}</p>
-                                        {account.noTeleponBank && (
-                                            <p><strong>No. Telepon Bank:</strong> {account.noTeleponBank}</p>
-                                        )}
-                                    </Col>
-                                </Row>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No bank accounts provided</p>
-                    )}
-                </Card.Body>
-            </Card>
-
-            {/* Declaration Summary */}
-            <Card className="border-0 shadow-sm mb-3">
-                <Card.Header className="bg-light">
-                    <h6 className="mb-0 text-primary">Declaration</h6>
-                </Card.Header>
-                <Card.Body>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Company Profile Declaration:</strong> {allData.declaration === 'ya' ? 'Accepted' : allData.declaration === 'tidak' ? 'Rejected' : 'Not provided'}</p>
-                            {allData.declarationDate && (
-                                <p><strong>Declaration Date:</strong> {new Date(allData.declarationDate).toLocaleString()}</p>
-                            )}
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Trading Simulation Declaration:</strong> {allData.tradingSimulation === 'ya' ? 'Accepted' : allData.tradingSimulation === 'tidak' ? 'Rejected' : 'Not provided'}</p>
-                            {allData.tradingSimulationDate && (
-                                <p><strong>Trading Simulation Date:</strong> {new Date(allData.tradingSimulationDate).toLocaleString()}</p>
-                            )}
-                            {allData.tradingExperience && (
-                                <p><strong>Trading Experience:</strong> {allData.tradingExperience === 'ya' ? 'Yes' : 'No'}</p>
-                            )}
-                            {allData.tradingExperience === 'ya' && allData.brokerCompany && (
-                                <p><strong>Broker Company:</strong> {allData.brokerCompany}</p>
-                            )}
-                            {allData.tradingExperience === 'ya' && allData.demoAccountNumber && (
-                                <p><strong>Demo Account Number:</strong> {allData.demoAccountNumber}</p>
-                            )}
-                        </Col>
-                    </Row>
-                    
-                    <Row>
-                        <Col md={12}>
-                            <p><strong>Disclosure Statement:</strong> {allData.disclosureStatement === 'ya' ? 'Accepted' : allData.disclosureStatement === 'tidak' ? 'Rejected' : 'Not provided'}</p>
-                            {allData.disclosureDate && (
-                                <p><strong>Disclosure Date:</strong> {new Date(allData.disclosureDate).toLocaleString()}</p>
-                            )}
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Application Status */}
-            <Card className="border-0 shadow-sm">
-                <Card.Body>
-                    <h6 className="text-primary mb-3">Application Status</h6>
-                    <Row>
-                        <Col md={6}>
-                            <p><strong>Account Type:</strong> Indonesian Person</p>
-                            <p><strong>Status:</strong> Ready for submission</p>
-                        </Col>
-                        <Col md={6}>
-                            <p><strong>Steps Completed:</strong> 11/11</p>
-                            <p><strong>Documents:</strong> Ready for upload</p>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
-        </div>
-    );
-};
-
-const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
+const RiskDisclosureDocumentStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const handleCheckboxChange = (field, value) => {
         onChange({ ...data, [field]: value });
+        
+        // Clear field error when checkbox is checked
+        if (clearFieldError && value) {
+            clearFieldError(field);
+        }
     };
 
     const riskDisclosurePoints = [
@@ -2743,8 +3353,14 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data[point.id] || false}
                                     onChange={(e) => handleCheckboxChange(point.id, e.target.checked)}
+                                    isInvalid={fieldErrors[point.id]}
                                     required
                                 />
+                                {fieldErrors[point.id] && (
+                                    <div className="invalid-feedback d-block">
+                                        Please acknowledge this risk statement
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -2763,7 +3379,7 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
 
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak (Statement to Accept / Not) <span className="text-danger">*</span></strong></Form.Label>
-                            <div className="d-flex gap-4">
+                            <div className={`d-flex gap-4 ${fieldErrors.finalAcceptance ? 'is-invalid' : ''}`}>
                                 <Form.Check
                                     type="radio"
                                     id="final-acceptance-ya"
@@ -2771,7 +3387,12 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                                     label="Ya (Yes)"
                                     value="ya"
                                     checked={data.finalAcceptance === 'ya'}
-                                    onChange={(e) => onChange({ ...data, finalAcceptance: e.target.value })}
+                                    onChange={(e) => {
+                                        onChange({ ...data, finalAcceptance: e.target.value });
+                                        if (clearFieldError) {
+                                            clearFieldError('finalAcceptance');
+                                        }
+                                    }}
                                     required
                                 />
                                 <Form.Check
@@ -2781,13 +3402,23 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
                                     label="Tidak (No)"
                                     value="tidak"
                                     checked={data.finalAcceptance === 'tidak'}
-                                    onChange={(e) => onChange({ ...data, finalAcceptance: e.target.value })}
+                                    onChange={(e) => {
+                                        onChange({ ...data, finalAcceptance: e.target.value });
+                                        if (clearFieldError) {
+                                            clearFieldError('finalAcceptance');
+                                        }
+                                    }}
                                     required
                                 />
                             </div>
                             {data.finalAcceptance === 'tidak' && (
                                 <div className="mt-2">
                                     <small className="text-danger">You must select "Ya" to continue</small>
+                                </div>
+                            )}
+                            {fieldErrors.finalAcceptance && data.finalAcceptance !== 'tidak' && (
+                                <div className="invalid-feedback d-block">
+                                    Please acknowledge the risk disclosure by selecting "Ya"
                                 </div>
                             )}
                         </Form.Group>
@@ -2808,389 +3439,8 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange }) => {
     );
 };
 
-const AccountApplicationSummaryStep = ({ data = {}, onChange, allData = {} }) => {
-    // Flatten all form data from all steps into a single object
-    const flattenedData = Object.values(allData).reduce((acc, curr) => {
-        return { ...acc, ...curr };
-    }, {});
 
-    return (
-        <div>
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h5 className="mb-0 text-primary text-center">
-                        APLIKASI PEMBUKAAN REKENING TRANSAKSI SECARA ELEKTRONIK ONLINE
-                    </h5>
-                </Card.Header>
-                <Card.Body style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-                    <div className="mb-4">
-                        <p><strong>Kode Nasabah:</strong> {flattenedData.kodeNasabah || 'Will be assigned upon approval'}</p>
-                    </div>
-
-                    {/* DATA PRIBADI */}
-                    <div className="mb-5">
-                        <h5 className="text-center mb-4 border-bottom pb-2"><strong>DATA PRIBADI</strong></h5>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Nama Lengkap</strong></Col>
-                            <Col md={8}>: {flattenedData.namaLengkap || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Tempat, Tanggal Lahir</strong></Col>
-                            <Col md={8}>: {flattenedData.tempatLahir || ''}, {flattenedData.tanggalLahir || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. KTP</strong></Col>
-                            <Col md={8}>: {flattenedData.noKTP || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. NPWP</strong></Col>
-                            <Col md={8}>: {flattenedData.noNPWP || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Jenis Kelamin</strong></Col>
-                            <Col md={8}>: {flattenedData.jenisKelamin || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Nama Ibu Kandung</strong></Col>
-                            <Col md={8}>: {flattenedData.namaIbuKandung || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Status Perkawinan</strong></Col>
-                            <Col md={8}>: {flattenedData.statusPerkawinan || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Nama Istri/Suami</strong></Col>
-                            <Col md={8}>: {flattenedData.namaIstriSuami || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Alamat Rumah</strong></Col>
-                            <Col md={8}>: {flattenedData.streetAddress || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. Telepon Rumah</strong></Col>
-                            <Col md={8}>: {flattenedData.noTelephoneRumah || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. Handphone</strong></Col>
-                            <Col md={8}>: {flattenedData.noHandphone || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. Faksimili Rumah</strong></Col>
-                            <Col md={8}>: {flattenedData.noFaksimiliRumah || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>E-mail</strong></Col>
-                            <Col md={8}>: {flattenedData.email || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Status Kepemilikan Rumah</strong></Col>
-                            <Col md={8}>: {flattenedData.statusKepemilikanRumah || ''}{flattenedData.statusKepemilikanRumahOther ? ` - ${flattenedData.statusKepemilikanRumahOther}` : ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Tujuan Pembukaan Rekening</strong></Col>
-                            <Col md={8}>: {flattenedData.tujuanPembukaanRekening || ''}{flattenedData.tujuanPembukaanRekeningOther ? ` - ${flattenedData.tujuanPembukaanRekeningOther}` : ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Pengalaman Investasi</strong></Col>
-                            <Col md={8}>: {flattenedData.pengalamanInvestasi || ''}{flattenedData.pengalamanInvestasiBidang ? ` - ${flattenedData.pengalamanInvestasiBidang}` : ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Apakah Anda memiliki anggota keluarga yang bekerja di BAPPEBTI/Bursa Berjangka/Kliring Berjangka?</strong></Col>
-                            <Col md={8}>: {flattenedData.anggotaKeluargaBAPPEBTI || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Apakah Anda telah dinyatakan pailit oleh Pengadilan?</strong></Col>
-                            <Col md={8}>: {flattenedData.pernahPailit || ''}</Col>
-                        </Row>
-                    </div>
-
-                    {/* PIHAK YANG DIHUBUNGI DALAM KEADAAN DARURAT */}
-                    <div className="mb-5">
-                        <h5 className="text-center mb-4 border-bottom pb-2"><strong>PIHAK YANG DIHUBUNGI DALAM KEADAAN DARURAT</strong></h5>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Nama Lengkap</strong></Col>
-                            <Col md={8}>: {flattenedData.emergencyContactName || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Alamat</strong></Col>
-                            <Col md={8}>: {flattenedData.emergencyContactStreetAddress || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Kota & Kode Pos</strong></Col>
-                            <Col md={8}>: {flattenedData.emergencyContactCity || ''}, {flattenedData.emergencyContactPostalCode || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. Handphone</strong></Col>
-                            <Col md={8}>: {flattenedData.emergencyContactPhone || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Hubungan</strong></Col>
-                            <Col md={8}>: {flattenedData.emergencyContactRelationship || ''}{flattenedData.emergencyContactRelationshipOther ? ` - ${flattenedData.emergencyContactRelationshipOther}` : ''}</Col>
-                        </Row>
-                    </div>
-
-                    {/* DATA PEKERJAAN */}
-                    <div className="mb-5">
-                        <h5 className="text-center mb-4 border-bottom pb-2"><strong>DATA PEKERJAAN</strong></h5>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Pekerjaan</strong></Col>
-                            <Col md={8}>: {flattenedData.jenisPekerjaan || ''}{flattenedData.jenisPekerjaanOther ? ` - ${flattenedData.jenisPekerjaanOther}` : ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Nama Perusahaan</strong></Col>
-                            <Col md={8}>: {flattenedData.namaPerusahaan || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Bidang Usaha</strong></Col>
-                            <Col md={8}>: {flattenedData.bidangUsaha || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Jabatan</strong></Col>
-                            <Col md={8}>: {flattenedData.jabatan || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Lama Bekerja</strong></Col>
-                            <Col md={8}>: {flattenedData.lamaBekerja || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Kantor Sebelumnya</strong></Col>
-                            <Col md={8}>: {flattenedData.kantorSebelumnya || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Alamat Kantor</strong></Col>
-                            <Col md={8}>: {flattenedData.alamatKantor || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Kota & Kode Pos</strong></Col>
-                            <Col md={8}>: {flattenedData.kotaKantor || ''}, {flattenedData.postalCodeKantor || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. Telepon Kantor</strong></Col>
-                            <Col md={8}>: {flattenedData.noTeleponKantor || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>No. Faksimili</strong></Col>
-                            <Col md={8}>: {flattenedData.noFaksimiliKantor || ''}</Col>
-                        </Row>
-                    </div>
-
-                    {/* DAFTAR KEKAYAAN */}
-                    <div className="mb-5">
-                        <h5 className="text-center mb-4 border-bottom pb-2"><strong>DAFTAR KEKAYAAN</strong></h5>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Penghasilan Pertahun</strong></Col>
-                            <Col md={8}>: {flattenedData.penghasilanPertahun || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Lokasi Rumah</strong></Col>
-                            <Col md={8}>: {flattenedData.lokasiRumah || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Nilai (NJOP)</strong></Col>
-                            <Col md={8}>: {flattenedData.nilaiNJOP || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Deposit Bank</strong></Col>
-                            <Col md={8}>: {flattenedData.depositBank || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Jumlah</strong></Col>
-                            <Col md={8}>: {flattenedData.totalKekayaan || ''}</Col>
-                        </Row>
-                        
-                        <Row className="mb-2">
-                            <Col md={4}><strong>Lainnya</strong></Col>
-                            <Col md={8}>: {flattenedData.lainnya || ''}</Col>
-                        </Row>
-                    </div>
-
-                    {/* REKENING BANK NASABAH */}
-                    <div className="mb-5">
-                        <h5 className="text-center mb-4 border-bottom pb-2"><strong>REKENING BANK NASABAH UNTUK PENYETORAN DAN PENARIKAN MARGIN</strong></h5>
-                        
-                        {flattenedData.bankAccounts && flattenedData.bankAccounts.length > 0 ? (
-                            flattenedData.bankAccounts.map((account, index) => (
-                                <div key={index} className={`mb-4 ${index > 0 ? 'border-top pt-3' : ''}`}>
-                                    <h6><strong>Bank {index + 1}</strong></h6>
-                                    <Row className="mb-2">
-                                        <Col md={4}><strong>Nama Bank</strong></Col>
-                                        <Col md={8}>: {account.namaBank || ''}</Col>
-                                    </Row>
-                                    
-                                    <Row className="mb-2">
-                                        <Col md={4}><strong>Cabang</strong></Col>
-                                        <Col md={8}>: {account.cabang || ''}</Col>
-                                    </Row>
-                                    
-                                    <Row className="mb-2">
-                                        <Col md={4}><strong>No. Rekening</strong></Col>
-                                        <Col md={8}>: {account.noRekening || ''}</Col>
-                                    </Row>
-                                    
-                                    <Row className="mb-2">
-                                        <Col md={4}><strong>Nama Pemilik Rekening</strong></Col>
-                                        <Col md={8}>: {account.namaPemilikRekening || ''}</Col>
-                                    </Row>
-                                    
-                                    <Row className="mb-2">
-                                        <Col md={4}><strong>No. Telepon Bank</strong></Col>
-                                        <Col md={8}>: {account.noTeleponBank || ''}</Col>
-                                    </Row>
-                                    
-                                    <Row className="mb-2">
-                                        <Col md={4}><strong>Jenis Rekening Bank</strong></Col>
-                                        <Col md={8}>: {account.jenisRekeningBank || ''}</Col>
-                                    </Row>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="mb-4">
-                                <p>No bank accounts provided</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* DOKUMEN YANG DILAMPIRKAN */}
-                    <div className="mb-5">
-                        <h5 className="text-center mb-4 border-bottom pb-2"><strong>DOKUMEN YANG DILAMPIRKAN</strong></h5>
-                        
-                        {flattenedData.uploadedFiles ? (
-                            Object.entries(flattenedData.uploadedFiles).map(([docType, fileInfo], index) => (
-                                <Row key={index} className="mb-2">
-                                    <Col md={6}><strong>{docType}</strong></Col>
-                                    <Col md={6}>: <strong>Hasil Scan/Photo (Lampirkan) : {fileInfo.name || fileInfo}</strong></Col>
-                                </Row>
-                            ))
-                        ) : (
-                            // Show required documents from documentRequirements
-                            <>
-                                <Row className="mb-2">
-                                    <Col md={6}><strong>Rekening Koran / Tagihan Kartu Kredit</strong></Col>
-                                    <Col md={6}>: <strong>Status: {flattenedData.rekeningKoran ? 'Uploaded' : 'Pending Upload'}</strong></Col>
-                                </Row>
-                                
-                                <Row className="mb-2">
-                                    <Col md={6}><strong>Rekening Listrik/Telepon</strong></Col>
-                                    <Col md={6}>: <strong>Status: {flattenedData.rekeningListrik ? 'Uploaded' : 'Pending Upload'}</strong></Col>
-                                </Row>
-                                
-                                <Row className="mb-2">
-                                    <Col md={6}><strong>Foto Terkini</strong></Col>
-                                    <Col md={6}>: <strong>Status: {flattenedData.fotoTerkini ? 'Uploaded' : 'Pending Upload'}</strong></Col>
-                                </Row>
-                                
-                                <Row className="mb-2">
-                                    <Col md={6}><strong>KTP</strong></Col>
-                                    <Col md={6}>: <strong>Status: {flattenedData.ktp ? 'Uploaded' : 'Pending Upload'}</strong></Col>
-                                </Row>
-                                
-                                <Row className="mb-2">
-                                    <Col md={6}><strong>NPWP</strong></Col>
-                                    <Col md={6}>: <strong>Status: {flattenedData.npwp ? 'Uploaded' : 'Pending Upload'}</strong></Col>
-                                </Row>
-                            </>
-                        )}
-                    </div>
-
-                    {/* PERNYATAAN KEBENARAN DAN TANGGUNG JAWAB */}
-                    <div className="border-top pt-4">
-                        <h5 className="text-center mb-4"><strong>PERNYATAAN KEBENARAN DAN TANGGUNG JAWAB</strong></h5>
-                        
-                        <div className="mb-4">
-                            <p>
-                                Dengan mengisi kolom "YA" di bawah ini, saya menyatakan bahwa semua informasi dan semua dokumen yang saya
-                                lampirkan dalam <strong>APLIKASI PEMBUKAAN REKENING TRANSAKSI SECARA ELEKTRONIK ONLINE</strong> adalah benar
-                                dan tepat, Saya akan bertanggung jawab apabila dikemudian hari terjadi sesuatu hal sehubungan dengan
-                                ketidakbenaran data yang saya berikan.
-                            </p>
-                        </div>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label className="text-muted"><strong>Pernyataan Kebenaran dan Tanggung Jawab <span className="text-danger">*</span></strong></Form.Label>
-                            <div className="d-flex gap-4">
-                                <Form.Check
-                                    type="radio"
-                                    id="application-summary-ya"
-                                    name="applicationSummary"
-                                    label="Ya"
-                                    value="ya"
-                                    checked={data.applicationSummary === 'ya'}
-                                    onChange={(e) => onChange({ ...data, applicationSummary: e.target.value })}
-                                    required
-                                />
-                                <Form.Check
-                                    type="radio"
-                                    id="application-summary-tidak"
-                                    name="applicationSummary"
-                                    label="Tidak"
-                                    value="tidak"
-                                    checked={data.applicationSummary === 'tidak'}
-                                    onChange={(e) => onChange({ ...data, applicationSummary: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            {data.applicationSummary === 'tidak' && (
-                                <div className="mt-2">
-                                    <small className="text-danger">You must select "Ya" to continue</small>
-                                </div>
-                            )}
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label className="text-muted"><strong>Menyatakan Pada Tanggal:</strong></Form.Label>
-                            <Form.Control
-                                type="datetime-local"
-                                value={data.applicationSummaryDate || '2025-04-09T20:12:56'}
-                                onChange={(e) => onChange({ ...data, applicationSummaryDate: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </div>
-                </Card.Body>
-            </Card>
-        </div>
-    );
-};
-
-const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
+const AdditionalDisclosureStatementStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
@@ -3243,7 +3493,7 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
 
                     <Form.Group className="mb-3">
                         <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
+                        <div className={`d-flex gap-4 ${fieldErrors.additionalDisclosureStatement ? 'is-invalid' : ''}`}>
                             <Form.Check
                                 type="radio"
                                 id="additional-disclosure-ya"
@@ -3251,7 +3501,12 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
                                 label="Ya"
                                 value="ya"
                                 checked={data.additionalDisclosureStatement === 'ya'}
-                                onChange={(e) => onChange({ ...data, additionalDisclosureStatement: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, additionalDisclosureStatement: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('additionalDisclosureStatement');
+                                    }
+                                }}
                                 required
                             />
                             <Form.Check
@@ -3261,11 +3516,21 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
                                 label="Tidak"
                                 value="tidak"
                                 checked={data.additionalDisclosureStatement === 'tidak'}
-                                onChange={(e) => onChange({ ...data, additionalDisclosureStatement: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, additionalDisclosureStatement: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('additionalDisclosureStatement');
+                                    }
+                                }}
                                 required
                             />
                         </div>
-                        {data.additionalDisclosureStatement === 'tidak' && (
+                        {fieldErrors.additionalDisclosureStatement && (
+                            <div className="invalid-feedback d-block">
+                                You must select "Ya" to continue
+                            </div>
+                        )}
+                        {data.additionalDisclosureStatement === 'tidak' && !fieldErrors.additionalDisclosureStatement && (
                             <div className="mt-2">
                                 <small className="text-danger">You must select "Ya" to continue</small>
                             </div>
@@ -3287,7 +3552,7 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange }) => {
     );
 };
 
-const ElectronicAgreementStep = ({ data = {}, onChange }) => {
+const ElectronicAgreementStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     // Function to generate current date in Indonesian format
     const getCurrentIndonesianDate = () => {
         const now = new Date();
@@ -3576,22 +3841,39 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                         <p>(2) Apabila perselisihan dan perbedaan pendapat yang timbul tidak dapat diselesaikan secara musyawarah untuk mencapai mufakat, Para Pihak wajib memanfaatkan sarana penyelesaian Perselisihan yang tersedia di Bursa Berjangka.</p>
                         <p>(3) Apabila perselisihan dan perbedaan pendapat yang timbul tidak dapat diselesaikan melalui cara sebagaimana dimaksud pada angka (1) dan angka (2), maka Para Pihak sepakat untuk menyelesaikan perselisihan melalui:</p>
                         
-                        <div className="border p-3 bg-light mb-3">
-                            <p className="text-danger mb-2"><strong>Penyelesaian Perselisihan Melalui :</strong></p>
+                        <div className={`border p-3 bg-light mb-3 ${fieldErrors.disputeResolution ? 'border-danger' : ''}`}>
+                            <p className="text-danger mb-2"><strong>Penyelesaian Perselisihan Melalui : <span className="text-danger">*</span></strong></p>
                             <Form.Check
                                 type="checkbox"
                                 id="dispute-bappebti"
                                 label="Badan Arbitrase Perdagangan Berjangka Komoditi (BAKTI)"
                                 checked={data.disputeResolutionBappebti || false}
-                                onChange={(e) => onChange({ ...data, disputeResolutionBappebti: e.target.checked })}
+                                onChange={(e) => {
+                                    onChange({ ...data, disputeResolutionBappebti: e.target.checked });
+                                    if (clearFieldError) {
+                                        clearFieldError('disputeResolution');
+                                    }
+                                }}
+                                isInvalid={fieldErrors.disputeResolution}
                             />
                             <Form.Check
                                 type="checkbox"
                                 id="dispute-jakarta"
                                 label="Pengadilan Negeri Jakarta Barat"
                                 checked={data.disputeResolutionJakarta || false}
-                                onChange={(e) => onChange({ ...data, disputeResolutionJakarta: e.target.checked })}
+                                onChange={(e) => {
+                                    onChange({ ...data, disputeResolutionJakarta: e.target.checked });
+                                    if (clearFieldError) {
+                                        clearFieldError('disputeResolution');
+                                    }
+                                }}
+                                isInvalid={fieldErrors.disputeResolution}
                             />
+                            {fieldErrors.disputeResolution && (
+                                <div className="invalid-feedback d-block mt-2">
+                                    Please select both dispute resolution methods
+                                </div>
+                            )}
                             <p className="mt-2">(4) Kantor atau kantor cabang Pialang Berjangka terdekat dengan domisili Nasabah tempat
                             penyelesaian dalam hal terjadi perselisihan.</p>
                             <p><strong>Daftar Kantor</strong></p>
@@ -3616,7 +3898,7 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
 
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                            <div className="d-flex gap-4">
+                            <div className={`d-flex gap-4 ${fieldErrors.electronicAgreement ? 'is-invalid' : ''}`}>
                                 <Form.Check
                                     type="radio"
                                     id="electronic-agreement-ya"
@@ -3624,7 +3906,12 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                                     label="Ya"
                                     value="ya"
                                     checked={data.electronicAgreement === 'ya'}
-                                    onChange={(e) => onChange({ ...data, electronicAgreement: e.target.value })}
+                                    onChange={(e) => {
+                                        onChange({ ...data, electronicAgreement: e.target.value });
+                                        if (clearFieldError) {
+                                            clearFieldError('electronicAgreement');
+                                        }
+                                    }}
                                     required
                                 />
                                 <Form.Check
@@ -3634,11 +3921,21 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
                                     label="Tidak"
                                     value="tidak"
                                     checked={data.electronicAgreement === 'tidak'}
-                                    onChange={(e) => onChange({ ...data, electronicAgreement: e.target.value })}
+                                    onChange={(e) => {
+                                        onChange({ ...data, electronicAgreement: e.target.value });
+                                        if (clearFieldError) {
+                                            clearFieldError('electronicAgreement');
+                                        }
+                                    }}
                                     required
                                 />
                             </div>
-                            {data.electronicAgreement === 'tidak' && (
+                            {fieldErrors.electronicAgreement && (
+                                <div className="invalid-feedback d-block">
+                                    You must select "Ya" to continue
+                                </div>
+                            )}
+                            {data.electronicAgreement === 'tidak' && !fieldErrors.electronicAgreement && (
                                 <div className="mt-2">
                                     <small className="text-danger">You must select "Ya" to continue</small>
                                 </div>
@@ -3661,9 +3958,14 @@ const ElectronicAgreementStep = ({ data = {}, onChange }) => {
     );
 };
 
-const TradingRulesStep = ({ data = {}, onChange }) => {
+const TradingRulesStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const handleCheckboxChange = (field, value) => {
         onChange({ ...data, [field]: value });
+        
+        // Clear field error when checkbox is checked
+        if (clearFieldError && value) {
+            clearFieldError(field);
+        }
     };
 
     return (
@@ -3792,7 +4094,7 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
                         
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
-                            <div className="d-flex gap-3">
+                            <div className={`d-flex gap-3 ${fieldErrors.tradingRulesAcceptance ? 'is-invalid' : ''}`}>
                                 <Form.Check
                                     type="radio"
                                     id="tradingRulesAccept"
@@ -3810,6 +4112,16 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
                                     onChange={(e) => handleCheckboxChange('tradingRulesAcceptance', 'no')}
                                 />
                             </div>
+                            {fieldErrors.tradingRulesAcceptance && (
+                                <div className="invalid-feedback d-block">
+                                    You must select "Ya" to continue
+                                </div>
+                            )}
+                            {data.tradingRulesAcceptance === 'no' && !fieldErrors.tradingRulesAcceptance && (
+                                <div className="mt-2">
+                                    <small className="text-danger">You must select "Ya" to continue</small>
+                                </div>
+                            )}
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -3827,9 +4139,14 @@ const TradingRulesStep = ({ data = {}, onChange }) => {
     );
 };
 
-const NewFundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
+const NewFundDeclarationStep = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
     const handleInputChange = (field, value) => {
         onChange({ ...data, [field]: value });
+        
+        // Clear field error when user makes a selection
+        if (clearFieldError && field === 'newFundDeclarationAcceptance') {
+            clearFieldError('newFundDeclarationAcceptance');
+        }
     };
 
     // Flatten all form data from all steps into a single object
@@ -3908,7 +4225,7 @@ const NewFundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
 
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
-                            <div className="d-flex gap-3">
+                            <div className={`d-flex gap-3 ${fieldErrors.newFundDeclarationAcceptance ? 'is-invalid' : ''}`}>
                                 <Form.Check
                                     type="radio"
                                     id="newFundDeclarationAccept"
@@ -3926,6 +4243,16 @@ const NewFundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
                                     onChange={(e) => handleInputChange('newFundDeclarationAcceptance', 'no')}
                                 />
                             </div>
+                            {fieldErrors.newFundDeclarationAcceptance && (
+                                <div className="invalid-feedback d-block">
+                                    You must select "Ya" to continue
+                                </div>
+                            )}
+                            {data.newFundDeclarationAcceptance === 'no' && !fieldErrors.newFundDeclarationAcceptance && (
+                                <div className="mt-2">
+                                    <small className="text-danger">You must select "Ya" to continue</small>
+                                </div>
+                            )}
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -3943,9 +4270,14 @@ const NewFundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
     );
 };
 
-const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {} }) => {
+const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
     const handleInputChange = (field, value) => {
         onChange({ ...data, [field]: value });
+        
+        // Clear field error when user makes a selection
+        if (clearFieldError && field === 'accessCodeResponsibilityAcceptance') {
+            clearFieldError('accessCodeResponsibilityAcceptance');
+        }
     };
 
     // Flatten all form data from all steps into a single object
@@ -3999,7 +4331,7 @@ const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {} }) => 
                         </div>
                         
                         <div className="mb-4">
-                            <p><strong>No. KTP / SIM / Paspor*</strong> : {idNumber}</p>
+                            <p><strong>No. KTP / SIM / Paspor</strong> : {idNumber}</p>
                         </div>
 
                         <div className="mb-4">
@@ -4029,7 +4361,7 @@ const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {} }) => 
 
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
-                            <div className="d-flex gap-3">
+                            <div className={`d-flex gap-3 ${fieldErrors.accessCodeResponsibilityAcceptance ? 'is-invalid' : ''}`}>
                                 <Form.Check
                                     type="radio"
                                     id="accessCodeResponsibilityAccept"
@@ -4047,6 +4379,16 @@ const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {} }) => 
                                     onChange={(e) => handleInputChange('accessCodeResponsibilityAcceptance', 'no')}
                                 />
                             </div>
+                            {fieldErrors.accessCodeResponsibilityAcceptance && (
+                                <div className="invalid-feedback d-block">
+                                    You must select "Ya" to continue
+                                </div>
+                            )}
+                            {data.accessCodeResponsibilityAcceptance === 'no' && !fieldErrors.accessCodeResponsibilityAcceptance && (
+                                <div className="mt-2">
+                                    <small className="text-danger">You must select "Ya" to continue</small>
+                                </div>
+                            )}
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -4064,9 +4406,14 @@ const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {} }) => 
     );
 };
 
-const FundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
+const FundDeclarationStep = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
     const handleInputChange = (field, value) => {
         onChange({ ...data, [field]: value });
+        
+        // Clear field error when user makes a selection
+        if (clearFieldError && field === 'fundDeclarationAcceptance') {
+            clearFieldError('fundDeclarationAcceptance');
+        }
     };
 
     // Flatten all form data from all steps into a single object
@@ -4138,7 +4485,7 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
 
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted fw-bold">Pernyataan Menerima / Tidak <span className="text-danger">*</span></Form.Label>
-                            <div className="d-flex gap-3">
+                            <div className={`d-flex gap-3 ${fieldErrors.fundDeclarationAcceptance ? 'is-invalid' : ''}`}>
                                 <Form.Check
                                     type="radio"
                                     id="fundDeclarationAccept"
@@ -4156,6 +4503,16 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
                                     onChange={(e) => handleInputChange('fundDeclarationAcceptance', 'no')}
                                 />
                             </div>
+                            {fieldErrors.fundDeclarationAcceptance && (
+                                <div className="invalid-feedback d-block">
+                                    You must select "Ya" to continue
+                                </div>
+                            )}
+                            {data.fundDeclarationAcceptance === 'no' && !fieldErrors.fundDeclarationAcceptance && (
+                                <div className="mt-2">
+                                    <small className="text-danger">You must select "Ya" to continue</small>
+                                </div>
+                            )}
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -4173,162 +4530,8 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {} }) => {
     );
 };
 
-const PersonalInformationSummaryStep = ({ data = {}, onChange, allData = {} }) => {
-    // Flatten nested data
-    const flattenedData = Object.keys(allData).reduce((acc, key) => {
-        if (typeof allData[key] === 'object' && allData[key] !== null) {
-            return { ...acc, ...allData[key] };
-        }
-        return { ...acc, [key]: allData[key] };
-    }, {});
 
-    // Auto-populate fields from previous steps
-    const fullName = flattenedData.namaLengkap || '';
-    const placeOfBirth = flattenedData.tempatLahir || '';
-    const dateOfBirth = flattenedData.tanggalLahir || '';
-    const homeAddress = flattenedData.streetAddress || flattenedData.alamat || '';
-    const city = flattenedData.city || '';
-    const postalCode = flattenedData.postalCode || '';
-    const idNumber = flattenedData.noKTP || flattenedData.ktpNumber || '';
-
-    // Format date of birth for display (convert from YYYY-MM-DD to DD-MM-YYYY)
-    const formatDisplayDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return dateString;
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-    };
-
-    const formattedDateOfBirth = formatDisplayDate(dateOfBirth);
-
-    return (
-        <div>
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h6 className="mb-0 text-primary text-center">
-                        PERNYATAAN BERTANGGUNG JAWAB ATAS
-                    </h6>
-                    <h6 className="mb-0 text-primary text-center">
-                        KODE AKSES TRANSAKSI NASABAH
-                    </h6>
-                </Card.Header>
-                <Card.Body>
-                    <div className="mb-4">
-                        <p>Yang mengisi formulir di bawah ini:</p>
-                        
-                        <div className="mb-3">
-                            <Row>
-                                <Col md={3}><strong>Nama Lengkap</strong></Col>
-                                <Col md={1}>:</Col>
-                                <Col md={8}>{fullName}</Col>
-                            </Row>
-                        </div>
-                        
-                        <div className="mb-3">
-                            <Row>
-                                <Col md={3}><strong>Tempat Lahir & Tgl. Lahir</strong></Col>
-                                <Col md={1}>:</Col>
-                                <Col md={8}>{placeOfBirth}{placeOfBirth && formattedDateOfBirth ? ', ' : ''}{formattedDateOfBirth}</Col>
-                            </Row>
-                        </div>
-                        
-                        <div className="mb-3">
-                            <Row>
-                                <Col md={3}><strong>Alamat Rumah</strong></Col>
-                                <Col md={1}>:</Col>
-                                <Col md={8}>{homeAddress}</Col>
-                            </Row>
-                        </div>
-                        
-                        <div className="mb-3">
-                            <Row>
-                                <Col md={3}><strong>Kota & Kode Pos</strong></Col>
-                                <Col md={1}>:</Col>
-                                <Col md={8}>{city}{city && postalCode ? ', ' : ''}{postalCode}</Col>
-                            </Row>
-                        </div>
-                        
-                        <div className="mb-4">
-                            <Row>
-                                <Col md={3}><strong>No. KTP / SIM / Paspor<span className="text-danger">*</span></strong></Col>
-                                <Col md={1}>:</Col>
-                                <Col md={8}>{idNumber}</Col>
-                            </Row>
-                        </div>
-
-                        <div className="mb-4">
-                            <p>
-                                Dengan mengisi kolom "Ya" dibawah ini saya menyatakan bahwa saya bertanggungjawab sepenuhnya terhadap kode 
-                                akses transaksi Nasabah (Personal Access Password) dan tidak menyerahkan kode akses transaksi nasabah 
-                                (Personal Access Password) ke pihak lain, terutama kepada pegawai Pialang Berjangka atau pihak yang memiliki 
-                                kepentingan dengan Pialang Berjangka.
-                            </p>
-                        </div>
-
-                        <div className="border p-3 bg-light mb-4">
-                            <div className="text-center mb-3">
-                                <strong>Peringatan!</strong>
-                            </div>
-                            <p className="mb-0">
-                                Pialang Berjangka, Wakil Pialang Berjangka, pegawai Pialang Berjangka atau pihak Yang memiliki kepentingan 
-                                dengan pialang berjangka dilarang menerima Kode Akses Transaksi Nasabah (Personal Access Password)
-                            </p>
-                        </div>
-
-                        <div className="mb-4">
-                            <p>
-                                Demikian pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, sehat jasmani dan rohani serta tanpa 
-                                paksaan apapun dari pihak manapun.
-                            </p>
-                        </div>
-
-                        <div className="mb-4">
-                            <h6><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></h6>
-                            <Row className="mt-3">
-                                <Col md={3}>
-                                    <Form.Check
-                                        type="radio"
-                                        name="acceptanceStatement"
-                                        id="acceptanceYes"
-                                        label="Ya"
-                                        checked={data.acceptanceStatement === 'yes'}
-                                        onChange={(e) => onChange({ ...data, acceptanceStatement: 'yes' })}
-                                    />
-                                </Col>
-                                <Col md={3}>
-                                    <Form.Check
-                                        type="radio"
-                                        name="acceptanceStatement"
-                                        id="acceptanceNo"
-                                        label="Tidak"
-                                        checked={data.acceptanceStatement === 'no'}
-                                        onChange={(e) => onChange({ ...data, acceptanceStatement: 'no' })}
-                                    />
-                                </Col>
-                            </Row>
-                        </div>
-
-                                               <Form.Group className="mb-3">
-                            <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
-                            <Form.Control
-                                type="datetime-local"
-                                value={data.statementDateTime || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
-                                onChange={(e) => onChange({ ...data, statementDateTime: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                    </div>
-                </Card.Body>
-            </Card>
-        </div>
-    );
-};
-
-const ProcessVerificationStep = ({ data = {}, onChange, allData = {} }) => {
+const ProcessVerificationStep = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
     // List of processes with their completion status - all defaulted to completed
     const processes = [
         {
@@ -4455,7 +4658,7 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {} }) => {
 
                         <div className="mb-4">
                             <h6><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></h6>
-                            <Row className="mt-3">
+                            <Row className={`mt-3 ${fieldErrors.verificationAcceptance ? 'is-invalid' : ''}`}>
                                 <Col md={3}>
                                     <Form.Check
                                         type="radio"
@@ -4463,7 +4666,12 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {} }) => {
                                         id="verificationYes"
                                         label="Ya"
                                         checked={data.verificationAcceptance === 'yes'}
-                                        onChange={(e) => onChange({ ...data, verificationAcceptance: 'yes' })}
+                                        onChange={(e) => {
+                                            onChange({ ...data, verificationAcceptance: 'yes' });
+                                            if (clearFieldError) {
+                                                clearFieldError('verificationAcceptance');
+                                            }
+                                        }}
                                     />
                                 </Col>
                                 <Col md={3}>
@@ -4473,20 +4681,44 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {} }) => {
                                         id="verificationNo"
                                         label="Tidak"
                                         checked={data.verificationAcceptance === 'no'}
-                                        onChange={(e) => onChange({ ...data, verificationAcceptance: 'no' })}
+                                        onChange={(e) => {
+                                            onChange({ ...data, verificationAcceptance: 'no' });
+                                            if (clearFieldError) {
+                                                clearFieldError('verificationAcceptance');
+                                            }
+                                        }}
                                     />
                                 </Col>
                             </Row>
+                            {fieldErrors.verificationAcceptance && (
+                                <div className="invalid-feedback d-block">
+                                    You must select "Ya" to continue
+                                </div>
+                            )}
+                            {data.verificationAcceptance === 'no' && !fieldErrors.verificationAcceptance && (
+                                <div className="mt-2">
+                                    <small className="text-danger">You must select "Ya" to continue</small>
+                                </div>
+                            )}
                         </div>
 
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
+                            <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal: <span className="text-danger">*</span></strong></Form.Label>
                             <Form.Control
                                 type="datetime-local"
                                 value={data.verificationDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
-                                onChange={(e) => onChange({ ...data, verificationDate: e.target.value })}
+                                onChange={(e) => {
+                                    onChange({ ...data, verificationDate: e.target.value });
+                                    if (clearFieldError) {
+                                        clearFieldError('verificationDate');
+                                    }
+                                }}
+                                isInvalid={fieldErrors.verificationDate}
                                 required
                             />
+                            <Form.Control.Feedback type="invalid">
+                                Process verification date is required
+                            </Form.Control.Feedback>
                         </Form.Group>
                     </div>
                 </Card.Body>
@@ -4495,97 +4727,5 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {} }) => {
     );
 };
 
-const RiskDisclosureAcknowledgmentStep = ({ data = {}, onChange }) => {
-    return (
-        <div>
-            <Card className="border-0 shadow-sm mb-4">
-                <Card.Header className="bg-light border-0">
-                    <h5 className="mb-0 text-primary text-center">PERNYATAAN PENGUNGKAPAN</h5>
-                    <h6 className="mb-0 text-secondary text-center">(DISCLOSURE STATEMENT)</h6>
-                </Card.Header>
-                <Card.Body>
-                    <div className="mb-4">
-                        <ol className="list-unstyled">
-                            <li className="mb-3">
-                                <strong>1.</strong> Perdagangan Berjangka <strong>Berisiko SANGAT TINGGI</strong> tidak cocok untuk semua orang. Pastikan bahwa Anda <strong>SEPENUHNYA MEMAHAMI RISIKO</strong> ini sebelum melakukan perdagangan.
-                            </li>
-                            <li className="mb-3">
-                                <strong>2.</strong> Perdagangan Berjangka merupakan produk keuangan dengan leverage dan dapat menyebabkan <strong>KERUGIAN ANDA MELEBIHI</strong> setoran awal Anda. Anda harus siap apabila <strong>SELURUH DANA ANDA</strong> Habis.
-                            </li>
-                            <li className="mb-3">
-                                <strong>3.</strong> <strong>TIDAK ADA</strong> pendapatan <strong>TETAP (FIXED INCOME)</strong> dalam Perdagangan Berjangka.
-                            </li>
-                            <li className="mb-3">
-                                <strong>4.</strong> Apabila Anda <strong>PEMULA</strong> kami sarankan untuk mempelajari mekanisme transaksinya, <strong>PERDAGANGAN BERJANGKA</strong> membutuhkan pengetahuan dan pemahaman khusus.
-                            </li>
-                            <li className="mb-3">
-                                <strong>5.</strong> <strong>ANDA HARUS MELAKUKAN TRANSAKSI SENDIRI</strong>, segala risiko yang akan timbul akibat transaksi sepenuhnya akan menjadi tanggung jawab Saudara.
-                            </li>
-                            <li className="mb-3">
-                                <strong>6.</strong> <strong>User id</strong> dan <strong>password</strong> bersifat <strong>PRIBADI DAN RAHASIA</strong>, anda bertanggung jawab atas penggunaannya, <strong>JANGAN SERAHKAN</strong> ke pihak lain terutama Wakil Pialang Berjangka dan pegawai Pialang Berjangka.
-                            </li>
-                            <li className="mb-3">
-                                <strong>7.</strong> <strong>ANDA</strong> berhak menerima <strong>LAPORAN ATAS TRANSAKSI</strong> yang anda lakukan. Waktu anda <strong>2 X 24 JAM UNTUK MEMBERIKAN SANGGAHAN</strong>. Untuk transaksi yang telah Selesai <strong>(DONE/SETTLE) DAPAT ANDA CEK</strong> melalui sistem informasi transaksi nasabah yang berfungsi untuk memastikan transaksi anda telah terdaftar di Lembaga Kliring Berjangka.
-                            </li>
-                        </ol>
-                    </div>
-
-                    <div className="border-top pt-4">
-                        <p className="text-center mb-4">
-                            <strong>SECARA DETAIL BACA DOKUMEN PEMBERITAHUAN ADANYA RISIKO DAN DOKUMEN PERJANJIAN PEMBERIAN AMANAT</strong>
-                        </p>
-                        <p className="text-center mb-4">
-                            Untuk mempelajari lebih lanjut mengenai Perdagangan Berjangka dapat anda mengunjungi situs{' '}
-                            <a href="https://www.bappebti.go.id" target="_blank" rel="noopener noreferrer" className="text-primary">
-                                www.bappebti.go.id
-                            </a>
-                        </p>
-                    </div>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted"><strong>Pernyataan Menerima / Tidak <span className="text-danger">*</span></strong></Form.Label>
-                        <div className="d-flex gap-4">
-                            <Form.Check
-                                type="radio"
-                                id="risk-disclosure-acknowledgment-ya"
-                                name="riskDisclosureAcknowledgment"
-                                label="Ya"
-                                value="ya"
-                                checked={data.riskDisclosureAcknowledgment === 'ya'}
-                                onChange={(e) => onChange({ ...data, riskDisclosureAcknowledgment: e.target.value })}
-                                required
-                            />
-                            <Form.Check
-                                type="radio"
-                                id="risk-disclosure-acknowledgment-tidak"
-                                name="riskDisclosureAcknowledgment"
-                                label="Tidak"
-                                value="tidak"
-                                checked={data.riskDisclosureAcknowledgment === 'tidak'}
-                                onChange={(e) => onChange({ ...data, riskDisclosureAcknowledgment: e.target.value })}
-                                required
-                            />
-                        </div>
-                        {data.riskDisclosureAcknowledgment === 'tidak' && (
-                            <div className="mt-2">
-                                <small className="text-danger">You must select "Ya" to continue</small>
-                            </div>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label className="text-muted"><strong>Pernyataan Pada Tanggal:</strong></Form.Label>
-                        <Form.Control
-                            type="datetime-local"
-                            value={data.riskDisclosureAcknowledgmentDate || new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16)}
-                            onChange={(e) => onChange({ ...data, riskDisclosureAcknowledgmentDate: e.target.value })}
-                            required
-                        />
-                    </Form.Group>
-                </Card.Body>
-            </Card>
-        </div>
-    );
-};
 
 export default IndonesianPersonForm; 
