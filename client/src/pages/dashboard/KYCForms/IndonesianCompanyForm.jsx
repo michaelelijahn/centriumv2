@@ -1,12 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Row, Col, Alert, Card, ListGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
+import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
+import en from 'react-phone-number-input/locale/en';
 
 const IndonesianCompanyForm = () => {
     const [formData, setFormData] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
     const { showNotification } = useNotificationContext();
+    const navigate = useNavigate();
+
+    // Function to clear specific field errors
+    const clearFieldError = (fieldName) => {
+        if (fieldErrors[fieldName]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[fieldName];
+                return newErrors;
+            });
+        }
+    };
+
+    // Function to set specific field errors
+    const setFieldError = (fieldName) => {
+        setFieldErrors(prev => ({
+            ...prev,
+            [fieldName]: true
+        }));
+    };
 
     const steps = [
         {
@@ -71,17 +95,17 @@ const IndonesianCompanyForm = () => {
             case 0:
                 return <RequirementsStep requirements={documentRequirements} />;
             case 1:
-                return <EmailRegistrationStep data={stepData} onChange={updateFormData} />;
+                return <EmailRegistrationStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 2:
-                return <CompanyDetailsStep data={stepData} onChange={updateFormData} />;
+                return <CompanyDetailsStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 3:
-                return <CompanyDocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} />;
+                return <CompanyDocumentUploadStep data={stepData} onChange={updateFormData} requirements={documentRequirements} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 4:
-                return <PowerOfAttorneyStep data={stepData} onChange={updateFormData} />;
+                return <PowerOfAttorneyStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} setFieldError={setFieldError} />;
             case 5:
-                return <PersonalDocumentUploadStep data={stepData} onChange={updateFormData} />;
+                return <PersonalDocumentUploadStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 6:
-                return <ReadStatementsStep data={stepData} onChange={updateFormData} />;
+                return <ReadStatementsStep data={stepData} onChange={updateFormData} fieldErrors={fieldErrors} clearFieldError={clearFieldError} />;
             case 7:
                 return <ReviewStep allData={formData} />;
             default:
@@ -165,6 +189,24 @@ const IndonesianCompanyForm = () => {
                 errors.push(`${label} is required`);
             }
         });
+
+        // Special validation for office telephone number (always +62 for Indonesian companies)
+        if (data.officeTelephoneNo) {
+            // For Indonesian companies, office phone should have at least 8-12 digits
+            const phoneNumber = data.officeTelephoneNo.replace(/\D/g, ''); // Remove non-digits
+            
+            // Check if phone number starts with 0 (not allowed for Indonesian numbers with +62)
+            if (phoneNumber.startsWith('0')) {
+                errors.push('Office Telephone Number cannot start with 0');
+            } else if (phoneNumber.length < 8) {
+                errors.push('Office Telephone Number must have at least 8 digits');
+            }
+            
+            // Auto-set country code to +62 if not set
+            if (!data.officeTelephoneCountryCode) {
+                data.officeTelephoneCountryCode = '+62';
+            }
+        }
         
         // Check conditional fields
         if (data.legalForm === 'OTHER' && !data.legalFormOther?.trim()) {
@@ -178,6 +220,66 @@ const IndonesianCompanyForm = () => {
         if (data.accountPurpose === 'OTHER' && !data.accountPurposeOther?.trim()) {
             errors.push('Please specify the other account purpose');
         }
+
+        // Validate bank accounts - the bankAccounts state is managed separately in CompanyDetailsStep
+        // We need to get it from the component's local state, not from the step data
+        // For now, let's validate the individual fields even if array appears empty
+        // because the local bankAccounts state in the component might have data
+        
+        // Check if we have bank accounts data at all
+        const hasBankAccounts = data.bankAccounts && Array.isArray(data.bankAccounts) && data.bankAccounts.length > 0;
+        
+        if (!hasBankAccounts) {
+            // Add errors for the default bank account fields since we know at least one exists in the form
+            errors.push('Bank 1 - Nama Bank is required');
+            errors.push('Bank 1 - Cabang is required');
+            errors.push('Bank 1 - No. Rekening is required');
+            errors.push('Bank 1 - Account Holder Name is required');
+            errors.push('Bank 1 - Bank Telephone Country Code is required');
+            errors.push('Bank 1 - Bank Telephone No. is required');
+            errors.push('Bank 1 - Bank Account Type is required');
+        } else {
+            console.log('Validating bank accounts:', data.bankAccounts);
+            data.bankAccounts.forEach((account, index) => {
+                const bankNumber = index + 1;
+                console.log(`Validating bank account ${bankNumber}:`, account);
+                
+                if (!account.bankName?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Nama Bank is required`);
+                }
+                if (!account.branch?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Cabang is required`);
+                }
+                if (!account.accountNo?.trim()) {
+                    errors.push(`Bank ${bankNumber} - No. Rekening is required`);
+                }
+                if (!account.accountHolderName?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Account Holder Name is required`);
+                }
+                if (!account.bankTelephoneCountryCode?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Bank Telephone Country Code is required`);
+                }
+                if (!account.bankTelephoneNo?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Bank Telephone No. is required`);
+                }
+                if (!account.bankAccountType?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Bank Account Type is required`);
+                }
+                
+                // Special validation for bank telephone number
+                if (account.bankTelephoneNo && account.bankTelephoneCountryCode) {
+                    const phoneWithoutCode = account.bankTelephoneNo.replace(account.bankTelephoneCountryCode, '').trim();
+                    if (!phoneWithoutCode || phoneWithoutCode.length < 4) {
+                        errors.push(`Bank ${bankNumber} - Bank Telephone Number requires at least 4 digits after the country code`);
+                    }
+                }
+                
+                // Validate conditional field
+                if (account.bankAccountType === 'LAINNYA' && !account.bankAccountTypeOther?.trim()) {
+                    errors.push(`Bank ${bankNumber} - Please specify the bank account type`);
+                }
+            });
+        }
         
         return { isValid: errors.length === 0, errors };
     };
@@ -185,10 +287,23 @@ const IndonesianCompanyForm = () => {
     const validateCompanyDocumentsStep = (data) => {
         const errors = [];
         
-        // Check if documents are uploaded for company documents
-        if (!data.companyDocumentsUploaded) {
-            errors.push('Please upload all required company documents before proceeding');
-        }
+        // Define required company documents that must be uploaded
+        const requiredCompanyDocs = [
+            { key: 'articlesOfAssociation', name: 'Scan Anggaran Dasar Perusahaan (Scan Company\'s Articles of Association)' },
+            { key: 'certificateOfIncorporation', name: 'Scan Nomor Izin Usaha (Scan Certificate of Incorporation)' },
+            { key: 'financialStatements', name: 'Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities)' },
+            { key: 'managementStructure', name: 'Struktur Manajemen (Management Structure)' },
+            { key: 'ownershipStructure', name: 'Struktur Kepemilikan (Ownership Structure)' },
+            { key: 'boardOfResolutionFile', name: 'Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution)' },
+            { key: 'powerOfAttorneyFile', name: 'Surat Kuasa (Power of Attorney)' }
+        ];
+        
+        // Check each required document
+        requiredCompanyDocs.forEach(doc => {
+            if (!data[doc.key]) {
+                errors.push(`Required document missing: ${doc.name}`);
+            }
+        });
         
         return { isValid: errors.length === 0, errors };
     };
@@ -196,6 +311,7 @@ const IndonesianCompanyForm = () => {
     const validatePowerOfAttorneyStep = (data) => {
         const errors = [];
         const requiredFields = [
+            // Personal Information
             { field: 'fullName', label: 'Full Name' },
             { field: 'placeOfBirth', label: 'Place of Birth' },
             { field: 'dateOfBirth', label: 'Date of Birth' },
@@ -205,23 +321,57 @@ const IndonesianCompanyForm = () => {
             { field: 'motherName', label: 'Mother Name' },
             { field: 'maritalStatus', label: 'Marital Status' },
             { field: 'nationality', label: 'Nationality' },
+            // Address Information
             { field: 'streetAddress', label: 'Street Address' },
             { field: 'addressCity', label: 'City' },
             { field: 'addressPostalCode', label: 'Postal Code' },
+            // Contact Information
             { field: 'homeTelephoneNo', label: 'Home Telephone Number' },
             { field: 'handphoneNo', label: 'Handphone Number' },
             { field: 'personalEmail', label: 'Email' },
+            // Status and Purpose
             { field: 'homeOwnershipStatus', label: 'Home Ownership Status' },
             { field: 'accountOpeningPurpose', label: 'Account Opening Purpose' },
+            // Experience Questions
             { field: 'investmentExperience', label: 'Investment Experience' },
             { field: 'futuresTradingExperience', label: 'Futures Trading Experience' },
             { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
-            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
+            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' },
+            // Emergency Contact Information
+            { field: 'emergencyContactName', label: 'Emergency Contact Name' },
+            { field: 'emergencyContactHandphone', label: 'Emergency Contact Handphone' },
+            { field: 'emergencyContactStreetAddress', label: 'Emergency Contact Street Address' },
+            { field: 'emergencyContactCity', label: 'Emergency Contact City' },
+            { field: 'emergencyContactPostalCode', label: 'Emergency Contact Postal Code' },
+            { field: 'emergencyContactRelationship', label: 'Emergency Contact Relationship' },
+            // Job Information
+            { field: 'jobOfPowerOfAttorney', label: 'Job of Power of Attorney' },
+            // Assets Information
+            { field: 'annualIncome', label: 'Annual Income' },
+            { field: 'houseLocation', label: 'House Location' },
+            { field: 'njopValue', label: 'NJOP Value' },
+            { field: 'bankDeposit', label: 'Bank Deposit' },
+            { field: 'totalAmount', label: 'Total Amount' }
         ];
         
         requiredFields.forEach(({ field, label }) => {
+            // Special handling for radio button fields that can have "YA" or "TIDAK" values
+            if (['investmentExperience', 'futuresTradingExperience', 'familyInBappebti', 'declaredBankrupt'].includes(field)) {
+                if (field === 'investmentExperience') {
+                    // Investment experience can be 'YA_BIDANG' or 'TIDAK'
+                    if (!data[field] || !['YA_BIDANG', 'TIDAK'].includes(data[field])) {
+                        errors.push(`${label} is required`);
+                    }
+                } else {
+                    // Other radio fields use 'YA' or 'TIDAK'
+                    if (!data[field] || !['YA', 'TIDAK'].includes(data[field])) {
+                        errors.push(`${label} is required`);
+                    }
+                }
+            } else {
             if (!data[field]?.trim()) {
                 errors.push(`${label} is required`);
+                }
             }
         });
         
@@ -242,9 +392,99 @@ const IndonesianCompanyForm = () => {
             errors.push('Please provide details about investment experience');
         }
         
+        if (data.jobOfPowerOfAttorney === 'LAINNYA' && !data.jobOfPowerOfAttorneyOther?.trim()) {
+            errors.push('Please specify other job of power of attorney');
+        }
+        
+        if (data.emergencyContactRelationship === 'LAINNYA' && !data.emergencyContactRelationshipOther?.trim()) {
+            errors.push('Please specify other emergency contact relationship');
+        }
+        
+        // Validate conditional employment fields for specific job types
+        if (['SWASTA', 'WIRASWASTA', 'ASN'].includes(data.jobOfPowerOfAttorney)) {
+            const employmentFields = [
+                { field: 'employmentCompanyName', label: 'Employment Company Name' },
+                { field: 'businessField', label: 'Business Field' },
+                { field: 'employmentPosition', label: 'Employment Position' },
+                { field: 'lengthOfWork', label: 'Length of Work' },
+                { field: 'officeStreetAddress', label: 'Office Street Address' },
+                { field: 'officeCity', label: 'Office City' },
+                { field: 'officePostalCode', label: 'Office Postal Code' },
+                { field: 'officePhoneCountryCode', label: 'Office Phone Country Code' },
+                { field: 'officePhoneNo', label: 'Office Phone Number' }
+            ];
+            
+            employmentFields.forEach(({ field, label }) => {
+                if (!data[field]?.trim()) {
+                    errors.push(`${label} is required`);
+                }
+            });
+        }
+        
         // Validate email format
         if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
             errors.push('Please enter a valid email address');
+        }
+        
+        // Validate phone numbers - cannot start with 0 and must have minimum digits
+        if (data.homeTelephoneNo) {
+            const phoneNumber = data.homeTelephoneNo.replace(/\D/g, ''); // Remove non-digits
+            if (phoneNumber.startsWith('0')) {
+                errors.push('Home Telephone Number cannot start with 0');
+            } else if (phoneNumber.length < 8) {
+                errors.push('Home Telephone Number must have at least 8 digits');
+            }
+            if (!data.homeTelephoneCountryCode) {
+                data.homeTelephoneCountryCode = '+62';
+            }
+        }
+        
+        if (data.handphoneNo) {
+            const phoneNumber = data.handphoneNo.replace(/\D/g, ''); // Remove non-digits
+            if (phoneNumber.startsWith('0')) {
+                errors.push('Handphone Number cannot start with 0');
+            } else if (phoneNumber.length < 8) {
+                errors.push('Handphone Number must have at least 8 digits');
+            }
+            if (!data.handphoneCountryCode) {
+                data.handphoneCountryCode = '+62';
+            }
+        }
+        
+        if (data.emergencyContactHandphone) {
+            const phoneNumber = data.emergencyContactHandphone.replace(/\D/g, ''); // Remove non-digits
+            if (phoneNumber.startsWith('0')) {
+                errors.push('Emergency Contact Handphone cannot start with 0');
+            } else if (phoneNumber.length < 8) {
+                errors.push('Emergency Contact Handphone must have at least 8 digits');
+            }
+            if (!data.emergencyContactHandphoneCountryCode) {
+                data.emergencyContactHandphoneCountryCode = '+62';
+            }
+        }
+        
+        // Validate date of birth - must be at least 21 years old
+        if (data.dateOfBirth) {
+            const birthDate = new Date(data.dateOfBirth);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            // Calculate exact age considering month and day
+            const exactAge = age - (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? 1 : 0);
+            
+            if (exactAge < 21) {
+                errors.push('You must be at least 21 years old');
+            }
+        }
+        
+        // Validate disqualifying questions - these must be answered "TIDAK" (No)
+        if (data.familyInBappebti === 'YA') {
+            errors.push('You must select "Tidak (No)" for the BAPPEBTI family question to proceed');
+        }
+        
+        if (data.declaredBankrupt === 'YA') {
+            errors.push('You must select "Tidak (No)" for the bankruptcy question to proceed');
         }
         
         return { isValid: errors.length === 0, errors };
@@ -253,10 +493,21 @@ const IndonesianCompanyForm = () => {
     const validatePersonalDocumentsStep = (data) => {
         const errors = [];
         
-        // Check if personal documents are uploaded
-        if (!data.personalDocumentsUploaded) {
-            errors.push('Please upload all required personal documents before proceeding');
-        }
+        // Define required personal documents that must be uploaded
+        const requiredPersonalDocs = [
+            { key: 'currentAccountFile', name: 'Rekening Koran / Tagihan Kartu Kredit (Current Account / Credit Card Statement)' },
+            { key: 'electricityPhoneAccountFile', name: 'Rekening Listrik / Telepon (Electricity / Phone Account)' },
+            { key: 'photoSelfiePersonalFile', name: 'Foto Terkini (Photo Selfie)' },
+            { key: 'identityPassportPersonalFile', name: 'KTP / SIM / Paspor (Identity No. / SIM / Passport)' },
+            { key: 'npwpPersonalFile', name: 'NPWP (Tax Identification No.)' }
+        ];
+        
+        // Check each required document
+        requiredPersonalDocs.forEach(doc => {
+            if (!data[doc.key]) {
+                errors.push(`Required document missing: ${doc.name}`);
+            }
+        });
         
         return { isValid: errors.length === 0, errors };
     };
@@ -283,6 +534,31 @@ const IndonesianCompanyForm = () => {
             { field: 'personalAccessPasswordRead', label: 'Personal Access Password (Read)' },
             { field: 'personalAccessPasswordUnderstanding', label: 'Personal Access Password (Understanding)' }
         ];
+        
+        // Add individual risk statement fields (1-14) with descriptive labels
+        const riskStatementLabels = [
+            'Risk Disclosure Statement 5.1 - Futures trading suitability and leverage risks',
+            'Risk Disclosure Statement 5.2 - Unlimited loss potential beyond margin',
+            'Risk Disclosure Statement 5.3 - No guaranteed profit warnings', 
+            'Risk Disclosure Statement 5.4 - Leverage and rapid loss mechanisms',
+            'Risk Disclosure Statement 5.5 - Position liquidation difficulties',
+            'Risk Disclosure Statement 5.6 - Risk management limitations',
+            'Risk Disclosure Statement 5.7 - Physical delivery obligations',
+            'Risk Disclosure Statement 5.8 - System failure risks',
+            'Risk Disclosure Statement 5.9 - Trading strategy risks',
+            'Risk Disclosure Statement 5.10 - Day trading specific risks',
+            'Risk Disclosure Statement 5.11 - Stop loss order limitations',
+            'Risk Disclosure Statement 5.12 - Mandate agreement requirements',
+            'Risk Disclosure Statement 5.13 - Comprehensive risk understanding',
+            'Risk Disclosure Statement 5.14 - Indonesian language documentation'
+        ];
+        
+        for (let i = 1; i <= 14; i++) {
+            requiredStatements.push({ 
+                field: `riskStatement${i}`, 
+                label: riskStatementLabels[i - 1] 
+            });
+        }
         
         requiredStatements.forEach(({ field, label }) => {
             if (!data[field]) {
@@ -315,9 +591,205 @@ const IndonesianCompanyForm = () => {
     };
 
     const handleStepValidation = (stepIndex, stepData, allData) => {
+        console.log(`Validating step ${stepIndex} with data:`, stepData);
         const validation = validateStep(stepIndex, stepData, allData);
         
+        // Create field error mapping for red border styling
+        const newFieldErrors = {};
         if (!validation.isValid) {
+            validation.errors.forEach(error => {
+                // Email Registration Step errors
+                if (error.includes('Company email address is required') || error.includes('valid email address')) newFieldErrors.email = true;
+                if (error.includes('Demo account selection is required')) newFieldErrors.demoAccountNo = true;
+                
+                // Company Details Step errors
+                if (error.includes('Company Name is required')) newFieldErrors.companyName = true;
+                if (error.includes('Business License Number is required')) newFieldErrors.businessLicenseNo = true;
+                if (error.includes('Business Entity is required')) newFieldErrors.businessEntity = true;
+                if (error.includes('Company NPWP is required')) newFieldErrors.companyNPWP = true;
+                if (error.includes('Company Address is required')) newFieldErrors.streetName = true;
+                if (error.includes('City is required')) newFieldErrors.city = true;
+                if (error.includes('Postal Code is required')) newFieldErrors.postalCode = true;
+                if (error.includes('Place of Establishment is required')) newFieldErrors.placeOfEstablishment = true;
+                if (error.includes('Establishment Date is required')) newFieldErrors.establishmentDate = true;
+                if (error.includes('Legal Form is required')) newFieldErrors.legalForm = true;
+                if (error.includes('Office Telephone Country Code is required')) newFieldErrors.officeTelephoneCountryCode = true;
+                if (error.includes('Office Telephone Number is required')) newFieldErrors.officeTelephoneNo = true;
+                if (error.includes('Office Telephone Number must have at least 8 digits')) newFieldErrors.officeTelephoneNo = true;
+                if (error.includes('Office Telephone Number cannot start with 0')) newFieldErrors.officeTelephoneNo = true;
+                if (error.includes('Home Telephone Number cannot start with 0')) newFieldErrors.homeTelephoneNo = true;
+                if (error.includes('Home Telephone Number must have at least 8 digits')) newFieldErrors.homeTelephoneNo = true;
+                if (error.includes('Handphone Number cannot start with 0')) newFieldErrors.handphoneNo = true;
+                if (error.includes('Handphone Number must have at least 8 digits')) newFieldErrors.handphoneNo = true;
+                if (error.includes('Emergency Contact Handphone cannot start with 0')) newFieldErrors.emergencyContactHandphone = true;
+                if (error.includes('Emergency Contact Handphone must have at least 8 digits')) newFieldErrors.emergencyContactHandphone = true;
+                if (error.includes('Beneficial Owner Name is required')) newFieldErrors.beneficialOwnerName = true;
+                if (error.includes('Beneficial Owner ID Number is required')) newFieldErrors.beneficialOwnerIdNo = true;
+                if (error.includes('Source of Funds is required')) newFieldErrors.sourceOfFunds = true;
+                if (error.includes('Account Purpose is required')) newFieldErrors.accountPurpose = true;
+                if (error.includes('Authorized Person Name is required')) newFieldErrors.authorizedPersonName = true;
+                if (error.includes('Authorized Debit Person is required')) newFieldErrors.authorizedDebitPerson = true;
+                
+                // Conditional field errors for Company Details
+                if (error.includes('Please specify the other legal form')) newFieldErrors.legalFormOther = true;
+                if (error.includes('Please specify the other source of funds')) newFieldErrors.sourceOfFundsOther = true;
+                if (error.includes('Please specify the other account purpose')) newFieldErrors.accountPurposeOther = true;
+                
+                // Power of Attorney Step errors
+                if (error.includes('Full Name is required')) newFieldErrors.fullName = true;
+                if (error.includes('Place of Birth is required')) newFieldErrors.placeOfBirth = true;
+                if (error.includes('Date of Birth is required')) newFieldErrors.dateOfBirth = true;
+                if (error.includes('ID/Passport Number is required')) newFieldErrors.idPassportNo = true;
+                if (error.includes('NPWP Number is required')) newFieldErrors.npwpNo = true;
+                if (error.includes('Gender is required')) newFieldErrors.gender = true;
+                if (error.includes('Mother Name is required')) newFieldErrors.motherName = true;
+                if (error.includes('Marital Status is required')) newFieldErrors.maritalStatus = true;
+                if (error.includes('Nationality is required')) newFieldErrors.nationality = true;
+                if (error.includes('Street Address is required')) newFieldErrors.streetAddress = true;
+                if (error.includes('City is required')) newFieldErrors.addressCity = true;
+                if (error.includes('Postal Code is required')) newFieldErrors.addressPostalCode = true;
+                if (error.includes('Home Telephone Number is required')) newFieldErrors.homeTelephoneNo = true;
+                if (error.includes('Handphone Number is required')) newFieldErrors.handphoneNo = true;
+                if (error.includes('Email is required')) newFieldErrors.personalEmail = true;
+                if (error.includes('Home Ownership Status is required')) newFieldErrors.homeOwnershipStatus = true;
+                if (error.includes('Account Opening Purpose is required')) newFieldErrors.accountOpeningPurpose = true;
+                if (error.includes('Investment Experience is required')) newFieldErrors.investmentExperience = true;
+                if (error.includes('Futures Trading Experience is required')) newFieldErrors.futuresTradingExperience = true;
+                if (error.includes('Family in BAPPEBTI is required')) newFieldErrors.familyInBappebti = true;
+                if (error.includes('Bankruptcy Declaration is required')) newFieldErrors.declaredBankrupt = true;
+                
+                // Emergency Contact and Additional Power of Attorney fields
+                if (error.includes('Emergency Contact Name is required')) newFieldErrors.emergencyContactName = true;
+                if (error.includes('Emergency Contact Handphone is required')) newFieldErrors.emergencyContactHandphone = true;
+                if (error.includes('Emergency Contact Street Address is required')) newFieldErrors.emergencyContactStreetAddress = true;
+                if (error.includes('Emergency Contact City is required')) newFieldErrors.emergencyContactCity = true;
+                if (error.includes('Emergency Contact Postal Code is required')) newFieldErrors.emergencyContactPostalCode = true;
+                if (error.includes('Emergency Contact Relationship is required')) newFieldErrors.emergencyContactRelationship = true;
+                if (error.includes('Job of Power of Attorney is required')) newFieldErrors.jobOfPowerOfAttorney = true;
+                if (error.includes('Annual Income is required')) newFieldErrors.annualIncome = true;
+                if (error.includes('House Location is required')) newFieldErrors.houseLocation = true;
+                if (error.includes('NJOP Value is required')) newFieldErrors.njopValue = true;
+                if (error.includes('Bank Deposit is required')) newFieldErrors.bankDeposit = true;
+                if (error.includes('Total Amount is required')) newFieldErrors.totalAmount = true;
+                
+                // Employment fields (conditional)
+                if (error.includes('Employment Company Name is required')) newFieldErrors.employmentCompanyName = true;
+                if (error.includes('Business Field is required')) newFieldErrors.businessField = true;
+                if (error.includes('Employment Position is required')) newFieldErrors.employmentPosition = true;
+                if (error.includes('Length of Work is required')) newFieldErrors.lengthOfWork = true;
+                if (error.includes('Office Street Address is required')) newFieldErrors.officeStreetAddress = true;
+                if (error.includes('Office City is required')) newFieldErrors.officeCity = true;
+                if (error.includes('Office Postal Code is required')) newFieldErrors.officePostalCode = true;
+                if (error.includes('Office Phone Country Code is required')) newFieldErrors.officePhoneCountryCode = true;
+                if (error.includes('Office Phone Number is required')) newFieldErrors.officePhoneNo = true;
+                
+                // Conditional field errors for Power of Attorney
+                if (error.includes('Please specify other nationality')) newFieldErrors.nationalityOther = true;
+                if (error.includes('Please specify other home ownership status')) newFieldErrors.homeOwnershipStatusOther = true;
+                if (error.includes('Please specify other account opening purpose')) newFieldErrors.accountOpeningPurposeOther = true;
+                if (error.includes('Please provide details about investment experience')) newFieldErrors.investmentExperienceExplanation = true;
+                if (error.includes('Please specify other job of power of attorney')) newFieldErrors.jobOfPowerOfAttorneyOther = true;
+                if (error.includes('Please specify other emergency contact relationship')) newFieldErrors.emergencyContactRelationshipOther = true;
+                if (error.includes('Please enter a valid email address')) newFieldErrors.personalEmail = true;
+                if (error.includes('You must be at least 21 years old')) newFieldErrors.dateOfBirth = true;
+                if (error.includes('You must select "Tidak (No)" for the BAPPEBTI family question to proceed')) newFieldErrors.familyInBappebti = true;
+                if (error.includes('You must select "Tidak (No)" for the bankruptcy question to proceed')) newFieldErrors.declaredBankrupt = true;
+                
+                // Document Upload Step errors
+                if (error.includes('Please upload all required company documents')) newFieldErrors.companyDocumentsUploaded = true;
+                if (error.includes('Please upload all required personal documents')) newFieldErrors.personalDocumentsUploaded = true;
+                
+                // Specific document upload errors
+                if (error.includes('Required document missing: Scan Anggaran Dasar Perusahaan')) newFieldErrors.articlesOfAssociation = true;
+                if (error.includes('Required document missing: Scan Nomor Izin Usaha')) newFieldErrors.certificateOfIncorporation = true;
+                if (error.includes('Required document missing: Laporan Keuangan / Deskripsi Kegiatan Usaha')) newFieldErrors.financialStatements = true;
+                if (error.includes('Required document missing: Struktur Manajemen')) newFieldErrors.managementStructure = true;
+                if (error.includes('Required document missing: Struktur Kepemilikan')) newFieldErrors.ownershipStructure = true;
+                if (error.includes('Required document missing: Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi')) newFieldErrors.boardOfResolutionFile = true;
+                if (error.includes('Required document missing: Surat Kuasa')) newFieldErrors.powerOfAttorneyFile = true;
+                
+                // Personal document upload errors
+                if (error.includes('Required document missing: Rekening Koran / Tagihan Kartu Kredit')) newFieldErrors.currentAccountFile = true;
+                if (error.includes('Required document missing: Rekening Listrik / Telepon')) newFieldErrors.electricityPhoneAccountFile = true;
+                if (error.includes('Required document missing: Foto Terkini')) newFieldErrors.photoSelfiePersonalFile = true;
+                if (error.includes('Required document missing: KTP / SIM / Paspor')) newFieldErrors.identityPassportPersonalFile = true;
+                if (error.includes('Required document missing: NPWP')) newFieldErrors.npwpPersonalFile = true;
+                
+                // Read Statements Step errors - detailed mappings
+                if (error.includes('Please read and acknowledge Company Profile (Read)')) newFieldErrors.companyProfileRead = true;
+                if (error.includes('Please read and acknowledge Company Profile (Understanding)')) newFieldErrors.companyProfileUnderstanding = true;
+                if (error.includes('Please read and acknowledge Statement of Having Simulation (Read)')) newFieldErrors.statementRead = true;
+                if (error.includes('Please read and acknowledge Statement of Having Simulation (Understanding)')) newFieldErrors.statementUnderstanding = true;
+                if (error.includes('Please read and acknowledge Statement of Having Experience (Read)')) newFieldErrors.experienceStatementRead = true;
+                if (error.includes('Please read and acknowledge Statement of Having Experience (Understanding)')) newFieldErrors.experienceUnderstanding = true;
+                if (error.includes('Please read and acknowledge Account Opening Application (Read)')) newFieldErrors.applicationStatementRead = true;
+                if (error.includes('Please read and acknowledge Account Opening Application (Understanding)')) newFieldErrors.applicationUnderstanding = true;
+                if (error.includes('Please read and acknowledge Risk Disclosure (Understanding)')) newFieldErrors.riskDisclosureUnderstanding = true;
+                if (error.includes('Please read and acknowledge Mandate Agreement (Read)')) newFieldErrors.mandateStatementRead = true;
+                if (error.includes('Please read and acknowledge BAKTI Arbitration Agreement')) newFieldErrors.baktiArbitration = true;
+                if (error.includes('Please read and acknowledge Mandate Agreement (Understanding)')) newFieldErrors.mandateUnderstanding = true;
+                if (error.includes('Please read and acknowledge Trading Rules (Read)')) newFieldErrors.tradingRulesRead = true;
+                if (error.includes('Please read and acknowledge Trading Rules (Understanding)')) newFieldErrors.tradingRulesUnderstanding = true;
+                if (error.includes('Please read and acknowledge Personal Access Password (Read)')) newFieldErrors.personalAccessPasswordRead = true;
+                if (error.includes('Please read and acknowledge Personal Access Password (Understanding)')) newFieldErrors.personalAccessPasswordUnderstanding = true;
+                if (error.includes('Please select your trading experience')) newFieldErrors.tradingExperience = true;
+                if (error.includes('Please specify the broker company name')) newFieldErrors.brokerCompany = true;
+                if (error.includes('Please specify the demo account number')) newFieldErrors.demoAccountNumber = true;
+                
+                // Risk statement checkboxes - individual mapping with descriptive labels
+                const riskStatementErrorMappings = [
+                    'Risk Disclosure Statement 5.1 - Futures trading suitability and leverage risks',
+                    'Risk Disclosure Statement 5.2 - Unlimited loss potential beyond margin',
+                    'Risk Disclosure Statement 5.3 - No guaranteed profit warnings', 
+                    'Risk Disclosure Statement 5.4 - Leverage and rapid loss mechanisms',
+                    'Risk Disclosure Statement 5.5 - Position liquidation difficulties',
+                    'Risk Disclosure Statement 5.6 - Risk management limitations',
+                    'Risk Disclosure Statement 5.7 - Physical delivery obligations',
+                    'Risk Disclosure Statement 5.8 - System failure risks',
+                    'Risk Disclosure Statement 5.9 - Trading strategy risks',
+                    'Risk Disclosure Statement 5.10 - Day trading specific risks',
+                    'Risk Disclosure Statement 5.11 - Stop loss order limitations',
+                    'Risk Disclosure Statement 5.12 - Mandate agreement requirements',
+                    'Risk Disclosure Statement 5.13 - Comprehensive risk understanding',
+                    'Risk Disclosure Statement 5.14 - Indonesian language documentation'
+                ];
+                
+                for (let i = 1; i <= 14; i++) {
+                    if (error.includes(`Please read and acknowledge ${riskStatementErrorMappings[i - 1]}`)) {
+                        newFieldErrors[`riskStatement${i}`] = true;
+                    }
+                }
+            });
+            
+            // Bank Account errors - handle dynamic bank accounts
+            const bankFieldMappings = [
+                { pattern: /Bank (\d+) - Nama Bank is required/, field: 'bankName' },
+                { pattern: /Bank (\d+) - Cabang is required/, field: 'branch' },
+                { pattern: /Bank (\d+) - No\. Rekening is required/, field: 'accountNo' },
+                { pattern: /Bank (\d+) - Account Holder Name is required/, field: 'accountHolderName' },
+                { pattern: /Bank (\d+) - Bank Telephone Country Code is required/, field: 'bankTelephoneCountryCode' },
+                { pattern: /Bank (\d+) - Bank Telephone No\. is required/, field: 'bankTelephoneNo' },
+                { pattern: /Bank (\d+) - Bank Telephone Number requires at least 4 digits after the country code/, field: 'bankTelephoneNo' },
+                { pattern: /Bank (\d+) - Bank Account Type is required/, field: 'bankAccountType' },
+                { pattern: /Bank (\d+) - Please specify the bank account type/, field: 'bankAccountTypeOther' }
+            ];
+
+            // Check for bank field errors
+            validation.errors.forEach(error => {
+                bankFieldMappings.forEach(({ pattern, field }) => {
+                    const match = error.match(pattern);
+                    if (match) {
+                        const bankIndex = parseInt(match[1]) - 1;
+                        newFieldErrors[field] = true;
+                        newFieldErrors[`${field}_${bankIndex}`] = true;
+                    }
+                });
+            });
+            
+            // Set the field errors
+            console.log('Setting field errors:', newFieldErrors);
+            setFieldErrors(newFieldErrors);
+            
             // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
@@ -328,6 +800,9 @@ const IndonesianCompanyForm = () => {
                 message: errorMessage,
                 type: 'error'
             });
+        } else {
+            // Clear field errors if validation passes
+            setFieldErrors({});
         }
         
         return validation.isValid;
@@ -341,6 +816,12 @@ const IndonesianCompanyForm = () => {
         console.log('Submitting Indonesian Company KYC (raw data):', data);
         
         try {
+            // Show loading notification
+            showNotification({
+                title: 'Processing',
+                message: 'Submitting your KYC application...',
+                type: 'info'
+            });
             // Flatten the nested step data structure
             const flattenedData = {};
             Object.keys(data).forEach(stepKey => {
@@ -397,12 +878,17 @@ const IndonesianCompanyForm = () => {
             if (response.success) {
                 showNotification({
                     title: 'Success',
-                    message: `Indonesian Company KYC submitted successfully! Application Reference: ${response.data.applicationReference}`,
+                    message: `Indonesian Company KYC submitted successfully! Application Reference: ${response.data.applicationReference || response.data.applicationId}`,
                     type: 'success'
                 });
                 
-                // Optionally, redirect to a success page or clear the form
+                // Clear the form
                 setFormData({});
+                
+                // Navigate to accounts page after successful submission
+                setTimeout(() => {
+                    navigate('/dashboard/accounts');
+                }, 2000); // Give time for user to read the success message
             } else {
                 throw new Error(response.message || 'Submission failed');
             }
@@ -484,7 +970,7 @@ const RequirementsStep = ({ requirements }) => {
     );
 };
 
-const EmailRegistrationStep = ({ data = {}, onChange }) => {
+const EmailRegistrationStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [email, setEmail] = useState(data.email || '');
     const [demoAccountNo, setDemoAccountNo] = useState(data.demoAccountNo || '');
 
@@ -496,6 +982,12 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
         const newData = { ...data, [field]: value };
         if (field === 'email') setEmail(value);
         if (field === 'demoAccountNo') setDemoAccountNo(value);
+        
+        // Clear field error when user starts typing
+        if (clearFieldError && fieldErrors[field]) {
+            clearFieldError(field);
+        }
+        
         onChange(newData);
     };
 
@@ -516,6 +1008,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                                 placeholder="Enter company email address"
                                 value={email}
                                 onChange={(e) => handleEmailChange('email', e.target.value)}
+                                isInvalid={fieldErrors.email}
                                 required
                             />
                         </Form.Group>
@@ -525,6 +1018,7 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
                             <Form.Select
                                 value={demoAccountNo}
                                 onChange={(e) => handleEmailChange('demoAccountNo', e.target.value)}
+                                isInvalid={fieldErrors.demoAccountNo}
                                 required
                             >
                                 <option value="">Select...</option>
@@ -542,16 +1036,79 @@ const EmailRegistrationStep = ({ data = {}, onChange }) => {
     );
 };
 
-const CompanyDetailsStep = ({ data = {}, onChange }) => {
+const CompanyDetailsStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
     const [bankAccounts, setBankAccounts] = useState(data.bankAccounts || [{ bankName: '', branch: '', accountNo: '', accountHolderName: '', bankTelephoneNo: '', bankTelephoneCountryCode: '', bankAccountType: '' }]);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
+    // Ensure initial bank accounts are synced with form data
+    useEffect(() => {
+        if (!data.bankAccounts || data.bankAccounts.length === 0) {
+            console.log('Initializing bank accounts in form data:', bankAccounts);
+            onChange({ ...data, bankAccounts });
+        }
+    }, []);
+
+    // Debug log to see fieldErrors
+    useEffect(() => {
+        if (Object.keys(fieldErrors).length > 0) {
+            console.log('CompanyDetailsStep received fieldErrors:', fieldErrors);
+        }
+    }, [fieldErrors]);
+
+    const handleChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError && fieldErrors[field]) {
+            clearFieldError(field);
+        }
+        
+        onChange(newData);
+    };
+
+    const handleCountryCodeChange = (countryCode) => {
+        // Get the current phone number and remove any existing country code
+        let currentPhoneNumber = data.officeTelephoneNo || '';
+        
+        // Remove any existing country code from the phone number
+        if (data.officeTelephoneCountryCode) {
+            currentPhoneNumber = currentPhoneNumber.replace(data.officeTelephoneCountryCode, '').trim();
+        }
+        
+        const newData = { 
+            ...data, 
+            officeTelephoneCountryCode: countryCode,
+            // Auto-populate the country code in the phone number field
+            // If countryCode is empty (default "Code" selected), just keep the number without code
+            officeTelephoneNo: countryCode ? countryCode + ' ' + currentPhoneNumber : currentPhoneNumber
+        };
+        
+        // Clear field errors when user selects a country code
+        if (clearFieldError && fieldErrors.officeTelephoneCountryCode) {
+            clearFieldError('officeTelephoneCountryCode');
+        }
+        
+        onChange(newData);
+    };
+
+    const handlePhoneNumberChange = (phoneNumber) => {
+        const newData = { ...data, officeTelephoneNo: phoneNumber };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError && fieldErrors.officeTelephoneNo) {
+            clearFieldError('officeTelephoneNo');
+        }
+        
+        onChange(newData);
+    };
+
     const addBankAccount = () => {
         const newAccounts = [...bankAccounts, { bankName: '', branch: '', accountNo: '', accountHolderName: '', bankTelephoneNo: '', bankTelephoneCountryCode: '', bankAccountType: '' }];
         setBankAccounts(newAccounts);
+        console.log('Adding bank account, new accounts:', newAccounts);
         onChange({ ...data, bankAccounts: newAccounts });
     };
 
@@ -562,9 +1119,52 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
     };
 
     const updateBankAccount = (index, field, value) => {
+        console.log(`Updating bank account ${index}, field: ${field}, value: ${value}`);
         const newAccounts = [...bankAccounts];
+        
+        // Special handling for bank telephone country code
+        if (field === 'bankTelephoneCountryCode') {
+            newAccounts[index] = { 
+                ...newAccounts[index], 
+                [field]: value
+            };
+        } else if (field === 'bankTelephoneNo') {
+            // Special handling for bank telephone number input
+            let phoneNumber = value;
+            
+            // Remove any country code that might be present in the input
+            const currentCountryCode = newAccounts[index].bankTelephoneCountryCode;
+            if (currentCountryCode && phoneNumber.startsWith(currentCountryCode)) {
+                phoneNumber = phoneNumber.replace(currentCountryCode, '').trim();
+            }
+            
+            // Remove any non-digit characters except spaces and dashes for formatting
+            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+            
+            // Prevent starting with 0 - remove leading zeros
+            phoneNumber = phoneNumber.replace(/^0+/, '');
+            
+            newAccounts[index] = { ...newAccounts[index], [field]: phoneNumber };
+        } else {
         newAccounts[index] = { ...newAccounts[index], [field]: value };
+            
+            // Special handling for bank account type - clear the "other" field when not selecting "Lainnya"
+            if (field === 'bankAccountType' && value !== 'LAINNYA') {
+                newAccounts[index] = { ...newAccounts[index], bankAccountTypeOther: '' };
+            }
+        }
+        
+        console.log('Updated bank accounts:', newAccounts);
         setBankAccounts(newAccounts);
+        
+        // Clear field error when user starts typing
+        if (clearFieldError && fieldErrors[field]) {
+            clearFieldError(field);
+        }
+        if (clearFieldError && fieldErrors[`${field}_${index}`]) {
+            clearFieldError(`${field}_${index}`);
+        }
+        
         onChange({ ...data, bankAccounts: newAccounts });
     };
 
@@ -581,24 +1181,26 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Nama Calon Nasabah Non-Orang Perseorangan (Nama Perusahaan) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Calon Nasabah Non-Orang Perseorangan (Nama Perusahaan) <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company registration number"
                                 value={data.companyName || ''}
-                                onChange={(e) => onChange({ ...data, companyName: e.target.value })}
+                                onChange={(e) => handleChange('companyName', e.target.value)}
+                                isInvalid={fieldErrors.companyName}
                                 required
                             />
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>No. Izin Usaha <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Izin Usaha <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter company license number"
                                 value={data.businessLicenseNo || ''}
-                                onChange={(e) => onChange({ ...data, businessLicenseNo: e.target.value })}
+                                onChange={(e) => handleChange('businessLicenseNo', e.target.value)}
+                                isInvalid={fieldErrors.businessLicenseNo}
                                 required
                             />
                         </Form.Group>
@@ -613,7 +1215,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter nature of business"
                                 value={data.businessEntity || ''}
-                                onChange={(e) => onChange({ ...data, businessEntity: e.target.value })}
+                                onChange={(e) => handleChange('businessEntity', e.target.value)}
+                                isInvalid={fieldErrors.businessEntity}
                                 required
                             />
                         </Form.Group>
@@ -625,7 +1228,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter tax identification number"
                                 value={data.companyNPWP || ''}
-                                onChange={(e) => onChange({ ...data, companyNPWP: e.target.value })}
+                                onChange={(e) => handleChange('companyNPWP', e.target.value)}
+                                isInvalid={fieldErrors.companyNPWP}
                                 required
                             />
                         </Form.Group>
@@ -642,7 +1246,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter street name"
                                 value={data.streetName || ''}
-                                onChange={(e) => onChange({ ...data, streetName: e.target.value })}
+                                onChange={(e) => handleChange('streetName', e.target.value)}
+                                isInvalid={fieldErrors.streetName}
                                 required
                             />
                         </Form.Group>
@@ -654,7 +1259,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter city"
                                 value={data.city || ''}
-                                onChange={(e) => onChange({ ...data, city: e.target.value })}
+                                onChange={(e) => handleChange('city', e.target.value)}
+                                isInvalid={fieldErrors.city}
                                 required
                             />
                         </Form.Group>
@@ -669,7 +1275,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter postal code"
                                 value={data.postalCode || ''}
-                                onChange={(e) => onChange({ ...data, postalCode: e.target.value })}
+                                onChange={(e) => handleChange('postalCode', e.target.value)}
+                                isInvalid={fieldErrors.postalCode}
                                 required
                             />
                         </Form.Group>
@@ -686,7 +1293,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter place of establishment"
                                 value={data.placeOfEstablishment || ''}
-                                onChange={(e) => onChange({ ...data, placeOfEstablishment: e.target.value })}
+                                onChange={(e) => handleChange('placeOfEstablishment', e.target.value)}
+                                isInvalid={fieldErrors.placeOfEstablishment}
                                 required
                             />
                         </Form.Group>
@@ -697,7 +1305,9 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Control
                                 type="date"
                                 value={data.establishmentDate || ''}
-                                onChange={(e) => onChange({ ...data, establishmentDate: e.target.value })}
+                                onChange={(e) => handleChange('establishmentDate', e.target.value)}
+                                max={new Date().toISOString().split('T')[0]}
+                                isInvalid={fieldErrors.establishmentDate}
                                 required
                             />
                         </Form.Group>
@@ -710,7 +1320,12 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">Bentuk Hukum <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.legalForm || ''}
-                                onChange={(e) => onChange({ ...data, legalForm: e.target.value, ...(e.target.value !== 'OTHER' && { legalFormOther: '' }) })}
+                                onChange={(e) => {
+                                    const newData = { ...data, legalForm: e.target.value, ...(e.target.value !== 'OTHER' && { legalFormOther: '' }) };
+                                    clearFieldError && clearFieldError('legalForm');
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.legalForm}
                                 required
                             >
                                 <option value="">Select legal form</option>
@@ -726,7 +1341,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the legal form"
                                     value={data.legalFormOther || ''}
-                                    onChange={(e) => onChange({ ...data, legalFormOther: e.target.value })}
+                                    onChange={(e) => handleChange('legalFormOther', e.target.value)}
+                                    isInvalid={fieldErrors.legalFormOther}
                                     className="mt-2"
                                     required
                                 />
@@ -738,27 +1354,38 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted">No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
                             <Row>
                                 <Col md={4}>
-                                    <Form.Select
-                                        value={data.officeTelephoneCountryCode || ''}
-                                        onChange={(e) => onChange({ ...data, officeTelephoneCountryCode: e.target.value })}
-                                        required
-                                    >
-                                        <option value="">Code</option>
-                                        <option value="+62">+62 (ID)</option>
-                                        <option value="+65">+65 (SG)</option>
-                                        <option value="+60">+60 (MY)</option>
-                                        <option value="+1">+1 (US/CA)</option>
-                                        <option value="+44">+44 (UK)</option>
-                                        <option value="+61">+61 (AU)</option>
-                                        <option value="+91">+91 (IN)</option>
-                                    </Form.Select>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
                                 </Col>
                                 <Col md={8}>
                                     <Form.Control
                                         type="tel"
                                         placeholder="Enter office telephone number"
                                         value={data.officeTelephoneNo || ''}
-                                        onChange={(e) => onChange({ ...data, officeTelephoneNo: e.target.value })}
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            
+                                            // Remove any non-digit characters except spaces and dashes for formatting
+                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            
+                                            // Prevent starting with 0 - remove leading zeros
+                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                officeTelephoneNo: phoneNumber,
+                                                officeTelephoneCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.officeTelephoneNo) {
+                                                clearFieldError('officeTelephoneNo');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.officeTelephoneNo}
                                         required
                                     />
                                 </Col>
@@ -772,24 +1399,26 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Nama Beneficial Owner <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Beneficial Owner <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter beneficial owner name"
                                 value={data.beneficialOwnerName || ''}
-                                onChange={(e) => onChange({ ...data, beneficialOwnerName: e.target.value })}
+                                onChange={(e) => handleChange('beneficialOwnerName', e.target.value)}
+                                isInvalid={fieldErrors.beneficialOwnerName}
                                 required
                             />
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>No. KTP / SIM / Paspor Beneficial Owner <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. KTP / SIM / Paspor Beneficial Owner <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter ID/Passport number"
                                 value={data.beneficialOwnerIdNo || ''}
-                                onChange={(e) => onChange({ ...data, beneficialOwnerIdNo: e.target.value })}
+                                onChange={(e) => handleChange('beneficialOwnerIdNo', e.target.value)}
+                                isInvalid={fieldErrors.beneficialOwnerIdNo}
                                 required
                             />
                         </Form.Group>
@@ -801,10 +1430,15 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Sumber Dana <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Sumber Dana <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.sourceOfFunds || ''}
-                                onChange={(e) => onChange({ ...data, sourceOfFunds: e.target.value, ...(e.target.value !== 'OTHER' && { sourceOfFundsOther: '' }) })}
+                                onChange={(e) => {
+                                    const newData = { ...data, sourceOfFunds: e.target.value, ...(e.target.value !== 'OTHER' && { sourceOfFundsOther: '' }) };
+                                    clearFieldError && clearFieldError('sourceOfFunds');
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.sourceOfFunds}
                                 required
                             >
                                 <option value="">Select source of funds</option>
@@ -819,7 +1453,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the source of funds"
                                     value={data.sourceOfFundsOther || ''}
-                                    onChange={(e) => onChange({ ...data, sourceOfFundsOther: e.target.value })}
+                                    onChange={(e) => handleChange('sourceOfFundsOther', e.target.value)}
+                                    isInvalid={fieldErrors.sourceOfFundsOther}
                                     className="mt-2"
                                     required
                                 />
@@ -828,10 +1463,15 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Maksud dan Tujuan Pembukaan Rekening Transaksi yang akan Dilakukan Calon Nasabah <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Maksud dan Tujuan Pembukaan Rekening Transaksi yang akan Dilakukan Calon Nasabah <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.accountPurpose || ''}
-                                onChange={(e) => onChange({ ...data, accountPurpose: e.target.value, ...(e.target.value !== 'OTHER' && { accountPurposeOther: '' }) })}
+                                onChange={(e) => {
+                                    const newData = { ...data, accountPurpose: e.target.value, ...(e.target.value !== 'OTHER' && { accountPurposeOther: '' }) };
+                                    clearFieldError && clearFieldError('accountPurpose');
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.accountPurpose}
                                 required
                             >
                                 <option value="">Select account purpose</option>
@@ -845,7 +1485,8 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the account purpose"
                                     value={data.accountPurposeOther || ''}
-                                    onChange={(e) => onChange({ ...data, accountPurposeOther: e.target.value })}
+                                    onChange={(e) => handleChange('accountPurposeOther', e.target.value)}
+                                    isInvalid={fieldErrors.accountPurposeOther}
                                     className="mt-2"
                                     required
                                 />
@@ -859,24 +1500,26 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Nama Penerima Kuasa yang Menjalankan Transaksi <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Nama Penerima Kuasa yang Menjalankan Transaksi <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter authorized person name"
                                 value={data.authorizedPersonName || ''}
-                                onChange={(e) => onChange({ ...data, authorizedPersonName: e.target.value })}
+                                onChange={(e) => handleChange('authorizedPersonName', e.target.value)}
+                                isInvalid={fieldErrors.authorizedPersonName}
                                 required
                             />
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Pihak yang berwenang melakukan Pendebetan <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Pihak yang berwenang melakukan Pendebetan <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter authorized debit person"
                                 value={data.authorizedDebitPerson || ''}
-                                onChange={(e) => onChange({ ...data, authorizedDebitPerson: e.target.value })}
+                                onChange={(e) => handleChange('authorizedDebitPerson', e.target.value)}
+                                isInvalid={fieldErrors.authorizedDebitPerson}
                                 required
                             />
                         </Form.Group>
@@ -910,6 +1553,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                 placeholder="Enter bank name"
                                                 value={account.bankName}
                                                 onChange={(e) => updateBankAccount(index, 'bankName', e.target.value)}
+                                                isInvalid={fieldErrors.bankName || fieldErrors[`bankName_${index}`]}
                                                 required
                                             />
                                         </Form.Group>
@@ -922,6 +1566,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                 placeholder="Enter branch name"
                                                 value={account.branch}
                                                 onChange={(e) => updateBankAccount(index, 'branch', e.target.value)}
+                                                isInvalid={fieldErrors.branch || fieldErrors[`branch_${index}`]}
                                                 required
                                             />
                                         </Form.Group>
@@ -937,6 +1582,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                 placeholder="Enter account number"
                                                 value={account.accountNo}
                                                 onChange={(e) => updateBankAccount(index, 'accountNo', e.target.value)}
+                                                isInvalid={fieldErrors.accountNo || fieldErrors[`accountNo_${index}`]}
                                                 required
                                             />
                                         </Form.Group>
@@ -949,6 +1595,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                 placeholder="Enter account holder name"
                                                 value={account.accountHolderName}
                                                 onChange={(e) => updateBankAccount(index, 'accountHolderName', e.target.value)}
+                                                isInvalid={fieldErrors.accountHolderName || fieldErrors[`accountHolderName_${index}`]}
                                                 required
                                             />
                                         </Form.Group>
@@ -958,30 +1605,34 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                 <Row>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
                                             <Row>
                                                 <Col md={4}>
                                                     <Form.Select
                                                         value={account.bankTelephoneCountryCode || ''}
                                                         onChange={(e) => updateBankAccount(index, 'bankTelephoneCountryCode', e.target.value)}
+                                                        isInvalid={fieldErrors.bankTelephoneCountryCode || fieldErrors[`bankTelephoneCountryCode_${index}`]}
                                                         required
                                                     >
                                                         <option value="">Code</option>
-                                                        <option value="+62">+62 (ID)</option>
-                                                        <option value="+65">+65 (SG)</option>
-                                                        <option value="+60">+60 (MY)</option>
-                                                        <option value="+1">+1 (US/CA)</option>
-                                                        <option value="+44">+44 (UK)</option>
-                                                        <option value="+61">+61 (AU)</option>
-                                                        <option value="+91">+91 (IN)</option>
+                                                        {getCountries().map((country) => {
+                                                            const callingCode = `+${getCountryCallingCode(country)}`;
+                                                            const countryName = en[country] || country;
+                                                            return (
+                                                                <option key={country} value={callingCode}>
+                                                                    {callingCode} ({countryName})
+                                                                </option>
+                                                            );
+                                                        })}
                                                     </Form.Select>
                                                 </Col>
                                                 <Col md={8}>
                                                     <Form.Control
                                                         type="tel"
                                                         placeholder="Enter bank telephone number"
-                                                        value={account.bankTelephoneNo}
+                                                        value={account.bankTelephoneNo || ''}
                                                         onChange={(e) => updateBankAccount(index, 'bankTelephoneNo', e.target.value)}
+                                                        isInvalid={fieldErrors.bankTelephoneNo || fieldErrors[`bankTelephoneNo_${index}`]}
                                                         required
                                                     />
                                                 </Col>
@@ -990,15 +1641,14 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                     </Col>
                                     <Col md={6}>
                                         <Form.Group className="mb-3">
-                                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Jenis Rekening Bank (Bank Account Type) <span className="text-danger">*</span></Form.Label>
+                                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Jenis Rekening Bank (Bank Account Type) <span className="text-danger">*</span></Form.Label>
                                             <Form.Select
-                                                value={account.bankAccountType}
+                                                value={account.bankAccountType || ''}
                                                 onChange={(e) => {
+                                                    console.log(`Bank account type selected: ${e.target.value} for account ${index}`);
                                                     updateBankAccount(index, 'bankAccountType', e.target.value);
-                                                    if (e.target.value !== 'LAINNYA') {
-                                                        updateBankAccount(index, 'bankAccountTypeOther', '');
-                                                    }
                                                 }}
+                                                isInvalid={fieldErrors.bankAccountType || fieldErrors[`bankAccountType_${index}`]}
                                                 required
                                             >
                                                 <option value="">Select account type</option>
@@ -1012,6 +1662,7 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
                                                     placeholder="Please specify the bank account type"
                                                     value={account.bankAccountTypeOther || ''}
                                                     onChange={(e) => updateBankAccount(index, 'bankAccountTypeOther', e.target.value)}
+                                                    isInvalid={fieldErrors.bankAccountTypeOther || fieldErrors[`bankAccountTypeOther_${index}`]}
                                                     className="mt-2"
                                                     required
                                                 />
@@ -1038,9 +1689,10 @@ const CompanyDetailsStep = ({ data = {}, onChange }) => {
     );
 };
 
-const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
+const CompanyDocumentUploadStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [uploadedDocs, setUploadedDocs] = useState(data.uploadedCompanyDocuments || {});
     const [uploadedFiles, setUploadedFiles] = useState(data.uploadedCompanyFiles || {});
+    const fileInputRefs = useRef({});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1061,19 +1713,21 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
     ];
 
     const handleFileUpload = (categoryIndex, docIndex, file) => {
+        if (!file) return;
+
         const docKey = `${categoryIndex}_${docIndex}`;
         const newUploadedDocs = {
             ...uploadedDocs,
-            [docKey]: file ? file.name : null
-        };
-        
-        const newUploadedFiles = {
-            ...uploadedFiles,
-            [docKey]: file || null
+            [docKey]: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+                file: file
+            }
         };
         
         setUploadedDocs(newUploadedDocs);
-        setUploadedFiles(newUploadedFiles);
         
         // Map document uploads to backend field names
         const documentMappingByIndex = {
@@ -1084,11 +1738,10 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
             '0_4': 'ownershipStructure'            // Ownership Structure
         };
         
-        // Update parent component with both document names and File objects
+        // Update parent component with file objects
         const updatedData = {
             ...data,
             uploadedCompanyDocuments: newUploadedDocs,
-            uploadedCompanyFiles: newUploadedFiles,
             companyDocumentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
         };
         
@@ -1098,6 +1751,55 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
         }
         
         onChange(updatedData);
+
+        // Clear field error when file is uploaded
+        if (clearFieldError) {
+            const fieldName = documentMappingByIndex[docKey];
+            if (fieldName) {
+                clearFieldError(fieldName);
+            }
+        }
+
+        // Clear the file input
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
+    };
+
+    const handleFileRemove = (categoryIndex, docIndex) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = { ...uploadedDocs };
+        delete newUploadedDocs[docKey];
+
+        setUploadedDocs(newUploadedDocs);
+        
+        // Map document uploads to backend field names
+        const documentMappingByIndex = {
+            '0_0': 'articlesOfAssociation',        // Articles of Association
+            '0_1': 'certificateOfIncorporation',   // Certificate of Incorporation  
+            '0_2': 'financialStatements',          // Financial Statements
+            '0_3': 'managementStructure',          // Management Structure
+            '0_4': 'ownershipStructure'            // Ownership Structure
+        };
+
+        // Update parent component
+        const updatedData = {
+            ...data,
+            uploadedCompanyDocuments: newUploadedDocs,
+            companyDocumentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
+        };
+        
+        // Remove the specific document file from the data
+        if (documentMappingByIndex[docKey]) {
+            delete updatedData[documentMappingByIndex[docKey]];
+        }
+        
+        onChange(updatedData);
+
+        // Clear the file input value
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
     };
 
     return (
@@ -1116,29 +1818,72 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
                         {category.documents.map((doc, docIndex) => {
                             const docKey = `${categoryIndex}_${docIndex}`;
                             const isUploaded = uploadedDocs[docKey];
+                            const documentMappingByIndex = {
+                                '0_0': 'articlesOfAssociation',
+                                '0_1': 'certificateOfIncorporation',
+                                '0_2': 'financialStatements',
+                                '0_3': 'managementStructure',
+                                '0_4': 'ownershipStructure'
+                            };
+                            const fieldName = documentMappingByIndex[docKey];
                             
                             return (
                                 <Form.Group key={docIndex} className="mb-3">
-                                    <Form.Label className="text-muted">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Form.Label className="text-muted mb-0">
                                         {doc} <span className="text-danger">*</span>
                                         {isUploaded && (
                                             <span className="text-success ms-2">
-                                                <i className="mdi mdi-check-circle"></i> Uploaded
+                                                    <i className="mdi mdi-check-circle"></i> Uploaded: {isUploaded.name}
                                             </span>
                                         )}
                                     </Form.Label>
+                                        {isUploaded && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => handleFileRemove(categoryIndex, docIndex)}
+                                                title="Remove file"
+                                            >
+                                                <i className="mdi mdi-delete"></i> Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Show file input when no file uploaded */}
+                                    {!isUploaded && (
                                     <Form.Control 
                                         type="file" 
                                         accept=".pdf,.jpg,.jpeg,.png"
                                         onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
-                                    />
+                                            isInvalid={fieldErrors[fieldName]}
+                                            className="mt-2"
+                                            ref={(el) => {
+                                                if (el) {
+                                                    fileInputRefs.current[docKey] = el;
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Show custom file display when file uploaded */}
+                                    {isUploaded && (
+                                        <div className="mt-2">
+                                            <div className={`form-control d-flex align-items-center ${fieldErrors[fieldName] ? 'is-invalid' : ''}`}>
+                                                <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                                <span className="flex-grow-1">{isUploaded.name}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <Form.Text className="text-muted">
                                         Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                                     </Form.Text>
-                                    {isUploaded && (
-                                        <Form.Text className="text-success">
-                                            File uploaded: {isUploaded}
-                                        </Form.Text>
+
+                                    {fieldErrors[fieldName] && (
+                                        <div className="invalid-feedback d-block">
+                                            This document is required.
+                                        </div>
                                     )}
                                 </Form.Group>
                             );
@@ -1150,56 +1895,140 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
              {/* Additional non-mapped documents */}
              <Card className="mb-4 border-0 shadow-sm">
                  <Card.Header className="bg-light border-0">
-                     <h6 className="mb-0 text-primary">Additional Documents</h6>
+                     <h6 className="mb-0 text-primary">Additional Required Documents</h6>
                  </Card.Header>
                  <Card.Body>
                      <Form.Group className="mb-3">
-                         <Form.Label className="text-muted">
+                         <div className="d-flex justify-content-between align-items-center">
+                             <Form.Label className="text-muted mb-0">
                              Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution) <span className="text-danger">*</span>
                              {data.boardOfResolutionFile && (
                                  <span className="text-success ms-2">
-                                     <i className="mdi mdi-check-circle"></i> Uploaded
+                                         <i className="mdi mdi-check-circle"></i> Uploaded: {data.boardOfResolutionFile.name}
                                  </span>
                              )}
                          </Form.Label>
+                             {data.boardOfResolutionFile && (
+                                 <button
+                                     type="button"
+                                     className="btn btn-sm btn-outline-danger"
+                                     onClick={() => {
+                                         const newData = { ...data };
+                                         delete newData.boardOfResolutionFile;
+                                         onChange(newData);
+                                     }}
+                                     title="Remove file"
+                                 >
+                                     <i className="mdi mdi-delete"></i> Remove
+                                 </button>
+                             )}
+                         </div>
+                         
+                         {/* Show file input when no file uploaded */}
+                         {!data.boardOfResolutionFile && (
                          <Form.Control 
                              type="file" 
                              accept=".pdf,.jpg,.jpeg,.png" 
-                             onChange={(e) => onChange({ ...data, boardOfResolutionFile: e.target.files[0] })}
+                                 onChange={(e) => {
+                                     if (e.target.files[0]) {
+                                         onChange({ ...data, boardOfResolutionFile: e.target.files[0] });
+                                         // Clear field error when user uploads a file
+                                         if (clearFieldError && fieldErrors.boardOfResolutionFile) {
+                                             clearFieldError('boardOfResolutionFile');
+                                         }
+                                     }
+                                 }}
+                                 isInvalid={fieldErrors.boardOfResolutionFile}
+                                 className="mt-2"
                              required 
                          />
+                         )}
+                         
+                         {/* Show custom file display when file uploaded */}
+                         {data.boardOfResolutionFile && (
+                             <div className="mt-2">
+                                 <div className={`form-control d-flex align-items-center ${fieldErrors.boardOfResolutionFile ? 'is-invalid' : ''}`}>
+                                     <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                     <span className="flex-grow-1">{data.boardOfResolutionFile.name}</span>
+                                 </div>
+                             </div>
+                         )}
+                         
                          <Form.Text className="text-muted">
                              Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                          </Form.Text>
-                         {data.boardOfResolutionFile && (
-                             <Form.Text className="text-success">
-                                 File uploaded: {data.boardOfResolutionFile.name}
-                             </Form.Text>
+
+                         {fieldErrors.boardOfResolutionFile && (
+                             <div className="invalid-feedback d-block">
+                                 This document is required.
+                             </div>
                          )}
                      </Form.Group>
  
                      <Form.Group className="mb-3">
-                         <Form.Label className="text-muted">
+                         <div className="d-flex justify-content-between align-items-center">
+                             <Form.Label className="text-muted mb-0">
                              Surat Kuasa (Power of Attorney) <span className="text-danger">*</span>
                              {data.powerOfAttorneyFile && (
                                  <span className="text-success ms-2">
-                                     <i className="mdi mdi-check-circle"></i> Uploaded
+                                         <i className="mdi mdi-check-circle"></i> Uploaded: {data.powerOfAttorneyFile.name}
                                  </span>
                              )}
                          </Form.Label>
+                             {data.powerOfAttorneyFile && (
+                                 <button
+                                     type="button"
+                                     className="btn btn-sm btn-outline-danger"
+                                     onClick={() => {
+                                         const newData = { ...data };
+                                         delete newData.powerOfAttorneyFile;
+                                         onChange(newData);
+                                     }}
+                                     title="Remove file"
+                                 >
+                                     <i className="mdi mdi-delete"></i> Remove
+                                 </button>
+                             )}
+                         </div>
+                         
+                         {/* Show file input when no file uploaded */}
+                         {!data.powerOfAttorneyFile && (
                          <Form.Control 
                              type="file" 
                              accept=".pdf,.jpg,.jpeg,.png" 
-                             onChange={(e) => onChange({ ...data, powerOfAttorneyFile: e.target.files[0] })}
+                                 onChange={(e) => {
+                                     if (e.target.files[0]) {
+                                         onChange({ ...data, powerOfAttorneyFile: e.target.files[0] });
+                                         // Clear field error when user uploads a file
+                                         if (clearFieldError && fieldErrors.powerOfAttorneyFile) {
+                                             clearFieldError('powerOfAttorneyFile');
+                                         }
+                                     }
+                                 }}
+                                 isInvalid={fieldErrors.powerOfAttorneyFile}
+                                 className="mt-2"
                              required 
                          />
+                         )}
+                         
+                         {/* Show custom file display when file uploaded */}
+                         {data.powerOfAttorneyFile && (
+                             <div className="mt-2">
+                                 <div className={`form-control d-flex align-items-center ${fieldErrors.powerOfAttorneyFile ? 'is-invalid' : ''}`}>
+                                     <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                     <span className="flex-grow-1">{data.powerOfAttorneyFile.name}</span>
+                                 </div>
+                             </div>
+                         )}
+                         
                          <Form.Text className="text-muted">
                              Max 10MB. Accepted formats: PDF, JPG, JPEG, PNG
                          </Form.Text>
-                         {data.powerOfAttorneyFile && (
-                             <Form.Text className="text-success">
-                                 File uploaded: {data.powerOfAttorneyFile.name}
-                             </Form.Text>
+
+                         {fieldErrors.powerOfAttorneyFile && (
+                             <div className="invalid-feedback d-block">
+                                 This document is required.
+                             </div>
                          )}
                      </Form.Group>
                  </Card.Body>
@@ -1208,10 +2037,21 @@ const CompanyDocumentUploadStep = ({ data = {}, onChange }) => {
     );
 };
 
-const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
+const PowerOfAttorneyStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError && fieldErrors[field]) {
+            clearFieldError(field);
+        }
+        
+        onChange(newData);
+    };
 
     return (
         <div>
@@ -1235,7 +2075,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter full name"
                                 value={data.fullName || ''}
-                                onChange={(e) => onChange({ ...data, fullName: e.target.value })}
+                                onChange={(e) => handleChange('fullName', e.target.value)}
+                                isInvalid={fieldErrors.fullName}
                                 required
                             />
                         </Form.Group>
@@ -1247,7 +2088,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter place of birth"
                                 value={data.placeOfBirth || ''}
-                                onChange={(e) => onChange({ ...data, placeOfBirth: e.target.value })}
+                                onChange={(e) => handleChange('placeOfBirth', e.target.value)}
+                                isInvalid={fieldErrors.placeOfBirth}
                                 required
                             />
                         </Form.Group>
@@ -1261,7 +2103,9 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Control
                                 type="date"
                                 value={data.dateOfBirth || ''}
-                                onChange={(e) => onChange({ ...data, dateOfBirth: e.target.value })}
+                                onChange={(e) => handleChange('dateOfBirth', e.target.value)}
+                                max={new Date().toISOString().split('T')[0]}
+                                isInvalid={fieldErrors.dateOfBirth}
                                 required
                             />
                         </Form.Group>
@@ -1273,7 +2117,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter ID/Passport number"
                                 value={data.idPassportNo || ''}
-                                onChange={(e) => onChange({ ...data, idPassportNo: e.target.value })}
+                                onChange={(e) => handleChange('idPassportNo', e.target.value)}
+                                isInvalid={fieldErrors.idPassportNo}
                                 required
                             />
                         </Form.Group>
@@ -1288,7 +2133,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter NPWP number"
                                 value={data.npwpNo || ''}
-                                onChange={(e) => onChange({ ...data, npwpNo: e.target.value })}
+                                onChange={(e) => handleChange('npwpNo', e.target.value)}
+                                isInvalid={fieldErrors.npwpNo}
                                 required
                             />
                         </Form.Group>
@@ -1298,7 +2144,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Jenis Kelamin <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.gender || ''}
-                                onChange={(e) => onChange({ ...data, gender: e.target.value })}
+                                onChange={(e) => handleChange('gender', e.target.value)}
+                                isInvalid={fieldErrors.gender}
                                 required
                             >
                                 <option value="">Select gender</option>
@@ -1317,7 +2164,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter mother's name"
                                 value={data.motherName || ''}
-                                onChange={(e) => onChange({ ...data, motherName: e.target.value })}
+                                onChange={(e) => handleChange('motherName', e.target.value)}
+                                isInvalid={fieldErrors.motherName}
                                 required
                             />
                         </Form.Group>
@@ -1327,7 +2175,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Status Perkawinan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.maritalStatus || ''}
-                                onChange={(e) => onChange({ ...data, maritalStatus: e.target.value })}
+                                onChange={(e) => handleChange('maritalStatus', e.target.value)}
+                                isInvalid={fieldErrors.maritalStatus}
                                 required
                             >
                                 <option value="">Select marital status</option>
@@ -1346,17 +2195,23 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kewarganegaraan <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.nationality || ''}
-                                onChange={(e) => onChange({ ...data, nationality: e.target.value })}
+                                onChange={(e) => {
+                                    const newData = { ...data, nationality: e.target.value, ...(e.target.value !== 'OTHER' && { nationalityOther: '' }) };
+                                    clearFieldError && clearFieldError('nationality');
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.nationality}
                                 required
                             >
                                 <option value="">Select nationality</option>
-                                <option value="US">United States</option>
-                                <option value="UK">United Kingdom</option>
-                                <option value="SG">Singapore</option>
-                                <option value="MY">Malaysia</option>
-                                <option value="AU">Australia</option>
-                                <option value="CA">Canada</option>
-                                <option value="ID">Indonesia</option>
+                                {getCountries().map((country) => {
+                                    const countryName = en[country] || country;
+                                    return (
+                                        <option key={country} value={country}>
+                                            {countryName}
+                                        </option>
+                                    );
+                                })}
                                 <option value="OTHER">Other</option>
                             </Form.Select>
                             {data.nationality === 'OTHER' && (
@@ -1364,7 +2219,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify other nationality"
                                     value={data.nationalityOther || ''}
-                                    onChange={(e) => onChange({ ...data, nationalityOther: e.target.value })}
+                                    onChange={(e) => handleChange('nationalityOther', e.target.value)}
+                                    isInvalid={fieldErrors.nationalityOther}
                                     className="mt-2"
                                     required
                                 />
@@ -1383,7 +2239,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter street address"
                                 value={data.streetAddress || ''}
-                                onChange={(e) => onChange({ ...data, streetAddress: e.target.value })}
+                                onChange={(e) => handleChange('streetAddress', e.target.value)}
+                                isInvalid={fieldErrors.streetAddress}
                                 required
                             />
                         </Form.Group>
@@ -1395,7 +2252,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter city"
                                 value={data.addressCity || ''}
-                                onChange={(e) => onChange({ ...data, addressCity: e.target.value })}
+                                onChange={(e) => handleChange('addressCity', e.target.value)}
+                                isInvalid={fieldErrors.addressCity}
                                 required
                             />
                         </Form.Group>
@@ -1410,7 +2268,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter postal code"
                                 value={data.addressPostalCode || ''}
-                                onChange={(e) => onChange({ ...data, addressPostalCode: e.target.value })}
+                                onChange={(e) => handleChange('addressPostalCode', e.target.value)}
+                                isInvalid={fieldErrors.addressPostalCode}
                                 required
                             />
                         </Form.Group>
@@ -1423,25 +2282,87 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Telepon Rumah (Home Telephone No.) <span className="text-danger">*</span></Form.Label>
+                            <Row>
+                                <Col md={4}>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
+                                </Col>
+                                <Col md={8}>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter home telephone number"
                                 value={data.homeTelephoneNo || ''}
-                                onChange={(e) => onChange({ ...data, homeTelephoneNo: e.target.value })}
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            
+                                            // Remove any non-digit characters except spaces and dashes for formatting
+                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            
+                                            // Prevent starting with 0 - remove leading zeros
+                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                homeTelephoneNo: phoneNumber,
+                                                homeTelephoneCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.homeTelephoneNo) {
+                                                clearFieldError('homeTelephoneNo');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.homeTelephoneNo}
                                 required
                             />
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Row>
+                                <Col md={4}>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
+                                </Col>
+                                <Col md={8}>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter handphone number"
                                 value={data.handphoneNo || ''}
-                                onChange={(e) => onChange({ ...data, handphoneNo: e.target.value })}
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            
+                                            // Remove any non-digit characters except spaces and dashes for formatting
+                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            
+                                            // Prevent starting with 0 - remove leading zeros
+                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                handphoneNo: phoneNumber,
+                                                handphoneCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.handphoneNo) {
+                                                clearFieldError('handphoneNo');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.handphoneNo}
                                 required
                             />
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1454,7 +2375,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="tel"
                                 placeholder="Enter home fax number (optional)"
                                 value={data.homeFaxNo || ''}
-                                onChange={(e) => onChange({ ...data, homeFaxNo: e.target.value })}
+                                onChange={(e) => handleChange('homeFaxNo', e.target.value)}
+                                isInvalid={fieldErrors.homeFaxNo}
                             />
                         </Form.Group>
                     </Col>
@@ -1465,7 +2387,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="email"
                                 placeholder="Enter email address"
                                 value={data.personalEmail || ''}
-                                onChange={(e) => onChange({ ...data, personalEmail: e.target.value })}
+                                onChange={(e) => handleChange('personalEmail', e.target.value)}
+                                isInvalid={fieldErrors.personalEmail}
                                 required
                             />
                         </Form.Group>
@@ -1476,10 +2399,17 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Status Kepemilikan Rumah (Home Ownership Status) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Status Kepemilikan Rumah (Home Ownership Status) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.homeOwnershipStatus || ''}
-                                onChange={(e) => onChange({ ...data, homeOwnershipStatus: e.target.value, ...(e.target.value !== 'LAINNYA' && { homeOwnershipStatusOther: '' }) })}
+                                onChange={(e) => {
+                                    const newData = { ...data, homeOwnershipStatus: e.target.value, ...(e.target.value !== 'LAINNYA' && { homeOwnershipStatusOther: '' }) };
+                                    if (clearFieldError && fieldErrors.homeOwnershipStatus) {
+                                        clearFieldError('homeOwnershipStatus');
+                                    }
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.homeOwnershipStatus}
                                 required
                             >
                                 <option value="">Select home ownership status</option>
@@ -1493,7 +2423,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the home ownership status"
                                     value={data.homeOwnershipStatusOther || ''}
-                                    onChange={(e) => onChange({ ...data, homeOwnershipStatusOther: e.target.value })}
+                                    onChange={(e) => handleChange('homeOwnershipStatusOther', e.target.value)}
+                                    isInvalid={fieldErrors.homeOwnershipStatusOther}
                                     className="mt-2"
                                     required
                                 />
@@ -1502,10 +2433,17 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted" style={{ minHeight: '48px' }}>Tujuan Pembukaan Rekening (Purpose of Account Opening) <span className="text-danger">*</span></Form.Label>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Tujuan Pembukaan Rekening (Purpose of Account Opening) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.accountOpeningPurpose || ''}
-                                onChange={(e) => onChange({ ...data, accountOpeningPurpose: e.target.value, ...(e.target.value !== 'LAINNYA' && { accountOpeningPurposeOther: '' }) })}
+                                onChange={(e) => {
+                                    const newData = { ...data, accountOpeningPurpose: e.target.value, ...(e.target.value !== 'LAINNYA' && { accountOpeningPurposeOther: '' }) };
+                                    if (clearFieldError && fieldErrors.accountOpeningPurpose) {
+                                        clearFieldError('accountOpeningPurpose');
+                                    }
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.accountOpeningPurpose}
                                 required
                             >
                                 <option value="">Select purpose</option>
@@ -1519,7 +2457,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the purpose of account opening"
                                     value={data.accountOpeningPurposeOther || ''}
-                                    onChange={(e) => onChange({ ...data, accountOpeningPurposeOther: e.target.value })}
+                                    onChange={(e) => handleChange('accountOpeningPurposeOther', e.target.value)}
+                                    isInvalid={fieldErrors.accountOpeningPurposeOther}
                                     className="mt-2"
                                     required
                                 />
@@ -1542,7 +2481,15 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="investmentExperience"
                                     value="YA_BIDANG"
                                     checked={data.investmentExperience === 'YA_BIDANG'}
-                                    onChange={(e) => onChange({ ...data, investmentExperience: e.target.value, ...(e.target.value !== 'YA_BIDANG' && { investmentExperienceExplanation: '' }) })}
+                                    onChange={(e) => {
+                                        const newData = { ...data, investmentExperience: e.target.value, ...(e.target.value !== 'YA_BIDANG' && { investmentExperienceExplanation: '' }) };
+                                        // Clear the radio button error since a valid option is selected
+                                        if (clearFieldError && fieldErrors.investmentExperience) {
+                                            clearFieldError('investmentExperience');
+                                        }
+                                        onChange(newData);
+                                    }}
+                                    isInvalid={fieldErrors.investmentExperience && !data.investmentExperience}
                                 />
                                 <Form.Check
                                     inline
@@ -1551,7 +2498,15 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="investmentExperience"
                                     value="TIDAK"
                                     checked={data.investmentExperience === 'TIDAK'}
-                                    onChange={(e) => onChange({ ...data, investmentExperience: e.target.value, ...(e.target.value !== 'YA_BIDANG' && { investmentExperienceExplanation: '' }) })}
+                                    onChange={(e) => {
+                                        const newData = { ...data, investmentExperience: e.target.value, ...(e.target.value !== 'YA_BIDANG' && { investmentExperienceExplanation: '' }) };
+                                        // Clear the radio button error since a valid option is selected
+                                        if (clearFieldError && fieldErrors.investmentExperience) {
+                                            clearFieldError('investmentExperience');
+                                        }
+                                        onChange(newData);
+                                    }}
+                                    isInvalid={fieldErrors.investmentExperience && !data.investmentExperience}
                                 />
                             </div>
                             {data.investmentExperience === 'YA_BIDANG' && (
@@ -1559,7 +2514,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Explain investment experience"
                                     value={data.investmentExperienceExplanation || ''}
-                                    onChange={(e) => onChange({ ...data, investmentExperienceExplanation: e.target.value })}
+                                    onChange={(e) => handleChange('investmentExperienceExplanation', e.target.value)}
+                                    isInvalid={fieldErrors.investmentExperienceExplanation}
                                     className="mt-2"
                                     required
                                 />
@@ -1580,7 +2536,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="futuresTradingExperience"
                                     value="YA"
                                     checked={data.futuresTradingExperience === 'YA'}
-                                    onChange={(e) => onChange({ ...data, futuresTradingExperience: e.target.value })}
+                                    onChange={(e) => handleChange('futuresTradingExperience', e.target.value)}
+                                    isInvalid={fieldErrors.futuresTradingExperience && !data.futuresTradingExperience}
                                 />
                                 <Form.Check
                                     inline
@@ -1589,7 +2546,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="futuresTradingExperience"
                                     value="TIDAK"
                                     checked={data.futuresTradingExperience === 'TIDAK'}
-                                    onChange={(e) => onChange({ ...data, futuresTradingExperience: e.target.value })}
+                                    onChange={(e) => handleChange('futuresTradingExperience', e.target.value)}
+                                    isInvalid={fieldErrors.futuresTradingExperience && !data.futuresTradingExperience}
                                 />
                             </div>
                         </Form.Group>
@@ -1608,7 +2566,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="familyInBappebti"
                                     value="YA"
                                     checked={data.familyInBappebti === 'YA'}
-                                    onChange={(e) => onChange({ ...data, familyInBappebti: e.target.value })}
+                                    onChange={(e) => handleChange('familyInBappebti', e.target.value)}
+                                    isInvalid={fieldErrors.familyInBappebti && !data.familyInBappebti}
                                 />
                                 <Form.Check
                                     inline
@@ -1617,9 +2576,18 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="familyInBappebti"
                                     value="TIDAK"
                                     checked={data.familyInBappebti === 'TIDAK'}
-                                    onChange={(e) => onChange({ ...data, familyInBappebti: e.target.value })}
+                                    onChange={(e) => handleChange('familyInBappebti', e.target.value)}
+                                    isInvalid={fieldErrors.familyInBappebti && !data.familyInBappebti}
                                 />
                             </div>
+                            {data.familyInBappebti === 'YA' && (
+                                <div className="mt-2">
+                                    <small className="text-danger">
+                                        <i className="mdi mdi-alert-circle me-1"></i>
+                                        You must select "Tidak (No)" to proceed. Having family members working in BAPPEBTI/Bursa/Berjangka/Kliring Berjangka disqualifies your application.
+                                    </small>
+                                </div>
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1636,7 +2604,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="declaredBankrupt"
                                     value="YA"
                                     checked={data.declaredBankrupt === 'YA'}
-                                    onChange={(e) => onChange({ ...data, declaredBankrupt: e.target.value })}
+                                    onChange={(e) => handleChange('declaredBankrupt', e.target.value)}
+                                    isInvalid={fieldErrors.declaredBankrupt && !data.declaredBankrupt}
                                 />
                                 <Form.Check
                                     inline
@@ -1645,9 +2614,18 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     name="declaredBankrupt"
                                     value="TIDAK"
                                     checked={data.declaredBankrupt === 'TIDAK'}
-                                    onChange={(e) => onChange({ ...data, declaredBankrupt: e.target.value })}
+                                    onChange={(e) => handleChange('declaredBankrupt', e.target.value)}
+                                    isInvalid={fieldErrors.declaredBankrupt && !data.declaredBankrupt}
                                 />
                             </div>
+                            {data.declaredBankrupt === 'YA' && (
+                                <div className="mt-2">
+                                    <small className="text-danger">
+                                        <i className="mdi mdi-alert-circle me-1"></i>
+                                        You must select "Tidak (No)" to proceed. Being declared bankrupt by the Court disqualifies your application.
+                                    </small>
+                                </div>
+                            )}
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1664,7 +2642,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter emergency contact full name"
                                 value={data.emergencyContactName || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactName: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactName', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactName}
                                 required
                             />
                         </Form.Group>
@@ -1672,13 +2651,44 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Row>
+                                <Col md={4}>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
+                                </Col>
+                                <Col md={8}>
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter emergency contact handphone"
                                 value={data.emergencyContactHandphone || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactHandphone: e.target.value })}
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            
+                                            // Remove any non-digit characters except spaces and dashes for formatting
+                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            
+                                            // Prevent starting with 0 - remove leading zeros
+                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                emergencyContactHandphone: phoneNumber,
+                                                emergencyContactHandphoneCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.emergencyContactHandphone) {
+                                                clearFieldError('emergencyContactHandphone');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.emergencyContactHandphone}
                                 required
                             />
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1692,7 +2702,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter emergency contact street address"
                                 value={data.emergencyContactStreetAddress || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactStreetAddress: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactStreetAddress', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactStreetAddress}
                                 required
                             />
                         </Form.Group>
@@ -1704,7 +2715,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter emergency contact city"
                                 value={data.emergencyContactCity || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactCity: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactCity', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactCity}
                                 required
                             />
                         </Form.Group>
@@ -1719,7 +2731,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter emergency contact postal code"
                                 value={data.emergencyContactPostalCode || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactPostalCode: e.target.value })}
+                                onChange={(e) => handleChange('emergencyContactPostalCode', e.target.value)}
+                                isInvalid={fieldErrors.emergencyContactPostalCode}
                                 required
                             />
                         </Form.Group>
@@ -1729,7 +2742,14 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Hubungan dengan anda (Relationship) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.emergencyContactRelationship || ''}
-                                onChange={(e) => onChange({ ...data, emergencyContactRelationship: e.target.value, ...(e.target.value !== 'LAINNYA' && { emergencyContactRelationshipOther: '' }) })}
+                                onChange={(e) => {
+                                    const newData = { ...data, emergencyContactRelationship: e.target.value, ...(e.target.value !== 'LAINNYA' && { emergencyContactRelationshipOther: '' }) };
+                                    if (clearFieldError && fieldErrors.emergencyContactRelationship) {
+                                        clearFieldError('emergencyContactRelationship');
+                                    }
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.emergencyContactRelationship}
                                 required
                             >
                                 <option value="">Select relationship</option>
@@ -1743,7 +2763,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the relationship"
                                     value={data.emergencyContactRelationshipOther || ''}
-                                    onChange={(e) => onChange({ ...data, emergencyContactRelationshipOther: e.target.value })}
+                                    onChange={(e) => handleChange('emergencyContactRelationshipOther', e.target.value)}
+                                    isInvalid={fieldErrors.emergencyContactRelationshipOther}
                                     className="mt-2"
                                     required
                                 />
@@ -1761,7 +2782,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Pekerjaan Penerima Kuasa (Job of Power of Attorney) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.jobOfPowerOfAttorney || ''}
-                                onChange={(e) => onChange({ 
+                                onChange={(e) => {
+                                    const newData = { 
                                     ...data, 
                                     jobOfPowerOfAttorney: e.target.value, 
                                     ...(e.target.value !== 'LAINNYA' && { jobOfPowerOfAttorneyOther: '' }),
@@ -1773,7 +2795,13 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                         lengthOfWork: '',
                                         previousCompany: ''
                                     })
-                                })}
+                                    };
+                                    if (clearFieldError && fieldErrors.jobOfPowerOfAttorney) {
+                                        clearFieldError('jobOfPowerOfAttorney');
+                                    }
+                                    onChange(newData);
+                                }}
+                                isInvalid={fieldErrors.jobOfPowerOfAttorney}
                                 required
                             >
                                 <option value="">Select job</option>
@@ -1790,7 +2818,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                     type="text"
                                     placeholder="Please specify the job of power of attorney"
                                     value={data.jobOfPowerOfAttorneyOther || ''}
-                                    onChange={(e) => onChange({ ...data, jobOfPowerOfAttorneyOther: e.target.value })}
+                                    onChange={(e) => handleChange('jobOfPowerOfAttorneyOther', e.target.value)}
+                                    isInvalid={fieldErrors.jobOfPowerOfAttorneyOther}
                                     className="mt-2"
                                     required
                                 />
@@ -1810,7 +2839,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter company name"
                                 value={data.employmentCompanyName || ''}
-                                onChange={(e) => onChange({ ...data, employmentCompanyName: e.target.value })}
+                                onChange={(e) => handleChange('employmentCompanyName', e.target.value)}
+                                isInvalid={fieldErrors.employmentCompanyName}
                                 required
                             />
                         </Form.Group>
@@ -1822,7 +2852,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter business field"
                                 value={data.businessField || ''}
-                                onChange={(e) => onChange({ ...data, businessField: e.target.value })}
+                                onChange={(e) => handleChange('businessField', e.target.value)}
+                                isInvalid={fieldErrors.businessField}
                                 required
                             />
                         </Form.Group>
@@ -1837,7 +2868,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter position"
                                 value={data.employmentPosition || ''}
-                                onChange={(e) => onChange({ ...data, employmentPosition: e.target.value })}
+                                onChange={(e) => handleChange('employmentPosition', e.target.value)}
+                                isInvalid={fieldErrors.employmentPosition}
                                 required
                             />
                         </Form.Group>
@@ -1849,7 +2881,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="e.g. 3 years, 2 months"
                                 value={data.lengthOfWork || ''}
-                                onChange={(e) => onChange({ ...data, lengthOfWork: e.target.value })}
+                                onChange={(e) => handleChange('lengthOfWork', e.target.value)}
+                                isInvalid={fieldErrors.lengthOfWork}
                                 required
                             />
                         </Form.Group>
@@ -1859,7 +2892,7 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                         <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kantor Sebelumnya (Previous Company) <span className="text-danger">*</span></Form.Label>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Kantor Sebelumnya (Previous Company)</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter previous company (optional)"
@@ -1880,7 +2913,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Enter office street address"
                                         value={data.officeStreetAddress || ''}
-                                        onChange={(e) => onChange({ ...data, officeStreetAddress: e.target.value })}
+                                        onChange={(e) => handleChange('officeStreetAddress', e.target.value)}
+                                        isInvalid={fieldErrors.officeStreetAddress}
                                         required
                                     />
                                 </Form.Group>
@@ -1892,7 +2926,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Enter office city"
                                         value={data.officeCity || ''}
-                                        onChange={(e) => onChange({ ...data, officeCity: e.target.value })}
+                                        onChange={(e) => handleChange('officeCity', e.target.value)}
+                                        isInvalid={fieldErrors.officeCity}
                                         required
                                     />
                                 </Form.Group>
@@ -1907,7 +2942,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                         type="text"
                                         placeholder="Enter office postal code"
                                         value={data.officePostalCode || ''}
-                                        onChange={(e) => onChange({ ...data, officePostalCode: e.target.value })}
+                                        onChange={(e) => handleChange('officePostalCode', e.target.value)}
+                                        isInvalid={fieldErrors.officePostalCode}
                                         required
                                     />
                                 </Form.Group>
@@ -1919,7 +2955,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                         <Col md={4}>
                                             <Form.Select
                                                 value={data.officePhoneCountryCode || ''}
-                                                onChange={(e) => onChange({ ...data, officePhoneCountryCode: e.target.value })}
+                                                onChange={(e) => handleChange('officePhoneCountryCode', e.target.value)}
+                                                isInvalid={fieldErrors.officePhoneCountryCode}
                                                 required
                                             >
                                                 <option value="">Code</option>
@@ -1937,7 +2974,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                                 type="tel"
                                                 placeholder="Enter office phone number"
                                                 value={data.officePhoneNo || ''}
-                                                onChange={(e) => onChange({ ...data, officePhoneNo: e.target.value })}
+                                                onChange={(e) => handleChange('officePhoneNo', e.target.value)}
+                                                isInvalid={fieldErrors.officePhoneNo}
                                                 required
                                             />
                                         </Col>
@@ -1972,7 +3010,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                             <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Penghasilan Pertahun (Annual Income) <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 value={data.annualIncome || ''}
-                                onChange={(e) => onChange({ ...data, annualIncome: e.target.value })}
+                                onChange={(e) => handleChange('annualIncome', e.target.value)}
+                                isInvalid={fieldErrors.annualIncome}
                                 required
                             >
                                 <option value="">Select annual income</option>
@@ -1989,7 +3028,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter house location"
                                 value={data.houseLocation || ''}
-                                onChange={(e) => onChange({ ...data, houseLocation: e.target.value })}
+                                onChange={(e) => handleChange('houseLocation', e.target.value)}
+                                isInvalid={fieldErrors.houseLocation}
                                 required
                             />
                         </Form.Group>
@@ -2004,7 +3044,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter NJOP value"
                                 value={data.njopValue || ''}
-                                onChange={(e) => onChange({ ...data, njopValue: e.target.value })}
+                                onChange={(e) => handleChange('njopValue', e.target.value)}
+                                isInvalid={fieldErrors.njopValue}
                                 required
                             />
                         </Form.Group>
@@ -2016,7 +3057,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter bank deposit amount"
                                 value={data.bankDeposit || ''}
-                                onChange={(e) => onChange({ ...data, bankDeposit: e.target.value })}
+                                onChange={(e) => handleChange('bankDeposit', e.target.value)}
+                                isInvalid={fieldErrors.bankDeposit}
                                 required
                             />
                         </Form.Group>
@@ -2031,7 +3073,8 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
                                 type="text"
                                 placeholder="Enter total amount"
                                 value={data.totalAmount || ''}
-                                onChange={(e) => onChange({ ...data, totalAmount: e.target.value })}
+                                onChange={(e) => handleChange('totalAmount', e.target.value)}
+                                isInvalid={fieldErrors.totalAmount}
                                 required
                             />
                         </Form.Group>
@@ -2055,9 +3098,9 @@ const PowerOfAttorneyStep = ({ data = {}, onChange }) => {
     );
 };
 
-const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
+const PersonalDocumentUploadStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const [uploadedDocs, setUploadedDocs] = useState(data.uploadedPersonalDocuments || {});
-    const [uploadedFiles, setUploadedFiles] = useState(data.uploadedPersonalFiles || {});
+    const fileInputRefs = useRef({});
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2078,19 +3121,21 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
     ];
 
     const handleFileUpload = (categoryIndex, docIndex, file) => {
+        if (!file) return;
+
         const docKey = `${categoryIndex}_${docIndex}`;
         const newUploadedDocs = {
             ...uploadedDocs,
-            [docKey]: file ? file.name : null
-        };
-        
-        const newUploadedFiles = {
-            ...uploadedFiles,
-            [docKey]: file || null
+            [docKey]: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified,
+                file: file
+            }
         };
         
         setUploadedDocs(newUploadedDocs);
-        setUploadedFiles(newUploadedFiles);
         
         // Map document uploads to backend field names
         const documentMappingByIndex = {
@@ -2101,11 +3146,10 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
             '0_4': 'npwpPersonalFile'                 // NPWP
         };
         
-        // Update parent component with both document names and File objects
+        // Update parent component with file objects
         const updatedData = {
             ...data,
             uploadedPersonalDocuments: newUploadedDocs,
-            uploadedPersonalFiles: newUploadedFiles,
             personalDocumentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
         };
         
@@ -2115,6 +3159,55 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
         }
         
         onChange(updatedData);
+
+        // Clear field error when file is uploaded
+        if (clearFieldError) {
+            const fieldName = documentMappingByIndex[docKey];
+            if (fieldName) {
+                clearFieldError(fieldName);
+            }
+        }
+
+        // Clear the file input
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
+    };
+
+    const handleFileRemove = (categoryIndex, docIndex) => {
+        const docKey = `${categoryIndex}_${docIndex}`;
+        const newUploadedDocs = { ...uploadedDocs };
+        delete newUploadedDocs[docKey];
+
+        setUploadedDocs(newUploadedDocs);
+        
+        // Map document uploads to backend field names
+        const documentMappingByIndex = {
+            '0_0': 'currentAccountFile',              // Current Account Statement
+            '0_1': 'electricityPhoneAccountFile',     // Electricity/Phone Account  
+            '0_2': 'photoSelfiePersonalFile',         // Photo Selfie
+            '0_3': 'identityPassportPersonalFile',    // Identity/Passport
+            '0_4': 'npwpPersonalFile'                 // NPWP
+        };
+
+        // Update parent component
+        const updatedData = {
+            ...data,
+            uploadedPersonalDocuments: newUploadedDocs,
+            personalDocumentsUploaded: Object.values(newUploadedDocs).every(doc => doc !== null)
+        };
+        
+        // Remove the specific document file from the data
+        if (documentMappingByIndex[docKey]) {
+            delete updatedData[documentMappingByIndex[docKey]];
+        }
+        
+        onChange(updatedData);
+
+        // Clear the file input value
+        if (fileInputRefs.current[docKey]) {
+            fileInputRefs.current[docKey].value = '';
+        }
     };
 
     return (
@@ -2133,29 +3226,72 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
                         {category.documents.map((doc, docIndex) => {
                             const docKey = `${categoryIndex}_${docIndex}`;
                             const isUploaded = uploadedDocs[docKey];
+                            const documentMappingByIndex = {
+                                '0_0': 'currentAccountFile',
+                                '0_1': 'electricityPhoneAccountFile',
+                                '0_2': 'photoSelfiePersonalFile',
+                                '0_3': 'identityPassportPersonalFile',
+                                '0_4': 'npwpPersonalFile'
+                            };
+                            const fieldName = documentMappingByIndex[docKey];
                             
                             return (
                                 <Form.Group key={docIndex} className="mb-3">
-                                    <Form.Label className="text-muted">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <Form.Label className="text-muted mb-0">
                                         {doc} <span className="text-danger">*</span>
                                         {isUploaded && (
                                             <span className="text-success ms-2">
-                                                <i className="mdi mdi-check-circle"></i> Uploaded
+                                                    <i className="mdi mdi-check-circle"></i> Uploaded: {isUploaded.name}
                                             </span>
                                         )}
                                     </Form.Label>
+                                        {isUploaded && (
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => handleFileRemove(categoryIndex, docIndex)}
+                                                title="Remove file"
+                                            >
+                                                <i className="mdi mdi-delete"></i> Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Show file input when no file uploaded */}
+                                    {!isUploaded && (
                                     <Form.Control 
                                         type="file" 
                                         accept={docIndex === 2 ? ".jpg,.jpeg,.png" : ".pdf,.jpg,.jpeg,.png"}
                                         onChange={(e) => handleFileUpload(categoryIndex, docIndex, e.target.files[0])}
-                                    />
+                                            isInvalid={fieldErrors[fieldName]}
+                                            className="mt-2"
+                                            ref={(el) => {
+                                                if (el) {
+                                                    fileInputRefs.current[docKey] = el;
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Show custom file display when file uploaded */}
+                                    {isUploaded && (
+                                        <div className="mt-2">
+                                            <div className={`form-control d-flex align-items-center ${fieldErrors[fieldName] ? 'is-invalid' : ''}`}>
+                                                <i className="mdi mdi-file-document me-2 text-primary"></i>
+                                                <span className="flex-grow-1">{isUploaded.name}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <Form.Text className="text-muted">
                                         Max 10MB. Accepted formats: {docIndex === 2 ? "JPG, JPEG, PNG" : "PDF, JPG, JPEG, PNG"}
                                     </Form.Text>
-                                    {isUploaded && (
-                                        <Form.Text className="text-success">
-                                            File uploaded: {isUploaded}
-                                        </Form.Text>
+
+                                    {fieldErrors[fieldName] && (
+                                        <div className="invalid-feedback d-block">
+                                            This document is required.
+                                        </div>
                                     )}
                                 </Form.Group>
                             );
@@ -2167,10 +3303,43 @@ const PersonalDocumentUploadStep = ({ data = {}, onChange }) => {
     );
 };
 
-const ReadStatementsStep = ({ data = {}, onChange }) => {
+const ReadStatementsStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    const handleCheckboxChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user checks the checkbox
+        if (clearFieldError && fieldErrors[field] && value) {
+            clearFieldError(field);
+        }
+        
+        onChange(newData);
+    };
+
+    const handleRadioChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user selects an option
+        if (clearFieldError && fieldErrors[field]) {
+            clearFieldError(field);
+        }
+        
+        onChange(newData);
+    };
+
+    const handleInputChange = (field, value) => {
+        const newData = { ...data, [field]: value };
+        
+        // Clear field error when user starts typing
+        if (clearFieldError && fieldErrors[field]) {
+            clearFieldError(field);
+        }
+        
+        onChange(newData);
+    };
 
     // All required fields for validation
     const baseRequiredFields = [
@@ -2217,7 +3386,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="company-profile-read-check"
                         label="Baca Profil Perusahaan PT. Genesis Gemilang Futures"
                         checked={data.companyProfileRead || false}
-                        onChange={(e) => onChange({ ...data, companyProfileRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('companyProfileRead', e.target.checked)}
+                        isInvalid={fieldErrors.companyProfileRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2243,7 +3413,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="company-profile-understanding"
                         checked={data.companyProfileUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, companyProfileUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('companyProfileUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.companyProfileUnderstanding}
                         required
                         label={
                             <>
@@ -2268,7 +3439,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="statement-read-check"
                         label="Baca Pernyataan Simulasi (Read)"
                         checked={data.statementRead || false}
-                        onChange={(e) => onChange({ ...data, statementRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('statementRead', e.target.checked)}
+                        isInvalid={fieldErrors.statementRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2294,7 +3466,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="statement-understanding"
                         checked={data.statementUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, statementUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('statementUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.statementUnderstanding}
                         required
                         label={
                             <>
@@ -2316,11 +3489,15 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                 label="Ya (Yes)" 
                                 value="ya" 
                                 checked={data.tradingExperience === 'ya'} 
-                                onChange={(e) => onChange({ 
+                                onChange={(e) => {
+                                    const newData = { 
                                     ...data, 
                                     tradingExperience: e.target.value,
                                     ...(e.target.value !== 'ya' && { brokerCompany: '', demoAccountNumber: '' })
-                                })} 
+                                    };
+                                    handleRadioChange('tradingExperience', e.target.value);
+                                }} 
+                                isInvalid={fieldErrors.tradingExperience && !data.tradingExperience}
                                 required 
                             />
                             <Form.Check 
@@ -2329,11 +3506,15 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                 label="Tidak (No)" 
                                 value="tidak" 
                                 checked={data.tradingExperience === 'tidak'} 
-                                onChange={(e) => onChange({ 
+                                onChange={(e) => {
+                                    const newData = { 
                                     ...data, 
                                     tradingExperience: e.target.value,
                                     ...(e.target.value !== 'ya' && { brokerCompany: '', demoAccountNumber: '' })
-                                })} 
+                                    };
+                                    handleRadioChange('tradingExperience', e.target.value);
+                                }} 
+                                isInvalid={fieldErrors.tradingExperience && !data.tradingExperience}
                                 required 
                             />
                         </div>
@@ -2347,7 +3528,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     type="text" 
                                     placeholder="Enter broker company name" 
                                     value={data.brokerCompany || ''} 
-                                    onChange={(e) => onChange({ ...data, brokerCompany: e.target.value })} 
+                                    onChange={(e) => handleInputChange('brokerCompany', e.target.value)} 
+                                    isInvalid={fieldErrors.brokerCompany}
                                     required 
                                 />
                         <Form.Text className="text-muted">Broker Company</Form.Text>
@@ -2359,7 +3541,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     type="text" 
                                     placeholder="Enter demo account number" 
                                     value={data.demoAccountNumber || ''} 
-                                    onChange={(e) => onChange({ ...data, demoAccountNumber: e.target.value })} 
+                                    onChange={(e) => handleInputChange('demoAccountNumber', e.target.value)} 
+                                    isInvalid={fieldErrors.demoAccountNumber}
                                     required 
                                 />
                                 <Form.Text className="text-muted">Demo Account Number</Form.Text>
@@ -2380,7 +3563,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="experience-statement-read-check"
                         label="Baca Pernyataan Pengalaman Melaksanakan Transaksi (Read)"
                         checked={data.experienceStatementRead || false}
-                        onChange={(e) => onChange({ ...data, experienceStatementRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('experienceStatementRead', e.target.checked)}
+                        isInvalid={fieldErrors.experienceStatementRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2406,7 +3590,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="experience-understanding"
                         checked={data.experienceUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, experienceUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('experienceUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.experienceUnderstanding}
                         required
                         label={
                             <>
@@ -2431,7 +3616,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="application-statement-read-check"
                         label="Baca Pernyataan Aplikasi Pembukaan Rekening (Read)"
                         checked={data.applicationStatementRead || false}
-                        onChange={(e) => onChange({ ...data, applicationStatementRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('applicationStatementRead', e.target.checked)}
+                        isInvalid={fieldErrors.applicationStatementRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2457,7 +3643,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="application-understanding"
                         checked={data.applicationUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, applicationUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('applicationUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.applicationUnderstanding}
                         required
                         label={
                             <>
@@ -2495,7 +3682,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-1"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement1 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement1: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement1', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement1}
                                     required
                                 />
                             </div>
@@ -2508,7 +3696,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-2"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement2 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement2: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement2', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement2}
                                     required
                                 />
                             </div>
@@ -2521,7 +3710,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-3"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement3 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement3: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement3', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement3}
                                     required
                                 />
                             </div>
@@ -2534,7 +3724,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-4"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement4 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement4: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement4', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement4}
                                     required
                                 />
                             </div>
@@ -2547,7 +3738,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-5"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement5 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement5: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement5', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement5}
                                     required
                                 />
                             </div>
@@ -2560,7 +3752,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-6"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement6 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement6: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement6', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement6}
                                     required
                                 />
                             </div>
@@ -2573,7 +3766,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-7"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement7 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement7: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement7', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement7}
                                     required
                                 />
                             </div>
@@ -2586,7 +3780,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-8"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement8 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement8: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement8', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement8}
                                     required
                                 />
                             </div>
@@ -2599,7 +3794,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-9"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement9 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement9: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement9', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement9}
                                     required
                                 />
                             </div>
@@ -2612,7 +3808,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-10"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement10 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement10: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement10', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement10}
                                     required
                                 />
                             </div>
@@ -2625,7 +3822,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-11"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement11 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement11: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement11', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement11}
                                     required
                                 />
                             </div>
@@ -2637,7 +3835,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-12"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement12 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement12: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement12', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement12}
                                     required
                                 />
                             </div>
@@ -2650,7 +3849,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-13"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement13 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement13: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement13', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement13}
                                     required
                                 />
                             </div>
@@ -2662,7 +3862,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                                     id="risk-statement-14"
                                     label="Saya Sudah membaca dan memahami"
                                     checked={data.riskStatement14 || false}
-                                    onChange={(e) => onChange({ ...data, riskStatement14: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskStatement14', e.target.checked)}
+                                    isInvalid={fieldErrors.riskStatement14}
                                     required
                                 />
                             </div>
@@ -2673,22 +3874,24 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         <p className="text-center mb-3">
                             Dengan mengisi kolom "YA" di bawah, saya menyatakan bahwa saya telah menerima "DOKUMEN PEMBERITAHUAN ADANYA RISIKO" mengerti dan menyetujui isinya.
                         </p>
+                        <div className="d-flex justify-content-center">
+                            <div className="d-flex align-items-start" style={{ gap: '8px' }}>
                         <Form.Check
                             type="checkbox"
                             id="risk-disclosure-understanding"
                             checked={data.riskDisclosureUnderstanding || false}
-                            onChange={(e) => onChange({ ...data, riskDisclosureUnderstanding: e.target.checked })}
+                                    onChange={(e) => handleCheckboxChange('riskDisclosureUnderstanding', e.target.checked)}
+                                    isInvalid={fieldErrors.riskDisclosureUnderstanding}
                             required
-                            label={
-                                <>
+                                />
+                                <label htmlFor="risk-disclosure-understanding" className="form-check-label">
                                     Ya, Saya menyatakan bahwa saya telah membaca dan menerima informasi, mengerti dan memahami isinya{' '}
                                     <a href="/documents/kyc/indonesian-company/Risk Disclosure 240705.pdf" target="_blank" rel="noopener noreferrer" className="text-primary text-decoration-underline">
                                         Risk Disclosure
                                     </a>.<span className="text-danger">*</span>
-                                </>
-                            }
-                            className="text-center"
-                        />
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </Card.Body>
             </Card>
@@ -2704,7 +3907,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="mandate-statement-read-check"
                         label="Baca Perjanjian Pemberian Amanat (Read)"
                         checked={data.mandateStatementRead || false}
-                        onChange={(e) => onChange({ ...data, mandateStatementRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('mandateStatementRead', e.target.checked)}
+                        isInvalid={fieldErrors.mandateStatementRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2733,7 +3937,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                             id="bakti-arbitration"
                             label="Badan Arbitrase Perdagangan Berjangka Komoditi (BAKTI)"
                             checked={data.baktiArbitration || false}
-                            onChange={(e) => onChange({ ...data, baktiArbitration: e.target.checked })}
+                            onChange={(e) => handleCheckboxChange('baktiArbitration', e.target.checked)}
+                            isInvalid={fieldErrors.baktiArbitration}
                             required
                         />
                     </Form.Group>
@@ -2742,7 +3947,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="mandate-understanding"
                         checked={data.mandateUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, mandateUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('mandateUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.mandateUnderstanding}
                         required
                         label={
                             <>
@@ -2767,7 +3973,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="trading-rules-read-check"
                         label="Baca Peraturan Transaksi (Read)"
                         checked={data.tradingRulesRead || false}
-                        onChange={(e) => onChange({ ...data, tradingRulesRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('tradingRulesRead', e.target.checked)}
+                        isInvalid={fieldErrors.tradingRulesRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2793,7 +4000,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="trading-rules-understanding"
                         checked={data.tradingRulesUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, tradingRulesUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('tradingRulesUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.tradingRulesUnderstanding}
                         required
                         label={
                             <>
@@ -2818,7 +4026,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         id="personal-access-password-read-check"
                         label="Baca Kode Akses Transaksi Nasabah (Read)"
                         checked={data.personalAccessPasswordRead || false}
-                        onChange={(e) => onChange({ ...data, personalAccessPasswordRead: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('personalAccessPasswordRead', e.target.checked)}
+                        isInvalid={fieldErrors.personalAccessPasswordRead}
                         className="fs-6 fw-bold mb-3"
                         required
                     />
@@ -2844,7 +4053,8 @@ const ReadStatementsStep = ({ data = {}, onChange }) => {
                         type="checkbox"
                         id="personal-access-password-understanding"
                         checked={data.personalAccessPasswordUnderstanding || false}
-                        onChange={(e) => onChange({ ...data, personalAccessPasswordUnderstanding: e.target.checked })}
+                        onChange={(e) => handleCheckboxChange('personalAccessPasswordUnderstanding', e.target.checked)}
+                        isInvalid={fieldErrors.personalAccessPasswordUnderstanding}
                         required
                         label={
                             <>
