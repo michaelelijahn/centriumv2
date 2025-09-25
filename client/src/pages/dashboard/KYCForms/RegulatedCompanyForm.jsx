@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
+import { validateEmail, validatePhoneWithCountryCode, formatPhoneInput } from '../../../common/helpers';
 import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
 import en from 'react-phone-number-input/locale/en';
 
@@ -13,7 +14,6 @@ const RegulatedCompanyForm = () => {
     const { showNotification } = useNotificationContext();
     const navigate = useNavigate();
 
-    // Function to clear specific field errors
     const clearFieldError = (fieldName) => {
         if (fieldErrors[fieldName]) {
             setFieldErrors(prev => {
@@ -55,7 +55,6 @@ const RegulatedCompanyForm = () => {
         }
     ];
 
-    // Required documents for regulated company KYC
     const documentRequirements = [
         {
             category: "Company Registration Documents",
@@ -102,28 +101,27 @@ const RegulatedCompanyForm = () => {
         }
     };
 
-    // Validation functions for each step
-    const validateStep = (stepIndex, stepData, allData) => {
+    const validateStep = (stepIndex, stepData) => {
         switch (stepIndex) {
-            case 0: // Requirements step - always valid (just informational)
+            case 0:
                 return { isValid: true, errors: [] };
             
-            case 1: // Company Email Registration step
+            case 1:
                 return validateEmailStep(stepData);
             
-            case 2: // Company Details step
+            case 2:
                 return validateCompanyDetailsStep(stepData);
             
-            case 3: // Document Upload step
+            case 3:
                 return validateDocumentUploadStep(stepData);
             
-            case 4: // Authorize Person step
+            case 4:
                 return validateAuthorizePersonStep(stepData);
             
-            case 5: // Passport Upload step
+            case 5:
                 return validatePassportUploadStep(stepData);
             
-            case 6: // Document Agreements step
+            case 6:
                 return validateDocumentAgreementsStep(stepData);
             
             default:
@@ -134,10 +132,9 @@ const RegulatedCompanyForm = () => {
     const validateEmailStep = (data) => {
         const errors = [];
         
-        if (!data.email?.trim()) {
-            errors.push('Company email address is required');
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-            errors.push('Please enter a valid email address');
+        const emailValidation = validateEmail(data.email, true, 'Company email address');
+        if (!emailValidation.isValid) {
+            errors.push(emailValidation.error);
         }
         
         if (!data.demoAccountNo?.trim()) {
@@ -161,7 +158,7 @@ const RegulatedCompanyForm = () => {
             { field: 'placeOfEstablishment', label: 'Place of Establishment' },
             { field: 'dateOfEstablishment', label: 'Date of Establishment' },
             { field: 'countryCode', label: 'Country Code' },
-            { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
+            { field: 'officePhoneNumber', label: 'Office Phone Number' },
             { field: 'beneficialOwnerName', label: 'Beneficial Owner Name' },
             { field: 'beneficialOwnerPassportNo', label: 'Beneficial Owner Passport Number' },
             { field: 'sourceOfFunds', label: 'Source of Funds' },
@@ -174,9 +171,6 @@ const RegulatedCompanyForm = () => {
             }
         });
 
-        console.log('CompanyDetailsStep - data:', data);
-        
-        // Check conditional fields
         if (data.companyLegalForm === 'OTHER' && !data.companyLegalFormOther?.trim()) {
             errors.push('Please specify the other legal form');
         }
@@ -193,13 +187,17 @@ const RegulatedCompanyForm = () => {
             errors.push('Please specify the other trading account purpose');
         }
         
+        const officePhoneValidation = validatePhoneWithCountryCode(data.officePhoneNumber, data.countryCode, false, 'office phone number');
+        if (!officePhoneValidation.isValid) {
+            errors.push(officePhoneValidation.error);
+        }
+        
         return { isValid: errors.length === 0, errors };
     };
 
     const validateDocumentUploadStep = (data) => {
         const errors = [];
         
-        // Define required documents and their expected positions
         const requiredDocuments = [
             { name: 'Certificate of Incorporation', categoryIndex: 0, docIndex: 0 },
             { name: 'Board of Resolution', categoryIndex: 0, docIndex: 1 },
@@ -210,7 +208,6 @@ const RegulatedCompanyForm = () => {
             { name: 'Beneficial Owner Passport', categoryIndex: 2, docIndex: 2 }
         ];
         
-        // Check each required document individually
         requiredDocuments.forEach(doc => {
             const docKey = `${doc.categoryIndex}_${doc.docIndex}`;
             if (!data.uploadedDocuments || !data.uploadedDocuments[docKey]) {
@@ -250,8 +247,6 @@ const RegulatedCompanyForm = () => {
             { field: 'authorizePersonOfficePostalCode', label: 'Office Postal Code' },
             { field: 'authorizePersonOfficeCountry', label: 'Office Country' }
         ];
-
-        console.log('AuthorizePersonStep - data:', data);
         
         requiredFields.forEach(({ field, label }) => {
             if (!data[field]?.trim()) {
@@ -259,7 +254,6 @@ const RegulatedCompanyForm = () => {
             }
         });
         
-        // Check conditional fields
         if (data.authorizePersonCitizen === 'OTHER' && !data.authorizePersonCitizenOther?.trim()) {
             errors.push('Please specify other citizenship');
         }
@@ -276,12 +270,13 @@ const RegulatedCompanyForm = () => {
             errors.push('Please provide details about investment experience');
         }
         
-        // Validate email format
-        if (data.authorizePersonEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.authorizePersonEmail)) {
-            errors.push('Please enter a valid email address for Authorize Person');
+        if (data.authorizePersonEmail) {
+            const authorizeEmailValidation = validateEmail(data.authorizePersonEmail, false, 'Authorize Person email');
+            if (!authorizeEmailValidation.isValid) {
+                errors.push('Please enter a valid email address for Authorize Person');
+            }
         }
         
-        // Validate bank accounts
         if (!data.bankAccounts || data.bankAccounts.length === 0) {
             errors.push('At least one bank account is required');
         } else {
@@ -308,13 +303,17 @@ const RegulatedCompanyForm = () => {
             });
         }
         
+        const authPersonPhoneValidation = validatePhoneWithCountryCode(data.authorizePersonPhoneNumber, data.authorizePersonCountryCode, false, 'phone number');
+        if (!authPersonPhoneValidation.isValid) {
+            errors.push(authPersonPhoneValidation.error);
+        }
+        
         return { isValid: errors.length === 0, errors };
     };
 
     const validatePassportUploadStep = (data) => {
         const errors = [];
         
-        // Check if authorize person passport document is uploaded
         if (!data.uploadedDocuments || !data.uploadedDocuments.authorizePersonPassport) {
             errors.push('Please upload Authorize Person Passport');
         }
@@ -361,20 +360,15 @@ const RegulatedCompanyForm = () => {
     const handleStepValidation = (stepIndex, stepData, allData) => {
         const validation = validateStep(stepIndex, stepData, allData);
         
-        // Create field error mapping for red border styling
         const newFieldErrors = {};
         if (!validation.isValid) {
-            // Map validation errors to specific field names for styling
             validation.errors.forEach(error => {
-                // Email step errors
                 if (error.includes('email address')) {
                     newFieldErrors.email = true;
                 }
                 if (error.includes('Demo account')) {
                     newFieldErrors.demoAccountNo = true;
                 }
-                
-                // Company details step errors
                 if (error.includes('Company Registration Name')) {
                     newFieldErrors.companyRegistrationName = true;
                 }
@@ -414,8 +408,8 @@ const RegulatedCompanyForm = () => {
                 if (error.includes('Country Code')) {
                     newFieldErrors.countryCode = true;
                 }
-                if (error.includes('Office Telephone Number')) {
-                    newFieldErrors.officeTelephoneNo = true;
+                if (error.includes('Office Phone Number')) {
+                    newFieldErrors.officePhoneNumber = true;
                 }
                 if (error.includes('Beneficial Owner Name')) {
                     newFieldErrors.beneficialOwnerName = true;
@@ -436,7 +430,6 @@ const RegulatedCompanyForm = () => {
                     newFieldErrors.tradingAccountPurposeOther = true;
                 }
                 
-                // Document upload step errors
                 if (error.includes('Please upload Certificate of Incorporation')) {
                     newFieldErrors['document_0_0'] = true;
                 }
@@ -459,12 +452,10 @@ const RegulatedCompanyForm = () => {
                     newFieldErrors['document_2_2'] = true;
                 }
                 
-                // Passport upload step errors
                 if (error.includes('Please upload Authorize Person Passport')) {
                     newFieldErrors['document_authorizePersonPassport'] = true;
                 }
                 
-                // Authorize Person step errors
                 if (error.includes('Authorize Person Title')) {
                     newFieldErrors.authorizePersonTitle = true;
                 }
@@ -553,7 +544,6 @@ const RegulatedCompanyForm = () => {
                     newFieldErrors.authorizePersonOfficeCountryOther = true;
                 }
                 
-                // Bank Account errors - Handle indexed bank account errors
                 const bankFieldMappings = [
                     { pattern: /Bank (\d+) - Bank Name is required/, field: 'bankName' },
                     { pattern: /Bank (\d+) - Account Name is required/, field: 'accountName' },
@@ -573,7 +563,6 @@ const RegulatedCompanyForm = () => {
                     }
                 });
                 
-                // Document Agreements step errors
                 const agreementMappings = [
                     { pattern: /Please agree to Company Profile/, field: 'companyProfile' },
                     { pattern: /Please agree to Statement of Having Simulation/, field: 'statementSimulation' },
@@ -593,7 +582,6 @@ const RegulatedCompanyForm = () => {
                 });
             });
             
-            // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
                 : `Please fix the following issues: ${validation.errors.join(', ')}`;
@@ -609,22 +597,16 @@ const RegulatedCompanyForm = () => {
         return validation.isValid;
     };
 
-    const handleStepChange = (step, data) => {
-        console.log(`Moving to step ${step}`, data);
-    };
 
     const handleSubmit = async (data) => {
-        console.log('Submitting Regulated Company KYC (raw data):', data);
         
         try {
-            // Show processing notification
             showNotification({
                 title: 'Processing',
                 message: 'Submitting your KYC application...',
                 type: 'info'
             });
             
-            // Flatten the nested step data structure
             const flattenedData = {};
             Object.keys(data).forEach(stepKey => {
                 if (stepKey.startsWith('step_') && typeof data[stepKey] === 'object') {
@@ -632,29 +614,90 @@ const RegulatedCompanyForm = () => {
                 }
             });
             
-            console.log('Flattened form data:', flattenedData);
             
-            // Create FormData object to handle both form data and file uploads
+            // Map frontend field names to backend field names to match database schema
+            const fieldMapping = {
+                // Email Registration Step (Step 1)
+                'demoAccountNo': 'demo_account_no',
+                
+                // Company Details Step (Step 2)
+                'companyRegistrationName': 'company_registration_name',
+                'companyLicenseNo': 'company_license_no',
+                'natureOfBusiness': 'nature_of_business',
+                'companyLegalForm': 'company_legal_form',
+                'companyLegalFormOther': 'company_legal_form_other',
+                'streetAddress': 'street_address',
+                'postalCode': 'postal_code',
+                'countryOther': 'country_other',
+                'placeOfEstablishment': 'place_of_establishment',
+                'dateOfEstablishment': 'date_of_establishment',
+                'countryCode': 'country_code',
+                'officePhoneNumber': 'office_telephone_no',
+                'beneficialOwnerName': 'beneficial_owner_name',
+                'beneficialOwnerPassportNo': 'beneficial_owner_passport_no',
+                'sourceOfFunds': 'source_of_funds',
+                'sourceOfFundsOther': 'source_of_funds_other',
+                'tradingAccountPurpose': 'trading_account_purpose',
+                'tradingAccountPurposeOther': 'trading_account_purpose_other',
+                
+                // Authorize Person Step (Step 4) 
+                'authorizePersonTitle': 'title',
+                'authorizePersonFullName': 'full_name',
+                'authorizePersonPlaceOfBirth': 'place_of_birth',
+                'authorizePersonDateOfBirth': 'date_of_birth',
+                'authorizePersonPassportId': 'passport_id',
+                'authorizePersonEmail': 'email',
+                'authorizePersonGender': 'gender',
+                'authorizePersonMaritalStatus': 'marital_status',
+                'authorizePersonCitizen': 'citizen',
+                'authorizePersonCitizenOther': 'citizen_other',
+                'authorizePersonCountryCode': 'country_code',
+                'authorizePersonPhoneNumber': 'phone_number',
+                'authorizePersonStreetAddress': 'street_address',
+                'authorizePersonCity': 'city',
+                'authorizePersonPostalCode': 'postal_code',
+                'authorizePersonCountry': 'country',
+                'authorizePersonCountryOther': 'country_other',
+                'authorizePersonInvestmentExperience': 'investment_experience',
+                'authorizePersonInvestmentExperienceDetails': 'investment_experience_details',
+                'authorizePersonFamilyInBappebti': 'family_in_bappebti',
+                'authorizePersonDeclaredBankrupt': 'declared_bankrupt',
+                'authorizePersonCompanyName': 'company_name',
+                'authorizePersonBusinessNature': 'business_nature',
+                'authorizePersonJobPosition': 'job_position',
+                'authorizePersonOfficeAddress': 'office_address',
+                'authorizePersonOfficeCity': 'office_city',
+                'authorizePersonOfficePostalCode': 'office_postal_code',
+                'authorizePersonOfficeCountry': 'office_country',
+                'authorizePersonOfficeCountryOther': 'office_country_other'
+            };
+            
+            // Apply field name mapping
+            const mappedData = {};
+            Object.keys(flattenedData).forEach(key => {
+                const mappedKey = fieldMapping[key] || key;
+                mappedData[mappedKey] = flattenedData[key];
+            });
+            
+            
             const formData = new FormData();
             
-            // Add all form fields to FormData
-            Object.keys(flattenedData).forEach(key => {
-                if (key === 'uploadedDocuments' && typeof flattenedData[key] === 'object') {
-                    // Handle uploaded company documents
-                    Object.keys(flattenedData[key]).forEach(docType => {
-                        const files = flattenedData[key][docType];
+            Object.keys(mappedData).forEach(key => {
+                if (key === 'uploadedDocuments' && typeof mappedData[key] === 'object') {
+                    Object.keys(mappedData[key]).forEach(docType => {
+                        const files = mappedData[key][docType];
                         if (Array.isArray(files) && files.length > 0) {
                             files.forEach((file, index) => {
                                 formData.append(`${docType}_${index}`, file);
                             });
                         }
                     });
-                } else if (typeof flattenedData[key] === 'object' && flattenedData[key] !== null && !(flattenedData[key] instanceof File)) {
-                    // Convert objects to JSON string (except File objects)
-                    formData.append(key, JSON.stringify(flattenedData[key]));
-                } else if (flattenedData[key] !== null && flattenedData[key] !== undefined) {
-                    // Add primitive values directly
-                    formData.append(key, flattenedData[key]);
+                } else if (key === 'bankAccounts' && Array.isArray(mappedData[key])) {
+                    formData.append('bankAccounts', JSON.stringify(mappedData[key]));
+                } else if (typeof mappedData[key] === 'object' && mappedData[key] !== null && !(mappedData[key] instanceof File)) {
+                    formData.append(key, JSON.stringify(mappedData[key]));
+                } else if (mappedData[key] !== null && mappedData[key] !== undefined) {
+                    formData.append(key, mappedData[key]);
                 }
             });
             
@@ -667,13 +710,11 @@ const RegulatedCompanyForm = () => {
                     type: 'success'
                 });
                 
-                // Clear the form
                 setFormData({});
                 
-                // Navigate to accounts page after successful submission
                 setTimeout(() => {
                     navigate('/dashboard/accounts');
-                }, 2000); // Give time for user to read the success message
+                }, 2000);
             } else {
                 throw new Error(response.message || 'Submission failed');
             }
@@ -692,7 +733,6 @@ const RegulatedCompanyForm = () => {
         <MultiStepFormWrapper
             accountType="Regulated Company"
             steps={steps}
-            onStepChange={handleStepChange}
             onSubmit={handleSubmit}
             onStepValidation={handleStepValidation}
         >
@@ -701,7 +741,6 @@ const RegulatedCompanyForm = () => {
     );
 };
 
-// Step Components
 const RequirementsStep = ({ requirements }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -776,17 +815,14 @@ const EmailRegistrationStep = ({ data = {}, onChange, fieldErrors = {}, clearFie
         const newData = { ...data, [field]: value };
         if (field === 'email') {
             setEmail(value);
-            // Validate email format
             const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
             setEmailValid(isValidEmail);
-            // Clear field error when user starts typing
             if (clearFieldError && fieldErrors.email) {
                 clearFieldError('email');
             }
         }
         if (field === 'demoAccountNo') {
             setDemoAccountNo(value);
-            // Clear field error when user makes selection
             if (clearFieldError && fieldErrors.demoAccountNo) {
                 clearFieldError('demoAccountNo');
             }
@@ -923,7 +959,6 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     clearFieldError && clearFieldError('companyLegalForm');
-                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
                                     if (newValue === 'OTHER' || (data.companyLegalForm === 'OTHER' && newValue !== 'OTHER')) {
                                         onChange({ ...data, companyLegalForm: newValue, companyLegalFormOther: '' });
                                     } else {
@@ -1020,7 +1055,6 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     clearFieldError && clearFieldError('country');
-                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
                                     if (newValue === 'OTHER' || (data.country === 'OTHER' && newValue !== 'OTHER')) {
                                         onChange({ ...data, country: newValue, countryOther: '' });
                                     } else {
@@ -1098,7 +1132,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                 <Row>
                     <Col md={6}>
                 <Form.Group className="mb-3">
-                    <Form.Label className="text-muted">Office Telephone No <span className="text-danger">*</span></Form.Label>
+                    <Form.Label className="text-muted">Office Phone Number <span className="text-danger">*</span></Form.Label>
                     <Row>
                         <Col md={4}>
                             <Form.Select
@@ -1106,24 +1140,21 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                                         isInvalid={fieldErrors.countryCode}
                                         onChange={(e) => {
                                             const selectedCode = e.target.value;
-                                            // Clear field errors when user makes a selection
                                             clearFieldError && clearFieldError('countryCode');
-                                            clearFieldError && clearFieldError('officeTelephoneNo');
+                                            clearFieldError && clearFieldError('officePhoneNumber');
                                             
-                                            // If no country is selected (back to "Select Country Code"), clear the phone number
                                             if (!selectedCode) {
                                                 onChange({ 
                                                     ...data, 
                                                     countryCode: selectedCode,
-                                                    officeTelephoneNo: ''
+                                                    officePhoneNumber: ''
                                                 });
                                             }
-                                            // If a country is selected, set the phone number to just the country code
                                             else {
                                                 onChange({ 
                                                     ...data, 
                                                     countryCode: selectedCode,
-                                                    officeTelephoneNo: selectedCode + ' '
+                                                    officePhoneNumber: selectedCode + ' '
                                                 });
                                             }
                                         }}
@@ -1144,30 +1175,19 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                         <Col md={8}>
                             <Form.Control
                                 type="tel"
-                                placeholder="Enter telephone number"
-                                value={data.officeTelephoneNo || ''}
-                                        isInvalid={fieldErrors.officeTelephoneNo}
+                                placeholder="Enter phone number"
+                                value={data.officePhoneNumber || ''}
+                                        isInvalid={fieldErrors.officePhoneNumber}
                                         onChange={(e) => {
                                             let value = e.target.value;
                                             
-                                            // Clear field error when user starts typing
-                                            clearFieldError && clearFieldError('officeTelephoneNo');
+                                            clearFieldError && clearFieldError('officePhoneNumber');
                                             
-                                            // If there's a country code, ensure it stays at the beginning
                                             if (data.countryCode) {
-                                                if (!value.startsWith(data.countryCode)) {
-                                                    // If user deleted the country code, restore it
-                                                    value = data.countryCode + ' ' + value.replace(/^\+\d+\s?/, '');
-                                                } else {
-                                                    // Extract the number part after country code
-                                                    const numberPart = value.substring(data.countryCode.length).trim();
-                                                    // Only allow numbers in the phone number part
-                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
-                                                    value = data.countryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
-                                                }
+                                                value = formatPhoneInput(value, data.countryCode);
                                             }
                                             
-                                            onChange({ ...data, officeTelephoneNo: value });
+                                            onChange({ ...data, officePhoneNumber: value });
                                         }}
                                 required
                             />
@@ -1222,9 +1242,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                                 value={data.sourceOfFunds || ''}
                                 onChange={(e) => {
                                     const newValue = e.target.value;
-                                    // Clear field error when user makes a selection
                                     clearFieldError && clearFieldError('sourceOfFunds');
-                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
                                     if (newValue === 'OTHER' || (data.sourceOfFunds === 'OTHER' && newValue !== 'OTHER')) {
                                         onChange({ ...data, sourceOfFunds: newValue, sourceOfFundsOther: '' });
                                     } else {
@@ -1266,9 +1284,7 @@ const CompanyDetailsStep = ({ data = {}, onChange, demoAccountNo, fieldErrors = 
                                 value={data.tradingAccountPurpose || ''}
                                 onChange={(e) => {
                                     const newValue = e.target.value;
-                                    // Clear field error when user makes a selection
                                     clearFieldError && clearFieldError('tradingAccountPurpose');
-                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
                                     if (newValue === 'OTHER' || (data.tradingAccountPurpose === 'OTHER' && newValue !== 'OTHER')) {
                                         onChange({ ...data, tradingAccountPurpose: newValue, tradingAccountPurposeOther: '' });
                                     } else {
@@ -1312,7 +1328,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
     const [uploadedDocuments, setUploadedDocuments] = useState(data.uploadedDocuments || {});
     const fileInputRefs = useRef({});
 
-    // Check if all required documents are uploaded on component mount
     useEffect(() => {
         const requiredDocuments = [
             'Certificate of Incorporation',
@@ -1330,7 +1345,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             );
         });
         
-        // Update the parent component with current status
         if (data.documentsUploaded !== allDocsUploaded) {
             onChange({ 
                 ...data, 
@@ -1338,7 +1352,7 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                 documentsUploaded: allDocsUploaded
             });
         }
-    }, []); // Only run on mount
+    }, []);
 
     const handleFileUpload = (categoryIndex, docIndex, file) => {
         if (!file) return;
@@ -1350,10 +1364,8 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
         };
         setUploadedDocuments(updatedDocs);
         
-        // Clear validation error for this document
         clearFieldError && clearFieldError(`document_${docKey}`);
         
-        // Check if all required documents are uploaded
         const requiredDocuments = [
             'Certificate of Incorporation',
             'Board of Resolution', 
@@ -1364,7 +1376,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             'Beneficial Owner Passport'
         ];
         
-        // Check if all required documents are uploaded
         const allDocsUploaded = requiredDocuments.every(doc => {
             return requirements.some(category => 
                 category.documents.some((categoryDoc, index) => {
@@ -1391,15 +1402,12 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
         delete updatedDocs[docKey];
         setUploadedDocuments(updatedDocs);
         
-        // Clear the file input
         if (fileInputRefs.current[docKey]) {
             fileInputRefs.current[docKey].value = '';
         }
         
-        // Clear validation error for this document
         clearFieldError && clearFieldError(`document_${docKey}`);
         
-        // Re-check if all required documents are still uploaded after removal
         const requiredDocuments = [
             'Certificate of Incorporation',
             'Board of Resolution', 
@@ -1484,7 +1492,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                         )}
                                     </div>
                                     
-                                    {/* Show file input when no file uploaded */}
                                     {!isUploaded && (
                                     <Form.Control 
                                         type="file" 
@@ -1500,7 +1507,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                         />
                                     )}
                                     
-                                    {/* Show custom file display when file uploaded */}
                                     {isUploaded && (
                                         <div className="mt-2">
                                             <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
@@ -1544,14 +1550,12 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    // Sync bank accounts with parent data
     useEffect(() => {
         if (data.bankAccounts && JSON.stringify(data.bankAccounts) !== JSON.stringify(bankAccounts)) {
             setBankAccounts(data.bankAccounts);
         }
     }, [data.bankAccounts]);
 
-    // Ensure parent data always has current bank accounts
     useEffect(() => {
         if (JSON.stringify(data.bankAccounts) !== JSON.stringify(bankAccounts)) {
             onChange({ ...data, bankAccounts });
@@ -1634,10 +1638,8 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                 value={data.authorizePersonEmail || ''}
                                 onChange={(e) => {
                                     const value = e.target.value;
-                                    // Validate email format
                                     const isValidEmail = value === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
                                     setEmailValid(isValidEmail);
-                                    // Clear field error when user starts typing
                                     clearFieldError && clearFieldError('authorizePersonEmail');
                                     onChange({ ...data, authorizePersonEmail: value });
                                 }}
@@ -1711,7 +1713,6 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     clearFieldError && clearFieldError('authorizePersonCitizen');
-                                    // Clear the "other" text field when switching to "OTHER" or away from "OTHER"
                                     if (newValue === 'OTHER' || (data.authorizePersonCitizen === 'OTHER' && newValue !== 'OTHER')) {
                                         onChange({ ...data, authorizePersonCitizen: newValue, authorizePersonCitizenOther: '' });
                                     } else {
@@ -1799,11 +1800,9 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                         isInvalid={fieldErrors.authorizePersonCountryCode}
                                         onChange={(e) => {
                                             const selectedCode = e.target.value;
-                                            // Clear field errors when user makes a selection
                                             clearFieldError && clearFieldError('authorizePersonCountryCode');
                                             clearFieldError && clearFieldError('authorizePersonPhoneNumber');
                                             
-                                            // If no country is selected (back to "Select Country Code"), clear the phone number
                                             if (!selectedCode) {
                                                 onChange({ 
                                                     ...data, 
@@ -1811,7 +1810,6 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                                     authorizePersonPhoneNumber: ''
                                                 });
                                             }
-                                            // If a country is selected, set the phone number to just the country code
                                             else {
                                                 onChange({ 
                                                     ...data, 
@@ -1842,22 +1840,9 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                         isInvalid={fieldErrors.authorizePersonPhoneNumber}
                                         onChange={(e) => {
                                             let value = e.target.value;
-                                            
-                                            // Clear field error when user starts typing
                                             clearFieldError && clearFieldError('authorizePersonPhoneNumber');
-                                            
-                                            // If there's a country code, ensure it stays at the beginning
                                             if (data.authorizePersonCountryCode) {
-                                                if (!value.startsWith(data.authorizePersonCountryCode)) {
-                                                    // If user deleted the country code, restore it
-                                                    value = data.authorizePersonCountryCode + ' ' + value.replace(/^\+\d+\s?/, '');
-                                                } else {
-                                                    // Extract the number part after country code
-                                                    const numberPart = value.substring(data.authorizePersonCountryCode.length).trim();
-                                                    // Only allow numbers in the phone number part
-                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
-                                                    value = data.authorizePersonCountryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
-                                                }
+                                                value = formatPhoneInput(value, data.authorizePersonCountryCode);
                                             }
                                             
                                             onChange({ ...data, authorizePersonPhoneNumber: value });
@@ -1870,7 +1855,6 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                     </Col>
                 </Row>
 
-                {/* Address Information */}
                 <h5 className="text-primary mb-3 mt-4">Address Information</h5>
                 <Row>
                     <Col md={6}>
@@ -1961,7 +1945,6 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                     </Col>
                 </Row>
 
-                {/* Yes/No Questions */}
                 <h5 className="text-primary mb-3 mt-4">Background Information</h5>
                 <Row>
                     <Col md={12}>
@@ -1978,7 +1961,6 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                     onChange={(e) => {
                                         const newValue = e.target.value;
                                         clearFieldError && clearFieldError('authorizePersonInvestmentExperience');
-                                        // Clear the details field when switching to "YES" or away from "YES"
                                         if (newValue === 'YES' || (data.authorizePersonInvestmentExperience === 'YES' && newValue !== 'YES')) {
                                             onChange({ ...data, authorizePersonInvestmentExperience: newValue, authorizePersonInvestmentExperienceDetails: '' });
                                         } else {
@@ -1996,7 +1978,6 @@ const AuthorizePersonStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                     onChange={(e) => {
                                         const newValue = e.target.value;
                                         clearFieldError && clearFieldError('authorizePersonInvestmentExperience');
-                                        // Clear the details field when switching to "NO" or away from "YES"
                                         if (newValue === 'NO' || (data.authorizePersonInvestmentExperience === 'YES' && newValue !== 'YES')) {
                                             onChange({ ...data, authorizePersonInvestmentExperience: newValue, authorizePersonInvestmentExperienceDetails: '' });
                                         } else {
@@ -2447,7 +2428,6 @@ const PassportUploadStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
         };
         setUploadedDocuments(updatedDocs);
         
-        // Clear validation error for this document
         clearFieldError && clearFieldError(`document_${docKey}`);
         
             onChange({ 
@@ -2463,12 +2443,10 @@ const PassportUploadStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
         delete updatedDocs[docKey];
         setUploadedDocuments(updatedDocs);
         
-        // Clear the file input
         if (fileInputRefs.current[docKey]) {
             fileInputRefs.current[docKey].value = '';
         }
         
-        // Clear validation error for this document
         clearFieldError && clearFieldError(`document_${docKey}`);
         
         onChange({ 
@@ -2582,7 +2560,6 @@ const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData, fieldE
     }, []);
 
     const handleCheckboxChange = (fieldName, checked) => {
-        // Clear field error when checkbox is checked
         if (checked && clearFieldError) {
             clearFieldError(fieldName);
         }
@@ -2591,7 +2568,6 @@ const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData, fieldE
     };
 
     const handleSubmit = () => {
-        // Check if all required agreements are checked
         const requiredAgreements = agreements.filter(agreement => agreement.required);
         const uncheckedAgreements = requiredAgreements.filter(agreement => !data[agreement.field]);
         
@@ -2600,14 +2576,9 @@ const DocumentAgreementsStep = ({ data = {}, onChange, onSubmit, allData, fieldE
             return;
         }
 
-        // Submit the form with all data
         onSubmit(allData);
     };
 
-    const areAllRequiredAgreementsChecked = () => {
-        const requiredAgreements = agreements.filter(agreement => agreement.required);
-        return requiredAgreements.every(agreement => data[agreement.field]);
-    };
 
     const agreements = [
         {

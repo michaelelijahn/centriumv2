@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
+import { validateEmail, validateDateOfBirth, isValidEmail } from '../../../common/helpers';
+import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
+import en from 'react-phone-number-input/locale/en';
+import { validateStepEfficiently } from './IndonesianPersonFormValidation';
 
 const IndonesianPersonForm = () => {
     const [formData, setFormData] = useState({});
@@ -11,7 +15,6 @@ const IndonesianPersonForm = () => {
     const { showNotification } = useNotificationContext();
     const navigate = useNavigate();
 
-    // Function to clear specific field errors
     const clearFieldError = (fieldName) => {
         if (fieldErrors[fieldName]) {
             setFieldErrors(prev => {
@@ -22,7 +25,6 @@ const IndonesianPersonForm = () => {
         }
     };
 
-    // Function to set specific field errors
     const setFieldError = (fieldName) => {
         setFieldErrors(prev => ({
             ...prev,
@@ -30,7 +32,6 @@ const IndonesianPersonForm = () => {
         }));
     };
 
-    // Steps for actual rendering logic
     const steps = [
         {
             title: "Requirements",
@@ -106,7 +107,6 @@ const IndonesianPersonForm = () => {
         }
     ];
 
-    // Steps for progress display (Declaration and Trading Simulation combined)
     const progressSteps = [
         {
             title: "Requirements",
@@ -164,10 +164,6 @@ const IndonesianPersonForm = () => {
     ];
 
     const renderStep = ({ currentStep, formData: stepData, updateFormData, allFormData = {} }) => {
-        // Flatten all form data from all steps into a single object
-        const flattenedData = Object.values(allFormData).reduce((acc, curr) => {
-            return { ...acc, ...curr };
-        }, {});
 
         switch (currentStep) {
             case 0:
@@ -213,645 +209,18 @@ const IndonesianPersonForm = () => {
         }
     };
 
-    // Validation functions for each step
     const validateStep = (stepIndex, stepData, allData) => {
-        switch (stepIndex) {
-            case 0: // Requirements step - always valid (just informational)
-                return { isValid: true, errors: [] };
-            
-            case 1: // Account Information step
-                return validateAccountInformationStep(stepData);
-            
-            case 2: // Data Pribadi step
-                return validateDataPribadiStep(stepData);
-            
-            case 3: // Emergency Contact step
-                return validateEmergencyContactStep(stepData);
-            
-            case 4: // Data Pekerjaan step
-                return validateDataPekerjaanStep(stepData);
-            
-            case 5: // Daftar Kekayaan step
-                return validateDaftarKekayaanStep(stepData);
-            
-            case 6: // Rekening Bank step
-                return validateRekeningBankStep(stepData);
-            
-            case 7: // Document Upload step
-                return validateDocumentUploadStep(stepData);
-            
-            case 8: // Declaration step
-                return validateDeclarationStep(stepData);
-            
-            case 9: // Trading Simulation step
-                return validateTradingSimulationStep(stepData);
-            
-            case 10: // Disclosure Statement step
-                return validateDisclosureStatementStep(stepData);
-            
-            case 11: // Risk Disclosure Document step
-                return validateRiskDisclosureDocumentStep(stepData);
-            
-            case 12: // Additional Disclosure Statement step
-                return validateAdditionalDisclosureStep(stepData);
-            
-            case 13: // Electronic Agreement step
-                return validateElectronicAgreementStep(stepData);
-            
-            case 14: // Trading Rules step
-                return validateTradingRulesStep(stepData);
-            
-            case 15: // New Fund Declaration step  
-                return validateNewFundDeclarationStep(stepData);
-            
-            case 16: // Access Code Responsibility step
-                return validateAccessCodeResponsibilityStep(stepData);
-            
-            case 17: // Fund Declaration step
-                return validateFundDeclarationStep(stepData);
-            
-            case 18: // Process Verification step
-                return validateProcessVerificationStep(stepData);
-            
-            default:
-                return { isValid: true, errors: [] };
-        }
+        return validateStepEfficiently(stepIndex, stepData);
     };
 
-    const validateAccountInformationStep = (data) => {
-        const errors = [];
-        
-        if (!data.email?.trim()) {
-            errors.push('Email address is required');
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-            errors.push('Please enter a valid email address');
-        }
-        
-        if (!data.demoAccountNo?.trim()) {
-            errors.push('Demo account selection is required');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDataPribadiStep = (data) => {
-        const errors = [];
-        const requiredFields = [
-            { field: 'namaLengkap', label: 'Nama Lengkap' },
-            { field: 'tempatLahir', label: 'Tempat Lahir' },
-            { field: 'tanggalLahir', label: 'Tanggal Lahir' },
-            { field: 'noKTP', label: 'No. KTP' },
-            { field: 'noNPWP', label: 'No. NPWP' },
-            { field: 'jenisKelamin', label: 'Jenis Kelamin' },
-            { field: 'namaIbuKandung', label: 'Nama Ibu Kandung' },
-            { field: 'statusPerkawinan', label: 'Status Perkawinan' },
-            { field: 'streetAddress', label: 'Street Address' },
-            { field: 'city', label: 'City' },
-            { field: 'postalCode', label: 'Postal Code' },
-            { field: 'noHandphone', label: 'No. Handphone' },
-            { field: 'statusKepemilikanRumah', label: 'Status Kepemilikan Rumah' },
-            { field: 'tujuanPembukaanRekening', label: 'Tujuan Pembukaan Rekening' },
-            { field: 'pengalamanInvestasi', label: 'Pengalaman Investasi' },
-            { field: 'anggotaKeluargaBAPPEBTI', label: 'Anggota Keluarga BAPPEBTI' },
-            { field: 'pernahPailit', label: 'Pernah Pailit' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
-        
-        // Validate age (must be at least 21 years old)
-        if (data.tanggalLahir) {
-            const birthDate = new Date(data.tanggalLahir);
-            const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
-                ? age - 1
-                : age;
-                
-            if (actualAge < 21) {
-                errors.push('Minimum 21 years old is required');
-            }
-        }
-        
-        // Check conditional fields
-        if (data.statusPerkawinan === 'Married' && !data.namaIstriSuami?.trim()) {
-            errors.push('Nama Istri/Suami is required when married');
-        }
-        
-        if (data.statusKepemilikanRumah === 'Lainnya' && !data.statusKepemilikanRumahOther?.trim()) {
-            errors.push('Please specify other home ownership status');
-        }
-        
-        if (data.tujuanPembukaanRekening === 'Lainnya' && !data.tujuanPembukaanRekeningOther?.trim()) {
-            errors.push('Please specify other account opening purpose');
-        }
-        
-        if (data.pengalamanInvestasi === 'Yes' && !data.pengalamanInvestasiBidang?.trim()) {
-            errors.push('Please provide details about your investment experience');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateEmergencyContactStep = (data) => {
-        const errors = [];
-        const requiredFields = [
-            { field: 'emergencyContactName', label: 'Emergency Contact Name' },
-            { field: 'emergencyContactPhone', label: 'Emergency Contact Phone' },
-            { field: 'emergencyContactStreetAddress', label: 'Emergency Contact Street Address' },
-            { field: 'emergencyContactCity', label: 'Emergency Contact City' },
-            { field: 'emergencyContactPostalCode', label: 'Emergency Contact Postal Code' },
-            { field: 'emergencyContactRelationship', label: 'Emergency Contact Relationship' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
-        
-        // Check conditional fields
-        if (data.emergencyContactRelationship === 'Lainnya' && !data.emergencyContactRelationshipOther?.trim()) {
-            errors.push('Please specify other relationship');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDataPekerjaanStep = (data) => {
-        const errors = [];
-        
-        // Check for jenisPekerjaan (employment type in Indonesian form)
-        if (!data.jenisPekerjaan?.trim()) {
-            errors.push('Jenis Pekerjaan is required');
-        }
-        
-        // If "Lainnya" (Other) is selected, check if other field is filled
-        if (data.jenisPekerjaan === 'Lainnya' && !data.jenisPekerjaanOther?.trim()) {
-            errors.push('Please specify other employment type');
-        }
-        
-        // If employment type requires company details, validate those fields
-        if (data.jenisPekerjaan === 'Swasta' || data.jenisPekerjaan === 'Wiraswasta' || 
-            data.jenisPekerjaan === 'Profesional' || data.jenisPekerjaan === 'ASN') {
-            
-            const employmentFields = [
-                { field: 'namaPerusahaan', label: 'Nama Perusahaan' },
-                { field: 'bidangUsaha', label: 'Bidang Usaha' },
-                { field: 'jabatan', label: 'Jabatan' },
-                { field: 'lamaBekerja', label: 'Lama Bekerja' },
-                { field: 'kantorSebelumnya', label: 'Kantor Sebelumnya' },
-                { field: 'alamatKantor', label: 'Alamat Kantor' },
-                { field: 'kotaKantor', label: 'Kota Kantor' },
-                { field: 'postalCodeKantor', label: 'Postal Code Kantor' },
-                { field: 'noTeleponKantor', label: 'No. Telepon Kantor' }
-            ];
-            
-            employmentFields.forEach(({ field, label }) => {
-                if (!data[field]?.trim()) {
-                    errors.push(`${label} is required`);
-                }
-            });
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDaftarKekayaanStep = (data) => {
-        const errors = [];
-        
-        const requiredFields = [
-            { field: 'penghasilanPertahun', label: 'Penghasilan Pertahun' },
-            { field: 'lokasiRumah', label: 'Lokasi Rumah' },
-            { field: 'nilaiNJOP', label: 'Nilai NJOP' },
-            { field: 'bankDeposit', label: 'Bank Deposit' },
-            { field: 'jumlah', label: 'Jumlah' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
-        
-        // lainnya is optional - no validation needed
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateRekeningBankStep = (data) => {
-        const errors = [];
-        
-        if (!data.bankAccounts || data.bankAccounts.length === 0) {
-            errors.push('At least one bank account is required');
-        } else {
-            data.bankAccounts.forEach((account, index) => {
-                const bankRequiredFields = [
-                    { field: 'namaBank', label: `Bank ${index + 1} - Nama Bank` },
-                    { field: 'cabang', label: `Bank ${index + 1} - Cabang` },
-                    { field: 'noRekening', label: `Bank ${index + 1} - No. Rekening` },
-                    { field: 'namaPemilikRekening', label: `Bank ${index + 1} - Nama Pemilik Rekening` },
-                    { field: 'noTeleponBank', label: `Bank ${index + 1} - No. Telepon Bank` },
-                    { field: 'bankAccountType', label: `Bank ${index + 1} - Jenis Rekening Bank` }
-                ];
-                
-                bankRequiredFields.forEach(({ field, label }) => {
-                    if (!account[field]?.trim()) {
-                        errors.push(`${label} is required`);
-                    }
-                });
-                
-                // If "LAINNYA" (Other) is selected for bank account type, check the other field
-                if (account.bankAccountType === 'LAINNYA' && !account.bankAccountTypeOther?.trim()) {
-                    errors.push(`Bank ${index + 1} - Please specify other account type`);
-                }
-            });
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDocumentUploadStep = (data) => {
-        const errors = [];
-        
-        // Get document requirements and check each one
-        documentRequirements.forEach((category, categoryIndex) => {
-            if (!category.optional) {
-                category.documents.forEach((doc, docIndex) => {
-                    const docKey = `${categoryIndex}_${docIndex}`;
-                    const hasFile = data.uploadedFiles && data.uploadedFiles[docKey] && data.uploadedFiles[docKey].name;
-                    
-                    if (!hasFile) {
-                        errors.push(`Missing required document: ${doc}`);
-                    }
-                });
-            }
-        });
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDeclarationStep = (data) => {
-        const errors = [];
-        
-        // Check if the declaration radio button is selected
-        if (!data.declaration) {
-            errors.push('Please acknowledge the company profile agreement by selecting "Ya"');
-        } else if (data.declaration === 'tidak') {
-            errors.push('You must select "Ya" to continue');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateTradingSimulationStep = (data) => {
-        const errors = [];
-        
-        // Check if the trading simulation radio button is set to "ya" (Yes)
-        if (!data.tradingSimulation) {
-            errors.push('Please acknowledge the trading simulation agreement by selecting "Ya"');
-        } else if (data.tradingSimulation === 'tidak') {
-            errors.push('You must select "Ya" to continue for trading simulation');
-        }
-        
-        // Check if trading experience is selected
-        if (!data.tradingExperience) {
-            errors.push('Trading experience information is required');
-        }
-        // Note: Trading experience can be "tidak" - users are not required to have previous experience
-        
-        // If has experience, validate additional fields
-        if (data.tradingExperience === 'ya') {
-            if (!data.brokerCompany?.trim()) {
-                errors.push('Previous broker company name is required');
-            }
-            if (!data.demoAccountNumber?.trim()) {
-                errors.push('Previous demo account number is required');
-            }
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDisclosureStatementStep = (data) => {
-        const errors = [];
-        
-        // Check if the disclosure statement radio button is set to "ya" (Yes)
-        if (!data.disclosureStatement) {
-            errors.push('Please acknowledge the disclosure statement by selecting "Ya"');
-        } else if (data.disclosureStatement === 'tidak') {
-            errors.push('You must select "Ya" to continue for disclosure statement');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateRiskDisclosureDocumentStep = (data) => {
-        const errors = [];
-
-        const requiredRiskStatements = [
-            'point1', 'point2', 'point3', 'point4', 'point5',
-            'point6', 'point7', 'point8', 'point9', 'point10',
-            'point11', 'point12', 'point13', 'point14'
-        ];
-        
-        requiredRiskStatements.forEach((statement, index) => {
-            if (!data[statement]) {
-                errors.push(`Please acknowledge risk statement ${index + 1}`);
-            }
-        });
-        
-        // Check final acceptance radio button
-        if (!data.finalAcceptance) {
-            errors.push('Please acknowledge the risk disclosure by selecting "Ya"');
-        } else if (data.finalAcceptance === 'tidak') {
-            errors.push('You must select "Ya" to continue for risk disclosure');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateAdditionalDisclosureStep = (data) => {
-        const errors = [];
-        
-        if (!data.additionalDisclosureStatement) {
-            errors.push('Please acknowledge the additional disclosure statement');
-        } else if (data.additionalDisclosureStatement === 'tidak') {
-            errors.push('You must select "Ya" to continue for additional disclosure statement');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateElectronicAgreementStep = (data) => {
-        const errors = [];
-        
-        if (!data.electronicAgreement) {
-            errors.push('Please acknowledge the electronic power of attorney agreement');
-        } else if (data.electronicAgreement === 'tidak') {
-            errors.push('You must select "Ya" to continue for electronic agreement');
-        }
-        
-        if (!data.disputeResolutionBappebti || !data.disputeResolutionJakarta) {
-            errors.push('Please select both dispute resolution methods');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateTradingRulesStep = (data) => {
-        const errors = [];
-        
-        if (!data.tradingRulesAcceptance) {
-            errors.push('Please acknowledge the PALN trading rules');
-        } else if (data.tradingRulesAcceptance === 'no') {
-            errors.push('You must select "Ya" to continue for trading rules');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateNewFundDeclarationStep = (data) => {
-        const errors = [];
-        
-        if (!data.newFundDeclarationAcceptance) {
-            errors.push('Please acknowledge the personal fund ownership declaration by selecting "Ya"');
-        } else if (data.newFundDeclarationAcceptance === 'no') {
-            errors.push('You must select "Ya" to continue for fund declaration');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateFundDeclarationStep = (data) => {
-        const errors = [];
-        
-        if (!data.fundDeclarationAcceptance) {
-            errors.push('Please acknowledge the fund declaration by selecting "Ya"');
-        } else if (data.fundDeclarationAcceptance === 'no') {
-            errors.push('You must select "Ya" to continue for fund declaration');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateAccessCodeResponsibilityStep = (data) => {
-        const errors = [];
-        
-        if (!data.accessCodeResponsibilityAcceptance) {
-            errors.push('Please acknowledge the personal access password responsibility statement');
-        } else if (data.accessCodeResponsibilityAcceptance === 'no') {
-            errors.push('You must select "Ya" to continue for access code responsibility');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateProcessVerificationStep = (data) => {
-        const errors = [];
-        
-        if (!data.verificationAcceptance) {
-            errors.push('Please acknowledge the electronic customer acceptance process verification');
-        } else if (data.verificationAcceptance === 'no') {
-            errors.push('You must select "Ya" to continue for process verification');
-        }
-        
-        if (!data.verificationDate?.trim()) {
-            errors.push('Process verification date is required');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
 
     const handleStepValidation = (stepIndex, stepData, allData) => {
         const validation = validateStep(stepIndex, stepData, allData);
         
-        // Create field error mapping for red border styling
-        const newFieldErrors = {};
+        // The new validation system already provides properly mapped field errors
+        let newFieldErrors = validation.fieldErrors || {};
+        
         if (!validation.isValid) {
-            validation.errors.forEach(error => {
-                // Account Information Step errors
-                if (error.includes('Email address is required') || error.includes('valid email address')) newFieldErrors.email = true;
-                if (error.includes('Demo account selection is required')) newFieldErrors.demoAccountNo = true;
-                
-                // Data Pribadi Step errors
-                if (error.includes('Nama Lengkap')) newFieldErrors.namaLengkap = true;
-                if (error.includes('Tempat Lahir')) newFieldErrors.tempatLahir = true;
-                if (error.includes('Tanggal Lahir')) newFieldErrors.tanggalLahir = true;
-                if (error.includes('Minimum 21 years old is required')) newFieldErrors.tanggalLahir = true;
-                if (error.includes('No. KTP')) newFieldErrors.noKTP = true;
-                if (error.includes('No. NPWP')) newFieldErrors.noNPWP = true;
-                if (error.includes('Jenis Kelamin')) newFieldErrors.jenisKelamin = true;
-                if (error.includes('Nama Ibu Kandung')) newFieldErrors.namaIbuKandung = true;
-                if (error.includes('Status Perkawinan')) newFieldErrors.statusPerkawinan = true;
-                if (error.includes('Street Address')) newFieldErrors.streetAddress = true;
-                if (error.includes('City')) newFieldErrors.city = true;
-                if (error.includes('Postal Code')) newFieldErrors.postalCode = true;
-                if (error.includes('Country')) newFieldErrors.country = true;
-                if (error.includes('Province')) newFieldErrors.province = true;
-                if (error.includes('No. Handphone')) newFieldErrors.noHandphone = true;
-                if (error.includes('Email')) newFieldErrors.contactEmail = true;
-                if (error.includes('Status Kepemilikan Rumah')) newFieldErrors.statusKepemilikanRumah = true;
-                if (error.includes('Tujuan Pembukaan Rekening')) newFieldErrors.tujuanPembukaanRekening = true;
-                if (error.includes('Pengalaman Investasi')) newFieldErrors.pengalamanInvestasi = true;
-                if (error.includes('Anggota Keluarga BAPPEBTI')) newFieldErrors.anggotaKeluargaBAPPEBTI = true;
-                if (error.includes('Pernah Pailit')) newFieldErrors.pernahPailit = true;
-                if (error.includes('WNI Tinggal di Luar Negeri')) newFieldErrors.wniLuarNegeri = true;
-                
-                // Conditional field errors
-                if (error.includes('Please specify other home ownership status')) newFieldErrors.statusKepemilikanRumahOther = true;
-                if (error.includes('Please specify other account opening purpose')) newFieldErrors.tujuanPembukaanRekeningOther = true;
-                if (error.includes('Please provide details about your investment experience')) newFieldErrors.pengalamanInvestasiBidang = true;
-                if (error.includes('Nama Istri/Suami is required when married')) newFieldErrors.namaIstriSuami = true;
-                
-                // Emergency Contact Step errors
-                if (error.includes('Emergency Contact Name')) newFieldErrors.emergencyContactName = true;
-                if (error.includes('Emergency Contact Phone')) newFieldErrors.emergencyContactPhone = true;
-                if (error.includes('Emergency Contact Street Address')) newFieldErrors.emergencyContactStreetAddress = true;
-                if (error.includes('Emergency Contact City')) newFieldErrors.emergencyContactCity = true;
-                if (error.includes('Emergency Contact Postal Code')) newFieldErrors.emergencyContactPostalCode = true;
-                if (error.includes('Emergency Contact Relationship')) newFieldErrors.emergencyContactRelationship = true;
-                if (error.includes('Please specify other relationship')) newFieldErrors.emergencyContactRelationshipOther = true;
-                
-                // Data Pekerjaan Step errors
-                if (error.includes('Jenis Pekerjaan')) newFieldErrors.jenisPekerjaan = true;
-                if (error.includes('Please specify other employment type')) newFieldErrors.jenisPekerjaanOther = true;
-                if (error.includes('Nama Perusahaan')) newFieldErrors.namaPerusahaan = true;
-                if (error.includes('Bidang Usaha')) newFieldErrors.bidangUsaha = true;
-                if (error.includes('Jabatan')) newFieldErrors.jabatan = true;
-                if (error.includes('Lama Bekerja')) newFieldErrors.lamaBekerja = true;
-                if (error.includes('Kantor Sebelumnya')) newFieldErrors.kantorSebelumnya = true;
-                if (error.includes('Alamat Kantor')) newFieldErrors.alamatKantor = true;
-                if (error.includes('Kota Kantor')) newFieldErrors.kotaKantor = true;
-                if (error.includes('Postal Code Kantor')) newFieldErrors.postalCodeKantor = true;
-                if (error.includes('No. Telepon Kantor')) newFieldErrors.noTeleponKantor = true;
-                
-                // Daftar Kekayaan Step errors
-                if (error.includes('Penghasilan Pertahun')) newFieldErrors.penghasilanPertahun = true;
-                if (error.includes('Lokasi Rumah')) newFieldErrors.lokasiRumah = true;
-                if (error.includes('Nilai NJOP')) newFieldErrors.nilaiNJOP = true;
-                if (error.includes('Bank Deposit')) newFieldErrors.bankDeposit = true;
-                if (error.includes('Jumlah')) newFieldErrors.jumlah = true;
-                if (error.includes('Account Type')) newFieldErrors.accountType = true;
-            });
-            
-            // Bank Account Step errors - using pattern matching like Foreign Person form
-            const bankFieldMappings = [
-                { pattern: /Bank (\d+) - Nama Bank is required/, field: 'namaBank' },
-                { pattern: /Bank (\d+) - Cabang is required/, field: 'cabang' },
-                { pattern: /Bank (\d+) - No\. Rekening is required/, field: 'noRekening' },
-                { pattern: /Bank (\d+) - Nama Pemilik Rekening is required/, field: 'namaPemilikRekening' },
-                { pattern: /Bank (\d+) - No\. Telepon Bank is required/, field: 'noTeleponBank' },
-                { pattern: /Bank (\d+) - Jenis Rekening Bank is required/, field: 'bankAccountType' },
-                { pattern: /Bank (\d+) - Please specify other account type/, field: 'bankAccountTypeOther' }
-            ];
-
-            // Check for bank field errors
-            validation.errors.forEach(error => {
-                bankFieldMappings.forEach(({ pattern, field }) => {
-                    const match = error.match(pattern);
-                    if (match) {
-                        const bankIndex = parseInt(match[1]) - 1;
-                        newFieldErrors[field] = true;
-                        newFieldErrors[`${field}_${bankIndex}`] = true;
-                    }
-                });
-            });
-            
-            // Document Upload Step errors
-            validation.errors.forEach(error => {
-                if (error.includes('Missing required document:')) {
-                    // Extract document name and find its position in requirements
-                    const docName = error.replace('Missing required document: ', '');
-                    documentRequirements.forEach((category, categoryIndex) => {
-                        category.documents.forEach((doc, docIndex) => {
-                            if (doc === docName) {
-                                const docKey = `${categoryIndex}_${docIndex}`;
-                                newFieldErrors[`document_${docKey}`] = true;
-                            }
-                        });
-                    });
-                }
-            });
-            
-            // Declaration Step errors
-            validation.errors.forEach(error => {
-                if (error.includes('company profile agreement') || error.includes('You must select "Ya" to continue')) {
-                    newFieldErrors.declaration = true;
-                }
-                if (error.includes('trading simulation') || error.includes('You must select "Ya" to continue for trading simulation')) {
-                    newFieldErrors.tradingSimulation = true;
-                }
-                if (error.includes('Trading experience information is required')) {
-                    newFieldErrors.tradingExperience = true;
-                }
-                if (error.includes('Previous broker company name is required')) {
-                    newFieldErrors.brokerCompany = true;
-                }
-                if (error.includes('Previous demo account number is required')) {
-                    newFieldErrors.demoAccountNumber = true;
-                }
-                if (error.includes('disclosure statement') || error.includes('You must select "Ya" to continue for disclosure statement')) {
-                    newFieldErrors.disclosureStatement = true;
-                }
-                if (error.includes('risk disclosure') || error.includes('You must select "Ya" to continue for risk disclosure')) {
-                    newFieldErrors.finalAcceptance = true;
-                }
-                if (error.includes('fund declaration') || error.includes('You must select "Ya" to continue for fund declaration') || error.includes('personal fund ownership declaration')) {
-                    newFieldErrors.newFundDeclarationAcceptance = true;
-                    newFieldErrors.fundDeclarationAcceptance = true;
-                }
-                
-                // Risk disclosure checkbox errors
-                if (error.includes('Please acknowledge risk statement')) {
-                    const match = error.match(/Please acknowledge risk statement (\d+)/);
-                    if (match) {
-                        const statementNumber = parseInt(match[1]);
-                        newFieldErrors[`point${statementNumber}`] = true;
-                    }
-                }
-                
-                // Additional disclosure statement errors
-                if (error.includes('additional disclosure statement') || error.includes('You must select "Ya" to continue for additional disclosure statement')) {
-                    newFieldErrors.additionalDisclosureStatement = true;
-                }
-                
-                // Electronic agreement errors
-                if (error.includes('electronic power of attorney agreement') || error.includes('You must select "Ya" to continue for electronic agreement')) {
-                    newFieldErrors.electronicAgreement = true;
-                }
-                if (error.includes('Please select both dispute resolution methods')) {
-                    newFieldErrors.disputeResolution = true;
-                }
-                
-                // Trading rules errors
-                if (error.includes('PALN trading rules') || error.includes('You must select "Ya" to continue for trading rules')) {
-                    newFieldErrors.tradingRulesAcceptance = true;
-                }
-                
-                // Access code responsibility errors
-                if (error.includes('personal access password responsibility') || error.includes('You must select "Ya" to continue for access code responsibility')) {
-                    newFieldErrors.accessCodeResponsibilityAcceptance = true;
-                }
-                
-                // Process verification errors
-                if (error.includes('electronic customer acceptance process verification') || error.includes('You must select "Ya" to continue for process verification')) {
-                    newFieldErrors.verificationAcceptance = true;
-                }
-                if (error.includes('Process verification date is required')) {
-                    newFieldErrors.verificationDate = true;
-                }
-            });
-            
-            // Set the field errors
-            setFieldErrors(newFieldErrors);
-            
-            // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
                 : `Please fix the following issues: ${validation.errors.join(', ')}`;
@@ -861,40 +230,30 @@ const IndonesianPersonForm = () => {
                 message: errorMessage,
                 type: 'error'
             });
-        } else {
-            // Clear field errors if validation passes
-            setFieldErrors({});
         }
         
+        setFieldErrors(newFieldErrors);
         return validation.isValid;
     };
 
-    const handleStepChange = (step, data) => {
-        // Step change handled by MultiStepFormWrapper
-    };
 
     const handleSubmit = async (allFormData) => {
         try {
-            // Show loading notification
             showNotification({
                 title: 'Processing',
                 message: 'Submitting your KYC application...',
                 type: 'info'
             });
             
-            // Flatten all form data from all steps
             const flattenedData = Object.values(allFormData).reduce((acc, curr) => {
                 return { ...acc, ...curr };
             }, {});
             
-            // Create FormData object to handle file uploads
             const formData = new FormData();
             
-            // Add all form fields to FormData
             Object.keys(flattenedData).forEach(key => {
                 const value = flattenedData[key];
                 
-                // Handle file uploads
                 if (key === 'uploadedFiles' && value) {
                     Object.keys(value).forEach(fileName => {
                         const fileData = value[fileName];
@@ -907,7 +266,6 @@ const IndonesianPersonForm = () => {
                         }
                     });
                 } else if (value !== null && value !== undefined && value !== '') {
-                    // Handle array data (like bank accounts)
                     if (Array.isArray(value)) {
                         formData.append(key, JSON.stringify(value));
                     } else {
@@ -916,7 +274,6 @@ const IndonesianPersonForm = () => {
                 }
             });
             
-            // Submit using AuthService (same pattern as other forms)
             const response = await AuthService.submitIndonesianPersonKYC(formData);
             
             if (response.success) {
@@ -926,13 +283,10 @@ const IndonesianPersonForm = () => {
                     type: 'success'
                 });
                 
-                // Clear the form
                 setFormData({});
-                
-                // Navigate to accounts page after successful submission
                 setTimeout(() => {
                     navigate('/dashboard/accounts');
-                }, 2000); // Give time for user to read the success message
+                }, 2000);
             } else {
                 throw new Error(response.message || 'Submission failed');
             }
@@ -948,12 +302,11 @@ const IndonesianPersonForm = () => {
         }
     };
 
-    // Function to map current step to progress step
     const getProgressStep = (currentStep) => {
         if (currentStep >= 8 && currentStep <= 10) {
-            return 8; // Declaration (8), Trading Simulation (9), and Disclosure Statement (10) show as Declaration in progress
+            return 8;
         } else if (currentStep >= 11) {
-            return 9; // Review & Submit step shows as step 9 in progress (0-indexed)
+            return 9;
         }
         return currentStep;
     };
@@ -964,7 +317,6 @@ const IndonesianPersonForm = () => {
             steps={progressSteps}
             actualSteps={steps}
             getProgressStep={getProgressStep}
-            onStepChange={handleStepChange}
             onSubmit={handleSubmit}
             onStepValidation={handleStepValidation}
         >
@@ -973,7 +325,6 @@ const IndonesianPersonForm = () => {
     );
 };
 
-// Step Components
 const RequirementsStep = ({ requirements }) => (
     <div>
         <div className="text-center mb-4">
@@ -1031,22 +382,16 @@ const AccountInformationStep = ({ data = {}, onChange, fieldErrors = {}, clearFi
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     const handleChange = (field, value) => {
         const newData = { ...data, [field]: value };
         
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError(field);
         }
         
         if (field === 'email') {
             setEmail(value);
-            const isValid = value.trim() === '' || validateEmail(value);
+            const isValid = value.trim() === '' || isValidEmail(value);
             setEmailValid(isValid);
             
             if (value.trim() !== '' && !isValid) {
@@ -1125,8 +470,6 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
 
     const handleChange = (field, value) => {
         const newData = { ...data, [field]: value };
-        
-        // Real-time age validation for date of birth
         if (field === 'tanggalLahir' && value) {
             const birthDate = new Date(value);
             const today = new Date();
@@ -1143,24 +486,20 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                     message: 'You must be at least 21 years old to register',
                     type: 'error'
                 });
-                // Set field error to make border red immediately
                 if (setFieldError) {
                     setFieldError('tanggalLahir');
                 }
             } else {
-                // Clear field error when age is valid
                 if (clearFieldError) {
                     clearFieldError(field);
                 }
             }
         } else {
-            // Clear field error when user starts typing (for non-date fields)
             if (clearFieldError) {
                 clearFieldError(field);
             }
         }
         
-        // Clear conditional fields when switching options
         if (field === 'statusKepemilikanRumah' && value !== 'Lainnya') {
             newData.statusKepemilikanRumahOther = '';
             if (clearFieldError) {
@@ -1192,8 +531,7 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                 <p className="text-muted fs-5">Please provide your personal information</p>
             </div>
 
-                    <Form>
-                {/* Basic Personal Information */}
+            <Form>
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -1340,7 +678,6 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                     </Col>
                 </Row>
 
-                {/* Conditional Spouse Name Field */}
                 {data.statusPerkawinan === 'Married' && (
                     <Row>
                         <Col md={12}>
@@ -1362,7 +699,6 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                     </Row>
                 )}
 
-                {/* Address Information */}
                 <Row>
                     <Col md={8}>
                         <Form.Group className="mb-3">
@@ -1417,33 +753,113 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                     </Col>
                 </Row>
 
-                {/* Contact Information */}
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">No. Telephone Rumah (Optional)</Form.Label>
-                            <Form.Control
-                                type="tel"
-                                placeholder="Home phone number"
-                                value={data.noTelephoneRumah || ''}
-                                onChange={(e) => onChange({ ...data, noTelephoneRumah: e.target.value })}
-                            />
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Telephone Rumah (Home Phone No.) (Optional)</Form.Label>
+                            <Row>
+                                <Col md={4}>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
+                                </Col>
+                                <Col md={8}>
+                                    <Form.Control
+                                        type="tel"
+                                        placeholder="Enter home phone number"
+                                        value={
+                                            data.noTelephoneRumah 
+                                                ? `+62 ${data.noTelephoneRumah}`
+                                                : '+62 '
+                                        }
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            const prefix = '+62';
+                                            
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
+                                            
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                noTelephoneRumah: finalNumber,
+                                                noTelephoneRumahCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.noTelephoneRumah) {
+                                                clearFieldError('noTelephoneRumah');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.noTelephoneRumah}
+                                    />
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">No. Handphone <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="tel"
-                                placeholder="Mobile phone number"
-                                value={data.noHandphone || ''}
-                                onChange={(e) => handleChange('noHandphone', e.target.value)}
-                                isInvalid={fieldErrors.noHandphone}
-                                required
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                Please enter your mobile phone number.
-                            </Form.Control.Feedback>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Handphone (Mobile Phone No.) <span className="text-danger">*</span></Form.Label>
+                            <Row>
+                                <Col md={4}>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
+                                </Col>
+                                <Col md={8}>
+                                    <Form.Control
+                                        type="tel"
+                                        placeholder="Enter mobile phone number"
+                                        value={
+                                            data.noHandphone 
+                                                ? `+62 ${data.noHandphone}`
+                                                : '+62 '
+                                        }
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            const prefix = '+62';
+                                            
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
+                                            
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                noHandphone: finalNumber,
+                                                noHandphoneCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.noHandphone) {
+                                                clearFieldError('noHandphone');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.noHandphone}
+                                        required
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter your mobile phone number.
+                                    </Form.Control.Feedback>
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1498,7 +914,6 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                     </Col>
                 </Row>
 
-                {/* Additional Information */}
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -1572,7 +987,6 @@ const DataPribadiStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErro
                     </Col>
                 </Row>
 
-                {/* Compliance Questions */}
                 <Row>
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -1636,12 +1050,10 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
     const handleChange = (field, value) => {
         const newData = { ...data, [field]: value };
         
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError(field);
         }
         
-        // Clear conditional fields when switching options
         if (field === 'emergencyContactRelationship' && value !== 'Lainnya') {
             newData.emergencyContactRelationshipOther = '';
             if (clearFieldError) {
@@ -1679,18 +1091,58 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
                     </Col>
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label className="text-muted">No. Handphone <span className="text-danger">*</span></Form.Label>
-                            <Form.Control
-                                type="tel"
-                                placeholder="Emergency contact phone number"
-                                value={data.emergencyContactPhone || ''}
-                                onChange={(e) => handleChange('emergencyContactPhone', e.target.value)}
-                                isInvalid={fieldErrors.emergencyContactPhone}
-                                required
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                Please enter emergency contact phone number.
-                            </Form.Control.Feedback>
+                            <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Handphone (Handphone No.) <span className="text-danger">*</span></Form.Label>
+                            <Row>
+                                <Col md={4}>
+                                    <Form.Control
+                                        type="text"
+                                        value="+62 (ID)"
+                                        readOnly
+                                        style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                    />
+                                </Col>
+                                <Col md={8}>
+                                    <Form.Control
+                                        type="tel"
+                                        placeholder="Enter emergency contact handphone"
+                                        value={
+                                            data.emergencyContactPhone 
+                                                ? `+62 ${data.emergencyContactPhone}`
+                                                : '+62 '
+                                        }
+                                        onChange={(e) => {
+                                            let phoneNumber = e.target.value;
+                                            const prefix = '+62';
+                                            
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
+                                            
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
+                                            
+                                            const newData = { 
+                                                ...data, 
+                                                emergencyContactPhone: finalNumber,
+                                                emergencyContactPhoneCountryCode: '+62'
+                                            };
+                                            if (clearFieldError && fieldErrors.emergencyContactPhone) {
+                                                clearFieldError('emergencyContactPhone');
+                                            }
+                                            onChange(newData);
+                                        }}
+                                        isInvalid={fieldErrors.emergencyContactPhone}
+                                        required
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        Please enter emergency contact phone number.
+                                    </Form.Control.Feedback>
+                                </Col>
+                            </Row>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -1790,7 +1242,6 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
 };
 
 const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError, setFieldError }) => {
-    const { showNotification } = useNotificationContext();
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1799,14 +1250,11 @@ const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldEr
     const handleChange = (field, value) => {
         const newData = { ...data, [field]: value };
         
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError(field);
         }
         
-        // Clear conditional fields when switching employment type
         if (field === 'jenisPekerjaan') {
-            // Clear all employment-related fields when changing job type
             if (value !== 'Swasta' && value !== 'Wiraswasta' && value !== 'Profesional' && value !== 'ASN') {
                 const fieldsToeClear = [
                     'namaPerusahaan', 'bidangUsaha', 'jabatan', 'lamaBekerja', 
@@ -1821,7 +1269,6 @@ const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldEr
                 });
             }
             
-            // Clear "other" field when not selecting "Lainnya"
             if (value !== 'Lainnya') {
                 newData.jenisPekerjaanOther = '';
                 if (clearFieldError) {
@@ -1883,7 +1330,6 @@ const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldEr
                     </Col>
                 </Row>
 
-                {/* Employment Details - Show for specific job types */}
                 {(data.jenisPekerjaan === 'Swasta' || data.jenisPekerjaan === 'Wiraswasta' || data.jenisPekerjaan === 'Profesional' || data.jenisPekerjaan === 'ASN') && (
                     <>
                         <Row>
@@ -1975,7 +1421,6 @@ const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldEr
                             </Col>
                         </Row>
 
-                        {/* Office Address */}
                         <Row>
                             <Col md={8}>
                                 <Form.Group className="mb-3">
@@ -2030,22 +1475,61 @@ const DataPekerjaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldEr
                             </Col>
                         </Row>
 
-                        {/* Office Contact */}
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label className="text-muted">No. Telepon Kantor <span className="text-danger">*</span></Form.Label>
-                                    <Form.Control
-                                        type="tel"
-                                        placeholder="Office Phone No"
-                                        value={data.noTeleponKantor || ''}
-                                        onChange={(e) => handleChange('noTeleponKantor', e.target.value)}
-                                        isInvalid={fieldErrors.noTeleponKantor}
-                                        required
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        Please enter office phone number.
-                                    </Form.Control.Feedback>
+                                    <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Telepon Kantor (Office Phone No.) <span className="text-danger">*</span></Form.Label>
+                                    <Row>
+                                        <Col md={4}>
+                                            <Form.Control
+                                                type="text"
+                                                value="+62 (ID)"
+                                                readOnly
+                                                style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                            />
+                                        </Col>
+                                        <Col md={8}>
+                                            <Form.Control
+                                                type="tel"
+                                                placeholder="Enter office phone number"
+                                                value={
+                                                    data.noTeleponKantor 
+                                                        ? `+62 ${data.noTeleponKantor}`
+                                                        : '+62 '
+                                                }
+                                                onChange={(e) => {
+                                                    let phoneNumber = e.target.value;
+                                                    const prefix = '+62';
+                                                    
+                                                    // If user tries to delete the +62 prefix, prevent it
+                                                    if (!phoneNumber.startsWith(prefix)) {
+                                                        // Don't update the field, just return to prevent deletion
+                                                        return;
+                                                    }
+                                                    
+                                                    const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                                    // Only keep digits, remove all non-digit characters
+                                                    const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                                    const finalNumber = cleanNumber.replace(/^0+/, '');
+                                                    
+                                                    const newData = { 
+                                                        ...data, 
+                                                        noTeleponKantor: finalNumber,
+                                                        noTeleponKantorCountryCode: '+62'
+                                                    };
+                                                    if (clearFieldError && fieldErrors.noTeleponKantor) {
+                                                        clearFieldError('noTeleponKantor');
+                                                    }
+                                                    onChange(newData);
+                                                }}
+                                                isInvalid={fieldErrors.noTeleponKantor}
+                                                required
+                                            />
+                                            <Form.Control.Feedback type="invalid">
+                                                Please enter office phone number.
+                                            </Form.Control.Feedback>
+                                        </Col>
+                                    </Row>
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
@@ -2075,22 +1559,19 @@ const DaftarKekayaanStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
     }, []);
 
     const handleChange = (field, value) => {
-        // Validate numeric fields
         if (['nilaiNJOP', 'bankDeposit', 'jumlah'].includes(field)) {
-            // Allow empty string or valid numbers (including decimals)
             if (value !== '' && (isNaN(value) || value < 0)) {
                 showNotification({
                     title: 'Invalid Input',
                     message: 'Please enter a valid positive number',
                     type: 'error'
                 });
-                return; // Don't update if invalid
+                return;
             }
         }
         
         const newData = { ...data, [field]: value };
         
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError(field);
         }
@@ -2234,13 +1715,11 @@ const RekeningBankStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        // Ensure bank accounts are initialized in parent data if not present
         if (!data.bankAccounts && bankAccounts.length > 0) {
             onChange({ ...data, bankAccounts: bankAccounts });
         }
     }, []);
 
-    // Update parent data when bank accounts change
     useEffect(() => {
         if (bankAccounts.length > 0) {
             onChange({ ...data, bankAccounts: bankAccounts });
@@ -2273,7 +1752,6 @@ const RekeningBankStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
         setBankAccounts(newAccounts);
         onChange({ ...data, bankAccounts: newAccounts });
         
-        // Clear field errors when user starts typing - using pattern from Foreign Person form
         if (clearFieldError) {
             clearFieldError(field);
             clearFieldError(`${field}_${index}`);
@@ -2377,18 +1855,62 @@ const RekeningBankStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
                             <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label className="text-muted">No. Telepon Bank <span className="text-danger">*</span></Form.Label>
-                                        <Form.Control
-                                            type="tel"
-                                            placeholder="Bank phone number"
-                                            value={account.noTeleponBank || ''}
-                                            onChange={(e) => updateBankAccount(index, 'noTeleponBank', e.target.value)}
-                                            isInvalid={fieldErrors.noTeleponBank || fieldErrors[`noTeleponBank_${index}`]}
-                                            required
-                                        />
-                                        <Form.Control.Feedback type="invalid">
-                                            No. Telepon Bank is required.
-                                        </Form.Control.Feedback>
+                                        <Form.Label className="text-muted" style={{ minHeight: '24px' }}>Bank Telephone No. <span className="text-danger">*</span></Form.Label>
+                                        <Row>
+                                            <Col md={4}>
+                                                <Form.Select
+                                                    value={account.bankTelephoneCountryCode || ''}
+                                                    onChange={(e) => updateBankAccount(index, 'bankTelephoneCountryCode', e.target.value)}
+                                                    isInvalid={fieldErrors.bankTelephoneCountryCode || fieldErrors[`bankTelephoneCountryCode_${index}`]}
+                                                    required
+                                                >
+                                                    <option value="">Code</option>
+                                                    {getCountries().map((country) => {
+                                                        const callingCode = `+${getCountryCallingCode(country)}`;
+                                                        const countryName = en[country] || country;
+                                                        return (
+                                                            <option key={country} value={callingCode}>
+                                                                {callingCode} ({countryName})
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </Form.Select>
+                                            </Col>
+                                            <Col md={8}>
+                                                <Form.Control
+                                                    type="tel"
+                                                    placeholder="Enter bank telephone number"
+                                                    value={
+                                                        account.bankTelephoneCountryCode && account.noTeleponBank 
+                                                            ? `${account.bankTelephoneCountryCode} ${account.noTeleponBank}`
+                                                            : account.bankTelephoneCountryCode 
+                                                                ? `${account.bankTelephoneCountryCode} `
+                                                                : account.noTeleponBank || ''
+                                                    }
+                                                    onChange={(e) => {
+                                                        let inputValue = e.target.value;
+                                                        const selectedCountryCode = account.bankTelephoneCountryCode;
+                                                        
+                                                        if (selectedCountryCode && inputValue.startsWith(selectedCountryCode)) {
+                                                            // Extract only the phone number part (remove country code prefix)
+                                                            const phoneNumberPart = inputValue.substring(selectedCountryCode.length).trim();
+                                                            // Only keep digits, remove all non-digit characters
+                                                            const cleanNumber = phoneNumberPart.replace(/\D/g, '');
+                                                            updateBankAccount(index, 'noTeleponBank', cleanNumber);
+                                                        } else if (!selectedCountryCode) {
+                                                            // If no country code selected, just store the input as is
+                                                            updateBankAccount(index, 'noTeleponBank', inputValue);
+                                                        }
+                                                        // If user tries to delete the country code prefix, don't update
+                                                    }}
+                                                    isInvalid={fieldErrors.noTeleponBank || fieldErrors[`noTeleponBank_${index}`]}
+                                                    required
+                                                />
+                                                <Form.Control.Feedback type="invalid">
+                                                    Bank Telephone No. is required.
+                                                </Form.Control.Feedback>
+                                            </Col>
+                                        </Row>
                                     </Form.Group>
                                 </Col>
                                 <Col md={6}>
@@ -2398,8 +1920,6 @@ const RekeningBankStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
                                             value={account.bankAccountType || ''}
                                             onChange={(e) => {
                                                 const newValue = e.target.value;
-                                                
-                                                // Update both fields in a single operation to avoid state conflicts
                                                 const newAccounts = [...bankAccounts];
                                                 newAccounts[index] = { 
                                                     ...newAccounts[index], 
@@ -2409,7 +1929,6 @@ const RekeningBankStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
                                                 setBankAccounts(newAccounts);
                                                 onChange({ ...data, bankAccounts: newAccounts });
                                                 
-                                                // Clear field error when user makes selection
                                                 if (clearFieldError) {
                                                     clearFieldError('bankAccountType');
                                                     clearFieldError(`bankAccountType_${index}`);
@@ -2783,7 +2302,6 @@ const CompanyProfileDeclaration = ({ data = {}, onChange, fieldErrors = {}, clea
 };
 
 const TradingSimulationDeclaration = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
-    // Flatten all form data from all steps into a single object
     const flattenedData = Object.values(allData).reduce((acc, curr) => {
         return { ...acc, ...curr };
     }, {});
@@ -3124,12 +2642,10 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
         setUploadedDocs(newUploadedDocs);
         onChange({ ...data, uploadedFiles: newUploadedDocs });
 
-        // Clear field error when file is uploaded
         if (clearFieldError) {
             clearFieldError(`document_${docKey}`);
         }
 
-        // Clear the file input
         if (fileInputRefs.current[docKey]) {
             fileInputRefs.current[docKey].value = '';
         }
@@ -3143,7 +2659,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
         setUploadedDocs(newUploadedDocs);
         onChange({ ...data, uploadedFiles: newUploadedDocs });
 
-        // Clear the file input value
         if (fileInputRefs.current[docKey]) {
             fileInputRefs.current[docKey].value = '';
         }
@@ -3193,7 +2708,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                         )}
                                     </div>
                                     
-                                    {/* Show file input when no file uploaded */}
                                     {!isUploaded && (
                                 <Form.Control 
                                     type="file" 
@@ -3209,7 +2723,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                         />
                                     )}
                                     
-                                    {/* Show custom file display when file uploaded */}
                                     {isUploaded && (
                                         <div className="mt-2">
                                             <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
@@ -3243,7 +2756,6 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange, fieldErrors = {}, cle
     const handleCheckboxChange = (field, value) => {
         onChange({ ...data, [field]: value });
         
-        // Clear field error when checkbox is checked
         if (clearFieldError && value) {
             clearFieldError(field);
         }
@@ -3307,10 +2819,6 @@ const RiskDisclosureDocumentStep = ({ data = {}, onChange, fieldErrors = {}, cle
             text: '<strong>Dokumen Pemberitahuan Adanya Risiko (Risk Disclosure) ini dibuat dan ditandatangani dalam Bahasa Indonesia.</strong>'
         }
     ];
-
-    // Check if all points are acknowledged
-    const allPointsAcknowledged = riskDisclosurePoints.every(point => data[point.id] === true);
-    const finalAcceptance = data.finalAcceptance === true;
 
     return (
         <div>
@@ -3553,7 +3061,6 @@ const AdditionalDisclosureStatementStep = ({ data = {}, onChange, fieldErrors = 
 };
 
 const ElectronicAgreementStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
-    // Function to generate current date in Indonesian format
     const getCurrentIndonesianDate = () => {
         const now = new Date();
         
@@ -3568,7 +3075,6 @@ const ElectronicAgreementStep = ({ data = {}, onChange, fieldErrors = {}, clearF
         return `${dayName}, tanggal ${date}, bulan ${month}, tahun ${year}`;
     };
 
-    // CSS styles for field alignment
     const fieldStyles = {
         fieldRow: {
             display: 'flex',
@@ -3962,7 +3468,6 @@ const TradingRulesStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
     const handleCheckboxChange = (field, value) => {
         onChange({ ...data, [field]: value });
         
-        // Clear field error when checkbox is checked
         if (clearFieldError && value) {
             clearFieldError(field);
         }
@@ -4143,18 +3648,15 @@ const NewFundDeclarationStep = ({ data = {}, onChange, allData = {}, fieldErrors
     const handleInputChange = (field, value) => {
         onChange({ ...data, [field]: value });
         
-        // Clear field error when user makes a selection
         if (clearFieldError && field === 'newFundDeclarationAcceptance') {
             clearFieldError('newFundDeclarationAcceptance');
         }
     };
 
-    // Flatten all form data from all steps into a single object
     const flattenedData = Object.values(allData).reduce((acc, curr) => {
         return { ...acc, ...curr };
     }, {});
 
-    // Auto-populate fields from previous steps
     const fullName = flattenedData.namaLengkap || '';
     const placeOfBirth = flattenedData.tempatLahir || '';
     const dateOfBirth = flattenedData.tanggalLahir || '';
@@ -4163,9 +3665,7 @@ const NewFundDeclarationStep = ({ data = {}, onChange, allData = {}, fieldErrors
     const postalCode = flattenedData.postalCode || '';
     const idNumber = flattenedData.noKTP || flattenedData.ktpNumber || '';
 
-    // Format the place and date of birth
     const placeAndDateOfBirth = `${placeOfBirth}, ${dateOfBirth}`.replace(/^, |, $/, '');
-    // Format city and postal code
     const cityAndPostalCode = `${city}, ${postalCode}`.replace(/^, |, $/, '');
 
     return (
@@ -4274,18 +3774,15 @@ const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {}, field
     const handleInputChange = (field, value) => {
         onChange({ ...data, [field]: value });
         
-        // Clear field error when user makes a selection
         if (clearFieldError && field === 'accessCodeResponsibilityAcceptance') {
             clearFieldError('accessCodeResponsibilityAcceptance');
         }
     };
 
-    // Flatten all form data from all steps into a single object
     const flattenedData = Object.values(allData).reduce((acc, curr) => {
         return { ...acc, ...curr };
     }, {});
 
-    // Auto-populate fields from previous steps
     const fullName = flattenedData.namaLengkap || '';
     const placeOfBirth = flattenedData.tempatLahir || '';
     const dateOfBirth = flattenedData.tanggalLahir || '';
@@ -4294,9 +3791,7 @@ const AccessCodeResponsibilityStep = ({ data = {}, onChange, allData = {}, field
     const postalCode = flattenedData.postalCode || '';
     const idNumber = flattenedData.noKTP || flattenedData.ktpNumber || '';
 
-    // Format the place and date of birth
     const placeAndDateOfBirth = `${placeOfBirth}, ${dateOfBirth}`.replace(/^, |, $/, '');
-    // Format city and postal code
     const cityAndPostalCode = `${city}, ${postalCode}`.replace(/^, |, $/, '');
 
     return (
@@ -4410,18 +3905,15 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {}, fieldErrors = 
     const handleInputChange = (field, value) => {
         onChange({ ...data, [field]: value });
         
-        // Clear field error when user makes a selection
         if (clearFieldError && field === 'fundDeclarationAcceptance') {
             clearFieldError('fundDeclarationAcceptance');
         }
     };
 
-    // Flatten all form data from all steps into a single object
     const flattenedData = Object.values(allData).reduce((acc, curr) => {
         return { ...acc, ...curr };
     }, {});
 
-    // Auto-populate fields from previous steps
     const fullName = flattenedData.namaLengkap || '';
     const placeAndDateOfBirth = `${flattenedData.tempatLahir || ''}, ${flattenedData.tanggalLahir || ''}`.replace(/^, |, $/, '');
     const homeAddress = flattenedData.streetAddress || flattenedData.alamat || '';
@@ -4531,8 +4023,7 @@ const FundDeclarationStep = ({ data = {}, onChange, allData = {}, fieldErrors = 
 };
 
 
-const ProcessVerificationStep = ({ data = {}, onChange, allData = {}, fieldErrors = {}, clearFieldError }) => {
-    // List of processes with their completion status - all defaulted to completed
+const ProcessVerificationStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldError }) => {
     const processes = [
         {
             id: 1,
@@ -4590,12 +4081,6 @@ const ProcessVerificationStep = ({ data = {}, onChange, allData = {}, fieldError
             isCompleted: true
         }
     ];
-
-    const handleProcessToggle = (processId) => {
-        const updatedProcesses = { ...data.processVerification };
-        updatedProcesses[processId] = !updatedProcesses[processId];
-        onChange({ ...data, processVerification: updatedProcesses });
-    };
 
     return (
         <div>

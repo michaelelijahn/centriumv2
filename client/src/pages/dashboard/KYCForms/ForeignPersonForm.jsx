@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import MultiStepFormWrapper from '../../../components/KYCForm/MultiStepFormWrapper';
 import { useNotificationContext } from '../../../common/context/useNotificationContext';
 import AuthService from '../../../common/api/auth';
+import { validateEmail, isValidEmail, validateDateOfBirth, validatePhoneWithCountryCode, formatPhoneInput } from '../../../common/helpers';
 import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
 import en from 'react-phone-number-input/locale/en';
+import { validateStepEfficiently } from './ForeignPersonFormValidation';
 
 const ForeignPersonForm = () => {
     const [formData, setFormData] = useState({});
@@ -13,7 +15,6 @@ const ForeignPersonForm = () => {
     const { showNotification } = useNotificationContext();
     const navigate = useNavigate();
 
-    // Function to clear specific field errors
     const clearFieldError = (fieldName) => {
         if (fieldErrors[fieldName]) {
             setFieldErrors(prev => {
@@ -59,7 +60,6 @@ const ForeignPersonForm = () => {
         }
     ];
 
-    // Document requirements for Foreign Person registration
     const documentRequirements = [
         {
             category: "Identity Documents",
@@ -112,438 +112,18 @@ const ForeignPersonForm = () => {
         }
     };
 
-    // Validation functions for each step
-    const validateStep = (stepIndex, stepData, allData) => {
-        switch (stepIndex) {
-            case 0: // Requirements step - always valid (just informational)
-                return { isValid: true, errors: [] };
-            
-            case 1: // Personal Email Registration step
-                return validatePersonalEmailStep(stepData);
-            
-            case 2: // Personal Data step
-                return validatePersonalDataStep(stepData);
-            
-            case 3: // Emergency Contact step
-                return validateEmergencyContactStep(stepData);
-            
-            case 4: // Employment Data step
-                return validateEmploymentDataStep(stepData);
-            
-            case 5: // Bank Account step
-                return validateBankAccountStep(stepData);
-            
-            case 6: // Document Upload step
-                return validateDocumentUploadStep(stepData);
-            
-            case 7: // Review step
-                return validateReviewStep(stepData);
-            
-            default:
-                return { isValid: true, errors: [] };
-        }
+    const validateStep = (stepIndex, stepData) => {
+        return validateStepEfficiently(stepIndex, stepData);
     };
 
-    const validatePersonalEmailStep = (data) => {
-        const errors = [];
-        
-        if (!data.email?.trim()) {
-            errors.push('Personal email address is required');
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-            errors.push('Please enter a valid email address');
-        }
-        
-        if (!data.demoAccountNo?.trim()) {
-            errors.push('Demo account selection is required');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validatePersonalDataStep = (data) => {
-        const errors = [];
-        const requiredFields = [
-            { field: 'fullName', label: 'Full Name' },
-            { field: 'placeOfBirth', label: 'Place of Birth' },
-            { field: 'dateOfBirth', label: 'Date of Birth' },
-            { field: 'passportId', label: 'Passport ID Number' },
-            { field: 'gender', label: 'Gender' },
-            { field: 'maritalStatus', label: 'Marital Status' },
-            { field: 'citizen', label: 'Citizenship' },
-            { field: 'countryCode', label: 'Country Code' },
-            { field: 'phoneNumber', label: 'Phone Number' },
-            { field: 'contactEmail', label: 'Email' },
-            { field: 'streetAddress', label: 'Street Address' },
-            { field: 'city', label: 'City' },
-            { field: 'postalCode', label: 'Postal Code' },
-            { field: 'country', label: 'Country' },
-            { field: 'accountOpeningPurpose', label: 'Account Opening Purpose' },
-            { field: 'investmentExperience', label: 'Investment Experience' },
-            { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
-            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
-        
-        // Check conditional fields
-        if (data.citizen === 'OTHER' && !data.citizenOther?.trim()) {
-            errors.push('Please specify other citizenship');
-        }
-        
-        if (data.country === 'OTHER' && !data.countryOther?.trim()) {
-            errors.push('Please specify other country');
-        }
-        
-        if (data.accountOpeningPurpose === 'Others' && !data.accountOpeningPurposeOther?.trim()) {
-            errors.push('Please specify other account opening purpose');
-        }
-        
-        if (data.investmentExperience === 'Yes' && !data.investmentExperienceDetails?.trim()) {
-            errors.push('Please provide details about your investment experience');
-        }
-        
-        // Validate age (must be at least 21 years old)
-        if (data.dateOfBirth) {
-            const birthDate = new Date(data.dateOfBirth);
-            const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())
-                ? age - 1
-                : age;
-                
-            if (actualAge < 21) {
-                errors.push('Minimum 21 years old is required');
-            }
-        }
-        
-        // Validate email format
-        if (data.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
-            errors.push('Please enter a valid email address');
-        }
-        
-        // Special validation for phone number - must have digits after country code
-        if (data.phoneNumber && data.countryCode) {
-            const numberPart = data.phoneNumber.substring(data.countryCode.length).trim();
-            if (!numberPart || numberPart.length === 0) {
-                errors.push('Please enter the phone number after the country code');
-            }
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateEmergencyContactStep = (data) => {
-        const errors = [];
-        const requiredFields = [
-            { field: 'emergencyContactName', label: 'Emergency Contact Full Name' },
-            { field: 'emergencyContactRelationship', label: 'Relationship' },
-            { field: 'emergencyContactCountryCode', label: 'Emergency Contact Country Code' },
-            { field: 'emergencyContactPhoneNumber', label: 'Emergency Contact Phone Number' },
-            { field: 'emergencyContactStreetAddress', label: 'Emergency Contact Street Address' },
-            { field: 'emergencyContactCity', label: 'Emergency Contact City' },
-            { field: 'emergencyContactPostalCode', label: 'Emergency Contact Postal Code' },
-            { field: 'emergencyContactCountry', label: 'Emergency Contact Country' },
-            { field: 'emergencyContactEmail', label: 'Emergency Contact Email' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
-        
-        // Check conditional fields
-        if (data.emergencyContactRelationship === 'OTHER' && !data.emergencyContactRelationshipOther?.trim()) {
-            errors.push('Please specify other relationship');
-        }
-        
-        if (data.emergencyContactCountry === 'OTHER' && !data.emergencyContactCountryOther?.trim()) {
-            errors.push('Please specify other emergency contact country');
-        }
-        
-        // Validate email format
-        if (data.emergencyContactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.emergencyContactEmail)) {
-            errors.push('Please enter a valid email address for emergency contact');
-        }
-        
-        // Special validation for phone number - must have digits after country code
-        if (data.emergencyContactPhoneNumber && data.emergencyContactCountryCode) {
-            const numberPart = data.emergencyContactPhoneNumber.substring(data.emergencyContactCountryCode.length).trim();
-            if (!numberPart || numberPart.length === 0) {
-                errors.push('Please enter the emergency contact phone number after the country code');
-            }
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateEmploymentDataStep = (data) => {
-        const errors = [];
-        
-        if (!data.employmentStatus?.trim()) {
-            errors.push('Employment status is required');
-        }
-        
-        // If employed or entrepreneur, validate employment details
-        if (data.employmentStatus === 'WORK' || data.employmentStatus === 'ENTREPRENEUR') {
-            const employmentFields = [
-                { field: 'companyName', label: 'Company Name' },
-                { field: 'businessNature', label: 'Nature of Business' },
-                { field: 'position', label: 'Position' },
-                { field: 'lengthOfWork', label: 'Length of Work' },
-                { field: 'officeCountryCode', label: 'Office Country Code' },
-                { field: 'officePhoneNumber', label: 'Office Phone Number' },
-                { field: 'officeStreetAddress', label: 'Office Street Address' },
-                { field: 'officeCity', label: 'Office City' },
-                { field: 'officePostalCode', label: 'Office Postal Code' },
-                { field: 'officeCountry', label: 'Office Country' }
-            ];
-            
-            employmentFields.forEach(({ field, label }) => {
-                if (!data[field]?.trim()) {
-                    errors.push(`${label} is required`);
-                }
-            });
-            
-            if (data.officeCountry === 'OTHER' && !data.officeCountryOther?.trim()) {
-                errors.push('Please specify other office country');
-            }
-            
-            // Special validation for office phone number - must have digits after country code
-            if (data.officePhoneNumber && data.officeCountryCode) {
-                const numberPart = data.officePhoneNumber.substring(data.officeCountryCode.length).trim();
-                if (!numberPart || numberPart.length === 0) {
-                    errors.push('Please enter the office phone number after the country code');
-                }
-            }
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateBankAccountStep = (data) => {
-        const errors = [];
-        
-        if (!data.bankAccounts || data.bankAccounts.length === 0) {
-            errors.push('At least one bank account is required');
-        } else {
-            data.bankAccounts.forEach((account, index) => {
-                const bankRequiredFields = [
-                    { field: 'bankName', label: `Bank ${index + 1} - Bank Name` },
-                    { field: 'accountName', label: `Bank ${index + 1} - Account Name` },
-                    { field: 'bankAddress', label: `Bank ${index + 1} - Bank Address` },
-                    { field: 'bankCity', label: `Bank ${index + 1} - Bank City` },
-                    { field: 'bankCountry', label: `Bank ${index + 1} - Bank Country` },
-                    { field: 'swiftCode', label: `Bank ${index + 1} - SWIFT Code` },
-                    { field: 'accountNo', label: `Bank ${index + 1} - Account Number` }
-                ];
-                
-                bankRequiredFields.forEach(({ field, label }) => {
-                    if (!account[field]?.trim()) {
-                        errors.push(`${label} is required`);
-                    }
-                });
-                
-                if (account.bankCountry === 'OTHER' && !account.bankCountryOther?.trim()) {
-                    errors.push(`Bank ${index + 1} - Please specify other country`);
-                }
-            });
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateDocumentUploadStep = (data) => {
-        const errors = [];
-        
-        // Check each required document individually
-        documentRequirements.forEach((category, categoryIndex) => {
-            if (!category.optional) {
-                category.documents.forEach((doc, docIndex) => {
-                    const docKey = `${categoryIndex}_${docIndex}`;
-                    const isUploaded = data.uploadedDocuments && data.uploadedDocuments[docKey];
-                    
-                    if (!isUploaded) {
-                        errors.push(`${doc} is required`);
-                    }
-                });
-            }
-        });
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateReviewStep = (data) => {
-        const errors = [];
-        
-        const requiredAgreements = [
-            'companyProfile',
-            'statementSimulation', 
-            'statementExperience',
-            'accountOpening',
-            'riskDisclosure',
-            'mandateAgreement',
-            'tradingRules',
-            'personalAccessPassword'
-        ];
-        
-        const agreementLabels = {
-            companyProfile: 'Company Profile',
-            statementSimulation: 'Statement of Having Simulation',
-            statementExperience: 'Statement of Having Experience', 
-            accountOpening: 'Account Opening Application',
-            riskDisclosure: 'Risk Disclosure',
-            mandateAgreement: 'Mandate Agreement',
-            tradingRules: 'Trading Rules',
-            personalAccessPassword: 'Personal Access Password'
-        };
-        
-        requiredAgreements.forEach(agreement => {
-            if (!data[agreement]) {
-                errors.push(`Please agree to ${agreementLabels[agreement]}`);
-            }
-        });
-        
-        return { isValid: errors.length === 0, errors };
-    };
 
     const handleStepValidation = (stepIndex, stepData, allData) => {
         const validation = validateStep(stepIndex, stepData, allData);
         
-        // Create field error mapping for red border styling
-        const newFieldErrors = {};
+        // The new validation system already provides properly mapped field errors
+        let newFieldErrors = validation.fieldErrors || {};
+        
         if (!validation.isValid) {
-            validation.errors.forEach(error => {
-                // Email Registration Step errors
-                if (error.includes('Personal email address') || error.includes('valid email address')) newFieldErrors.email = true;
-                if (error.includes('Demo account selection')) newFieldErrors.demoAccountNo = true;
-                
-                // Personal Data Step errors
-                if (error.includes('Full Name is required')) newFieldErrors.fullName = true;
-                if (error.includes('Place of Birth is required')) newFieldErrors.placeOfBirth = true;
-                if (error.includes('Date of Birth is required')) newFieldErrors.dateOfBirth = true;
-                if (error.includes('Minimum 21 years old is required')) newFieldErrors.dateOfBirth = true;
-                if (error.includes('Passport ID Number is required')) newFieldErrors.passportId = true;
-                if (error.includes('Gender is required')) newFieldErrors.gender = true;
-                if (error.includes('Marital Status is required')) newFieldErrors.maritalStatus = true;
-                if (error.includes('Citizenship is required')) newFieldErrors.citizen = true;
-                if (error.includes('Country Code is required')) newFieldErrors.countryCode = true;
-                if (error.includes('Phone Number is required')) newFieldErrors.phoneNumber = true;
-                if (error.includes('phone number after the country code')) newFieldErrors.phoneNumber = true;
-                if (error.includes('Email is required')) newFieldErrors.contactEmail = true;
-                if (error.includes('Street Address is required')) newFieldErrors.streetAddress = true;
-                if (error.includes('City is required')) newFieldErrors.city = true;
-                if (error.includes('Postal Code is required')) newFieldErrors.postalCode = true;
-                if (error.includes('Country is required')) newFieldErrors.country = true;
-                if (error.includes('Account Opening Purpose is required')) newFieldErrors.accountOpeningPurpose = true;
-                if (error.includes('Investment Experience is required')) newFieldErrors.investmentExperience = true;
-                if (error.includes('Family in BAPPEBTI is required')) newFieldErrors.familyInBappebti = true;
-                if (error.includes('Bankruptcy Declaration is required')) newFieldErrors.declaredBankrupt = true;
-                if (error.includes('specify other citizenship')) newFieldErrors.citizenOther = true;
-                if (error.includes('specify other country')) newFieldErrors.countryOther = true;
-                if (error.includes('specify other account opening purpose')) newFieldErrors.accountOpeningPurposeOther = true;
-                if (error.includes('details about your investment experience')) newFieldErrors.investmentExperienceDetails = true;
-                
-                // Emergency Contact Step errors
-                if (error.includes('Emergency Contact Full Name is required')) newFieldErrors.emergencyContactName = true;
-                if (error.includes('Relationship is required')) newFieldErrors.emergencyContactRelationship = true;
-                if (error.includes('Emergency Contact Country Code is required')) newFieldErrors.emergencyContactCountryCode = true;
-                if (error.includes('Emergency Contact Phone Number is required')) newFieldErrors.emergencyContactPhoneNumber = true;
-                if (error.includes('emergency contact phone number after the country code')) newFieldErrors.emergencyContactPhoneNumber = true;
-                if (error.includes('Emergency Contact Street Address is required')) newFieldErrors.emergencyContactStreetAddress = true;
-                if (error.includes('Emergency Contact City is required')) newFieldErrors.emergencyContactCity = true;
-                if (error.includes('Emergency Contact Postal Code is required')) newFieldErrors.emergencyContactPostalCode = true;
-                if (error.includes('Emergency Contact Country is required')) newFieldErrors.emergencyContactCountry = true;
-                if (error.includes('Emergency Contact Email is required')) newFieldErrors.emergencyContactEmail = true;
-                if (error.includes('valid email address for emergency contact')) newFieldErrors.emergencyContactEmail = true;
-                
-                // Employment Data Step errors
-                if (error.includes('Employment status is required')) newFieldErrors.employmentStatus = true;
-                if (error.includes('Company Name is required')) newFieldErrors.companyName = true;
-                if (error.includes('Nature of Business is required')) newFieldErrors.businessNature = true;
-                if (error.includes('Position is required')) newFieldErrors.position = true;
-                if (error.includes('Length of Work is required')) newFieldErrors.lengthOfWork = true;
-                if (error.includes('Office Country Code is required')) newFieldErrors.officeCountryCode = true;
-                if (error.includes('Office Phone Number is required')) newFieldErrors.officePhoneNumber = true;
-                if (error.includes('office phone number after the country code')) newFieldErrors.officePhoneNumber = true;
-                if (error.includes('Office Street Address is required')) newFieldErrors.officeStreetAddress = true;
-                if (error.includes('Office City is required')) newFieldErrors.officeCity = true;
-                if (error.includes('Office Postal Code is required')) newFieldErrors.officePostalCode = true;
-                if (error.includes('Office Country is required')) newFieldErrors.officeCountry = true;
-                if (error.includes('specify other office country')) newFieldErrors.officeCountryOther = true;
-                
-                // Bank Account Step errors - Handle indexed bank account errors
-                // More robust pattern matching for bank account errors
-                const bankFieldMappings = [
-                    { pattern: /Bank (\d+) - Bank Name is required/, field: 'bankName' },
-                    { pattern: /Bank (\d+) - Account Name is required/, field: 'accountName' },
-                    { pattern: /Bank (\d+) - Bank Address is required/, field: 'bankAddress' },
-                    { pattern: /Bank (\d+) - Bank City is required/, field: 'bankCity' },
-                    { pattern: /Bank (\d+) - Bank Country is required/, field: 'bankCountry' },
-                    { pattern: /Bank (\d+) - SWIFT Code is required/, field: 'swiftCode' },
-                    { pattern: /Bank (\d+) - Account Number is required/, field: 'accountNo' },
-                    { pattern: /Bank (\d+) - Please specify other country/, field: 'bankCountryOther' }
-                ];
-                
-                bankFieldMappings.forEach(({ pattern, field }) => {
-                    const match = error.match(pattern);
-                    if (match) {
-                        const index = parseInt(match[1]) - 1;
-                        newFieldErrors[`${field}_${index}`] = true;
-                    }
-                });
-                
-                // Also add general bank field errors (without index)
-                if (error.includes('Bank Name is required')) newFieldErrors.bankName = true;
-                if (error.includes('Account Name is required')) newFieldErrors.accountName = true;
-                if (error.includes('Bank Address is required')) newFieldErrors.bankAddress = true;
-                if (error.includes('Bank City is required')) newFieldErrors.bankCity = true;
-                if (error.includes('Bank Country is required')) newFieldErrors.bankCountry = true;
-                if (error.includes('SWIFT Code is required')) newFieldErrors.swiftCode = true;
-                if (error.includes('Account Number is required')) newFieldErrors.accountNo = true;
-                if (error.includes('Please specify other country')) newFieldErrors.bankCountryOther = true;
-                
-                // Handle case when no bank accounts exist - mark first bank account fields as invalid
-                if (error.includes('At least one bank account is required')) {
-                    const bankFields = ['bankName', 'accountName', 'bankAddress', 'bankCity', 'bankCountry', 'swiftCode', 'accountNo'];
-                    bankFields.forEach(field => {
-                        newFieldErrors[`${field}_0`] = true;
-                        newFieldErrors[field] = true; // Also add general field error
-                    });
-                }
-                
-                // Document Upload Step errors - Map specific document errors to field errors
-                documentRequirements.forEach((category, categoryIndex) => {
-                    if (!category.optional) {
-                        category.documents.forEach((doc, docIndex) => {
-                            if (error.includes(`${doc} is required`)) {
-                                const docKey = `${categoryIndex}_${docIndex}`;
-                                newFieldErrors[`document_${docKey}`] = true;
-                            }
-                        });
-                    }
-                });
-                
-                // Review Step errors - Map agreement errors to field errors
-                if (error.includes('Please agree to Company Profile')) newFieldErrors.companyProfile = true;
-                if (error.includes('Please agree to Statement of Having Simulation')) newFieldErrors.statementSimulation = true;
-                if (error.includes('Please agree to Statement of Having Experience')) newFieldErrors.statementExperience = true;
-                if (error.includes('Please agree to Account Opening Application')) newFieldErrors.accountOpening = true;
-                if (error.includes('Please agree to Risk Disclosure')) newFieldErrors.riskDisclosure = true;
-                if (error.includes('Please agree to Mandate Agreement')) newFieldErrors.mandateAgreement = true;
-                if (error.includes('Please agree to Trading Rules')) newFieldErrors.tradingRules = true;
-                if (error.includes('Please agree to Personal Access Password')) newFieldErrors.personalAccessPassword = true;
-                
-                // Add other step error mappings as needed
-            });
-            
-            // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
                 : `Please fix the following issues: ${validation.errors.join(', ')}`;
@@ -560,8 +140,6 @@ const ForeignPersonForm = () => {
     };
 
     const handleStepChange = (step, data) => {
-        console.log(`Moving to step ${step}`, data);
-        // Auto-populate demo account from email step
         if (step === 2 && data.demoAccountNo) {
             setFormData(prevData => ({
                 ...prevData,
@@ -573,48 +151,37 @@ const ForeignPersonForm = () => {
 
     const handleSubmit = async (data) => {
         try {
-            // Show processing notification
             showNotification({
                 title: 'Processing',
                 message: 'Submitting your KYC application...',
                 type: 'info'
             });
             
-            console.log('Submitting Foreign Person KYC:', data);
-            
-            // Flatten step data into a single object
             const flattenedData = {};
             Object.keys(data).forEach(stepKey => {
                 if (stepKey.startsWith('step_') && data[stepKey]) {
                     Object.assign(flattenedData, data[stepKey]);
                 }
             });
-            
-            console.log('Flattened data:', flattenedData);
-            
-            // Create FormData for multipart/form-data submission
             const formData = new FormData();
             
-            // Add all flattened form fields
             Object.keys(flattenedData).forEach(key => {
                 if (flattenedData[key] !== null && flattenedData[key] !== undefined) {
                     if (typeof flattenedData[key] === 'object' && !Array.isArray(flattenedData[key]) && !(flattenedData[key] instanceof File)) {
-                        // Skip file objects and convert other objects to JSON
+
                         formData.append(key, JSON.stringify(flattenedData[key]));
                     } else if (Array.isArray(flattenedData[key])) {
-                        // Convert arrays to JSON strings
+           
                         formData.append(key, JSON.stringify(flattenedData[key]));
                     } else if (flattenedData[key] instanceof File) {
-                        // Handle file uploads
+                   
                         formData.append(key, flattenedData[key]);
                     } else {
-                        // Handle primitive values
                         formData.append(key, flattenedData[key]);
                     }
                 }
             });
             
-            // Add uploaded files
             if (flattenedData.uploadedDocuments) {
                 Object.entries(flattenedData.uploadedDocuments).forEach(([key, fileName]) => {
                     if (fileName && flattenedData[`file_${key}`]) {
@@ -632,22 +199,18 @@ const ForeignPersonForm = () => {
                     type: 'success'
                 });
                 
-                // Clear the form
                 setFormData({});
                 
-                // Navigate to accounts page after successful submission
                 setTimeout(() => {
                     navigate('/dashboard/accounts');
-                }, 2000); // Give time for user to read the success message
+                }, 2000);
                 
-                console.log('KYC Application submitted:', response.data);
             } else {
                 throw new Error(response.message || 'Submission failed');
             }
         } catch (error) {
             console.error('Error submitting Foreign Person KYC:', error);
             
-            // Handle authentication errors more gracefully
             if (error.message && error.message.includes('Session expired')) {
                 showNotification({
                     title: 'Session Expired',
@@ -677,7 +240,6 @@ const ForeignPersonForm = () => {
     );
 };
 
-// Step Components
 const RequirementsStep = ({ requirements }) => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -740,22 +302,15 @@ const PersonalEmailRegistrationStep = ({ data = {}, onChange, fieldErrors = {}, 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     const handleEmailChange = (field, value) => {
         const newData = { ...data, [field]: value };
         
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError(field);
         }
-        
         if (field === 'email') {
             setEmail(value);
-            const isValid = value.trim() === '' || validateEmail(value);
+            const isValid = value.trim() === '' || isValidEmail(value);
             setEmailValid(isValid);
             
             if (value.trim() !== '' && !isValid) {
@@ -826,22 +381,14 @@ const PersonalDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
     const [contactEmailValid, setContactEmailValid] = useState(true);
     const { showNotification } = useNotificationContext();
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     const handleContactEmailChange = (value) => {
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError('contactEmail');
         }
         
-        // Validate email immediately
-        const isValid = value.trim() === '' || validateEmail(value);
+        const isValid = value.trim() === '' || isValidEmail(value);
         setContactEmailValid(isValid);
         
-        // Show notification for invalid email with content
         if (value.trim() !== '' && !isValid) {
             showNotification({
                 title: 'Invalid Email',
@@ -1123,11 +670,9 @@ const PersonalDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
                                           isInvalid={fieldErrors.countryCode}
                                           onChange={(e) => {
                                              const selectedCode = e.target.value;
-                                             // Clear field errors when user makes a selection
                                              clearFieldError && clearFieldError('countryCode');
                                              clearFieldError && clearFieldError('phoneNumber');
                                              
-                                             // If no country is selected (back to "Select Country Code"), clear the phone number
                                              if (!selectedCode) {
                                                  onChange({ 
                                                      ...data, 
@@ -1135,7 +680,6 @@ const PersonalDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
                                                      phoneNumber: ''
                                                  });
                                              }
-                                             // If a country is selected, set the phone number to just the country code
                                              else {
                                                  onChange({ 
                                                      ...data, 
@@ -1166,22 +710,9 @@ const PersonalDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldErr
                                           isInvalid={fieldErrors.phoneNumber}
                                           onChange={(e) => {
                                             let value = e.target.value;
-                                            
-                                            // Clear field error when user starts typing
                                             clearFieldError && clearFieldError('phoneNumber');
-                                            
-                                            // If there's a country code, ensure it stays at the beginning
                                             if (data.countryCode) {
-                                                if (!value.startsWith(data.countryCode)) {
-                                                    // If user deleted the country code, restore it
-                                                    value = data.countryCode + ' ' + value.replace(/^\+\d+\s?/, '');
-                                                } else {
-                                                    // Extract the number part after country code
-                                                    const numberPart = value.substring(data.countryCode.length).trim();
-                                                    // Only allow numbers in the phone number part
-                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
-                                                    value = data.countryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
-                                                }
+                                                value = formatPhoneInput(value, data.countryCode);
                                             }
                                             
                                             onChange({ ...data, phoneNumber: value });
@@ -1428,22 +959,14 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
     const [emergencyEmailValid, setEmergencyEmailValid] = useState(true);
     const { showNotification } = useNotificationContext();
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
     const handleEmergencyEmailChange = (value) => {
-        // Clear field error when user starts typing
         if (clearFieldError) {
             clearFieldError('emergencyContactEmail');
         }
         
-        // Validate email immediately
-        const isValid = value.trim() === '' || validateEmail(value);
+        const isValid = value.trim() === '' || isValidEmail(value);
         setEmergencyEmailValid(isValid);
         
-        // Show notification for invalid email with content
         if (value.trim() !== '' && !isValid) {
             showNotification({
                 title: 'Invalid Email',
@@ -1626,11 +1149,10 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
                                           isInvalid={fieldErrors.emergencyContactCountryCode}
                                           onChange={(e) => {
                                              const selectedCode = e.target.value;
-                                             // Clear field errors when user makes a selection
+                                            
                                              clearFieldError && clearFieldError('emergencyContactCountryCode');
                                              clearFieldError && clearFieldError('emergencyContactPhoneNumber');
                                              
-                                             // If no country is selected (back to "Select Country Code"), clear the phone number
                                              if (!selectedCode) {
                                                  onChange({ 
                                                      ...data, 
@@ -1638,7 +1160,6 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
                                                      emergencyContactPhoneNumber: ''
                                                  });
                                              }
-                                             // If a country is selected, set the phone number to just the country code
                                              else {
                                                  onChange({ 
                                                      ...data, 
@@ -1669,22 +1190,10 @@ const EmergencyContactStep = ({ data = {}, onChange, fieldErrors = {}, clearFiel
                                           isInvalid={fieldErrors.emergencyContactPhoneNumber}
                                           onChange={(e) => {
                                             let value = e.target.value;
-                                            
-                                            // Clear field error when user starts typing
                                             clearFieldError && clearFieldError('emergencyContactPhoneNumber');
                                             
-                                            // If there's a country code, ensure it stays at the beginning
                                             if (data.emergencyContactCountryCode) {
-                                                if (!value.startsWith(data.emergencyContactCountryCode)) {
-                                                    // If user deleted the country code, restore it
-                                                    value = data.emergencyContactCountryCode + ' ' + value.replace(/^\+\d+\s?/, '');
-                                                } else {
-                                                    // Extract the number part after country code
-                                                    const numberPart = value.substring(data.emergencyContactCountryCode.length).trim();
-                                                    // Only allow numbers in the phone number part
-                                                    const cleanNumber = numberPart.replace(/[^\d]/g, '');
-                                                    value = data.emergencyContactCountryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
-                                                }
+                                                value = formatPhoneInput(value, data.emergencyContactCountryCode);
                                             }
                                             
                                             onChange({ ...data, emergencyContactPhoneNumber: value });
@@ -1851,11 +1360,8 @@ const EmploymentDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
                                                 isInvalid={fieldErrors.officeCountryCode}
                                                 onChange={(e) => {
                                                    const selectedCode = e.target.value;
-                                                   // Clear field errors when user makes a selection
                                                    clearFieldError && clearFieldError('officeCountryCode');
                                                    clearFieldError && clearFieldError('officePhoneNumber');
-                                                   
-                                                   // If no country is selected (back to "Select Country Code"), clear the phone number
                                                    if (!selectedCode) {
                                                        onChange({ 
                                                            ...data, 
@@ -1863,7 +1369,6 @@ const EmploymentDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
                                                            officePhoneNumber: ''
                                                        });
                                                    }
-                                                   // If a country is selected, set the phone number to just the country code
                                                    else {
                                                        onChange({ 
                                                            ...data, 
@@ -1894,22 +1399,9 @@ const EmploymentDataStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
                                                 isInvalid={fieldErrors.officePhoneNumber}
                                                 onChange={(e) => {
                                                   let value = e.target.value;
-                                                  
-                                                  // Clear field error when user starts typing
                                                   clearFieldError && clearFieldError('officePhoneNumber');
-                                                  
-                                                  // If there's a country code, ensure it stays at the beginning
                                                   if (data.officeCountryCode) {
-                                                      if (!value.startsWith(data.officeCountryCode)) {
-                                                          // If user deleted the country code, restore it
-                                                          value = data.officeCountryCode + ' ' + value.replace(/^\+\d+\s?/, '');
-                                                      } else {
-                                                          // Extract the number part after country code
-                                                          const numberPart = value.substring(data.officeCountryCode.length).trim();
-                                                          // Only allow numbers in the phone number part
-                                                          const cleanNumber = numberPart.replace(/[^\d]/g, '');
-                                                          value = data.officeCountryCode + (cleanNumber ? ' ' + cleanNumber : ' ');
-                                                      }
+                                                      value = formatPhoneInput(value, data.officeCountryCode);
                                                   }
                                                   
                                                   onChange({ ...data, officePhoneNumber: value });
@@ -2255,7 +1747,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
     }, []);
 
     const getDocumentFieldName = (categoryIndex, docIndex) => {
-        // Map document categories to field names expected by backend
         const category = requirements[categoryIndex];
         const document = category.documents[docIndex];
         
@@ -2284,7 +1775,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             [docKey]: file || null
         };
         
-        // Clear field error when file is uploaded
         if (file && clearFieldError) {
             clearFieldError(`document_${docKey}`);
         }
@@ -2292,7 +1782,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
         setUploadedDocs(newUploadedDocs);
         setUploadedFiles(newUploadedFiles);
         
-        // Calculate if all required documents are uploaded
         const requiredDocsCount = requirements.filter(cat => !cat.optional)
             .reduce((total, cat) => total + cat.documents.length, 0);
         const uploadedRequiredCount = Object.entries(newUploadedDocs).filter(([key, value]) => {
@@ -2300,21 +1789,18 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             return value && !requirements[catIdx]?.optional;
         }).length;
         
-        // Store file object for later submission
         const updatedData = {
             ...data,
             uploadedDocuments: newUploadedDocs,
             uploadedFiles: newUploadedFiles,
             documentsUploaded: uploadedRequiredCount >= requiredDocsCount,
-            [`file_${docKey}`]: file  // Store actual file object
+            [`file_${docKey}`]: file 
         };
         
-        // Also store with backend field name
         if (file) {
             updatedData[fieldName] = file;
         }
         
-        // Update parent component with uploaded documents info
         onChange(updatedData);
     };
 
@@ -2332,7 +1818,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             [docKey]: null
         };
         
-        // Clear the file input value
         if (fileInputRefs.current[docKey]) {
             fileInputRefs.current[docKey].value = '';
         }
@@ -2340,7 +1825,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
         setUploadedDocs(newUploadedDocs);
         setUploadedFiles(newUploadedFiles);
         
-        // Calculate if all required documents are uploaded
         const requiredDocsCount = requirements.filter(cat => !cat.optional)
             .reduce((total, cat) => total + cat.documents.length, 0);
         const uploadedRequiredCount = Object.entries(newUploadedDocs).filter(([key, value]) => {
@@ -2348,7 +1832,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             return value && !requirements[catIdx]?.optional;
         }).length;
         
-        // Update parent component
         const updatedData = {
             ...data,
             uploadedDocuments: newUploadedDocs,
@@ -2357,7 +1840,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
             [`file_${docKey}`]: null
         };
         
-        // Remove the specific document file from the data
         updatedData[fieldName] = null;
         
         onChange(updatedData);
@@ -2407,7 +1889,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                         )}
                                     </div>
                                     
-                                    {/* Show file input when no file uploaded */}
                                     {!isUploaded && (
                                         <Form.Control 
                                             type="file" 
@@ -2423,7 +1904,6 @@ const DocumentUploadStep = ({ data = {}, onChange, requirements, fieldErrors = {
                                         />
                                     )}
                                     
-                                    {/* Show custom file display when file uploaded */}
                                     {isUploaded && (
                                         <div className="mt-2">
                                             <div className={`form-control d-flex align-items-center ${fieldErrors[`document_${docKey}`] ? 'is-invalid' : ''}`}>
@@ -2462,12 +1942,10 @@ const ReviewStep = ({ data = {}, onChange, allData, fieldErrors = {}, clearField
         const newAgreements = { ...agreements, [field]: value };
         setAgreements(newAgreements);
         
-        // Clear field error when checkbox is checked
         if (value && clearFieldError) {
             clearFieldError(field);
         }
         
-        // Update parent component with agreement data
         onChange({
             ...data,
             ...newAgreements

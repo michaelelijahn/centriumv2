@@ -6,6 +6,7 @@ import { useNotificationContext } from '../../../common/context/useNotificationC
 import AuthService from '../../../common/api/auth';
 import { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
 import en from 'react-phone-number-input/locale/en';
+import { validateStepEfficiently } from './IndonesianCompanyFormValidation';
 
 const IndonesianCompanyForm = () => {
     const [formData, setFormData] = useState({});
@@ -114,683 +115,19 @@ const IndonesianCompanyForm = () => {
     };
 
     // Validation functions for each step
-    const validateStep = (stepIndex, stepData, allData) => {
-        switch (stepIndex) {
-            case 0: // Requirements step - always valid (just informational)
-                return { isValid: true, errors: [] };
-            
-            case 1: // Company Email Registration step
-                return validateEmailStep(stepData);
-            
-            case 2: // Company Details step
-                return validateCompanyDetailsStep(stepData);
-            
-            case 3: // Company Documents step
-                return validateCompanyDocumentsStep(stepData);
-            
-            case 4: // Power of Attorney step
-                return validatePowerOfAttorneyStep(stepData);
-            
-            case 5: // Personal Documents step
-                return validatePersonalDocumentsStep(stepData);
-            
-            case 6: // Read Statements step
-                return validateReadStatementsStep(stepData);
-            
-            case 7: // Review step
-                return validateReviewStep(stepData);
-            
-            default:
-                return { isValid: true, errors: [] };
-        }
+    const validateStep = (stepIndex, stepData) => {
+        return validateStepEfficiently(stepIndex, stepData);
     };
 
-    const validateEmailStep = (data) => {
-        const errors = [];
-        
-        if (!data.email?.trim()) {
-            errors.push('Company email address is required');
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-            errors.push('Please enter a valid email address');
-        }
-        
-        if (!data.demoAccountNo?.trim()) {
-            errors.push('Demo account selection is required');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateCompanyDetailsStep = (data) => {
-        const errors = [];
-        const requiredFields = [
-            { field: 'companyName', label: 'Company Name' },
-            { field: 'businessLicenseNo', label: 'Business License Number' },
-            { field: 'businessEntity', label: 'Business Entity' },
-            { field: 'companyNPWP', label: 'Company NPWP' },
-            { field: 'streetName', label: 'Company Address' },
-            { field: 'city', label: 'City' },
-            { field: 'postalCode', label: 'Postal Code' },
-            { field: 'placeOfEstablishment', label: 'Place of Establishment' },
-            { field: 'establishmentDate', label: 'Establishment Date' },
-            { field: 'legalForm', label: 'Legal Form' },
-            { field: 'officeTelephoneCountryCode', label: 'Office Telephone Country Code' },
-            { field: 'officeTelephoneNo', label: 'Office Telephone Number' },
-            { field: 'beneficialOwnerName', label: 'Beneficial Owner Name' },
-            { field: 'beneficialOwnerIdNo', label: 'Beneficial Owner ID Number' },
-            { field: 'sourceOfFunds', label: 'Source of Funds' },
-            { field: 'accountPurpose', label: 'Account Purpose' },
-            { field: 'authorizedPersonName', label: 'Authorized Person Name' },
-            { field: 'authorizedDebitPerson', label: 'Authorized Debit Person' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-            }
-        });
-
-        // Special validation for office telephone number (always +62 for Indonesian companies)
-        if (data.officeTelephoneNo) {
-            // For Indonesian companies, office phone should have at least 8-12 digits
-            const phoneNumber = data.officeTelephoneNo.replace(/\D/g, ''); // Remove non-digits
-            
-            // Check if phone number starts with 0 (not allowed for Indonesian numbers with +62)
-            if (phoneNumber.startsWith('0')) {
-                errors.push('Office Telephone Number cannot start with 0');
-            } else if (phoneNumber.length < 8) {
-                errors.push('Office Telephone Number must have at least 8 digits');
-            }
-            
-            // Auto-set country code to +62 if not set
-            if (!data.officeTelephoneCountryCode) {
-                data.officeTelephoneCountryCode = '+62';
-            }
-        }
-        
-        // Check conditional fields
-        if (data.legalForm === 'OTHER' && !data.legalFormOther?.trim()) {
-            errors.push('Please specify the other legal form');
-        }
-        
-        if (data.sourceOfFunds === 'OTHER' && !data.sourceOfFundsOther?.trim()) {
-            errors.push('Please specify the other source of funds');
-        }
-        
-        if (data.accountPurpose === 'OTHER' && !data.accountPurposeOther?.trim()) {
-            errors.push('Please specify the other account purpose');
-        }
-
-        // Validate bank accounts - the bankAccounts state is managed separately in CompanyDetailsStep
-        // We need to get it from the component's local state, not from the step data
-        // For now, let's validate the individual fields even if array appears empty
-        // because the local bankAccounts state in the component might have data
-        
-        // Check if we have bank accounts data at all
-        const hasBankAccounts = data.bankAccounts && Array.isArray(data.bankAccounts) && data.bankAccounts.length > 0;
-        
-        if (!hasBankAccounts) {
-            // Add errors for the default bank account fields since we know at least one exists in the form
-            errors.push('Bank 1 - Nama Bank is required');
-            errors.push('Bank 1 - Cabang is required');
-            errors.push('Bank 1 - No. Rekening is required');
-            errors.push('Bank 1 - Account Holder Name is required');
-            errors.push('Bank 1 - Bank Telephone Country Code is required');
-            errors.push('Bank 1 - Bank Telephone No. is required');
-            errors.push('Bank 1 - Bank Account Type is required');
-        } else {
-            console.log('Validating bank accounts:', data.bankAccounts);
-            data.bankAccounts.forEach((account, index) => {
-                const bankNumber = index + 1;
-                console.log(`Validating bank account ${bankNumber}:`, account);
-                
-                if (!account.bankName?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Nama Bank is required`);
-                }
-                if (!account.branch?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Cabang is required`);
-                }
-                if (!account.accountNo?.trim()) {
-                    errors.push(`Bank ${bankNumber} - No. Rekening is required`);
-                }
-                if (!account.accountHolderName?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Account Holder Name is required`);
-                }
-                if (!account.bankTelephoneCountryCode?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Bank Telephone Country Code is required`);
-                }
-                if (!account.bankTelephoneNo?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Bank Telephone No. is required`);
-                }
-                if (!account.bankAccountType?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Bank Account Type is required`);
-                }
-                
-                // Special validation for bank telephone number
-                if (account.bankTelephoneNo && account.bankTelephoneCountryCode) {
-                    const phoneWithoutCode = account.bankTelephoneNo.replace(account.bankTelephoneCountryCode, '').trim();
-                    if (!phoneWithoutCode || phoneWithoutCode.length < 4) {
-                        errors.push(`Bank ${bankNumber} - Bank Telephone Number requires at least 4 digits after the country code`);
-                    }
-                }
-                
-                // Validate conditional field
-                if (account.bankAccountType === 'LAINNYA' && !account.bankAccountTypeOther?.trim()) {
-                    errors.push(`Bank ${bankNumber} - Please specify the bank account type`);
-                }
-            });
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateCompanyDocumentsStep = (data) => {
-        const errors = [];
-        
-        // Define required company documents that must be uploaded
-        const requiredCompanyDocs = [
-            { key: 'articlesOfAssociation', name: 'Scan Anggaran Dasar Perusahaan (Scan Company\'s Articles of Association)' },
-            { key: 'certificateOfIncorporation', name: 'Scan Nomor Izin Usaha (Scan Certificate of Incorporation)' },
-            { key: 'financialStatements', name: 'Laporan Keuangan / Deskripsi Kegiatan Usaha (Financial Statements / Description of Business Activities)' },
-            { key: 'managementStructure', name: 'Struktur Manajemen (Management Structure)' },
-            { key: 'ownershipStructure', name: 'Struktur Kepemilikan (Ownership Structure)' },
-            { key: 'boardOfResolutionFile', name: 'Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi (Board of Resolution)' },
-            { key: 'powerOfAttorneyFile', name: 'Surat Kuasa (Power of Attorney)' }
-        ];
-        
-        // Check each required document
-        requiredCompanyDocs.forEach(doc => {
-            if (!data[doc.key]) {
-                errors.push(`Required document missing: ${doc.name}`);
-            }
-        });
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validatePowerOfAttorneyStep = (data) => {
-        const errors = [];
-        const requiredFields = [
-            // Personal Information
-            { field: 'fullName', label: 'Full Name' },
-            { field: 'placeOfBirth', label: 'Place of Birth' },
-            { field: 'dateOfBirth', label: 'Date of Birth' },
-            { field: 'idPassportNo', label: 'ID/Passport Number' },
-            { field: 'npwpNo', label: 'NPWP Number' },
-            { field: 'gender', label: 'Gender' },
-            { field: 'motherName', label: 'Mother Name' },
-            { field: 'maritalStatus', label: 'Marital Status' },
-            { field: 'nationality', label: 'Nationality' },
-            // Address Information
-            { field: 'streetAddress', label: 'Street Address' },
-            { field: 'addressCity', label: 'City' },
-            { field: 'addressPostalCode', label: 'Postal Code' },
-            // Contact Information
-            { field: 'homeTelephoneNo', label: 'Home Telephone Number' },
-            { field: 'handphoneNo', label: 'Handphone Number' },
-            { field: 'personalEmail', label: 'Email' },
-            // Status and Purpose
-            { field: 'homeOwnershipStatus', label: 'Home Ownership Status' },
-            { field: 'accountOpeningPurpose', label: 'Account Opening Purpose' },
-            // Experience Questions
-            { field: 'investmentExperience', label: 'Investment Experience' },
-            { field: 'futuresTradingExperience', label: 'Futures Trading Experience' },
-            { field: 'familyInBappebti', label: 'Family in BAPPEBTI' },
-            { field: 'declaredBankrupt', label: 'Bankruptcy Declaration' },
-            // Emergency Contact Information
-            { field: 'emergencyContactName', label: 'Emergency Contact Name' },
-            { field: 'emergencyContactHandphone', label: 'Emergency Contact Handphone' },
-            { field: 'emergencyContactStreetAddress', label: 'Emergency Contact Street Address' },
-            { field: 'emergencyContactCity', label: 'Emergency Contact City' },
-            { field: 'emergencyContactPostalCode', label: 'Emergency Contact Postal Code' },
-            { field: 'emergencyContactRelationship', label: 'Emergency Contact Relationship' },
-            // Job Information
-            { field: 'jobOfPowerOfAttorney', label: 'Job of Power of Attorney' },
-            // Assets Information
-            { field: 'annualIncome', label: 'Annual Income' },
-            { field: 'houseLocation', label: 'House Location' },
-            { field: 'njopValue', label: 'NJOP Value' },
-            { field: 'bankDeposit', label: 'Bank Deposit' },
-            { field: 'totalAmount', label: 'Total Amount' }
-        ];
-        
-        requiredFields.forEach(({ field, label }) => {
-            // Special handling for radio button fields that can have "YA" or "TIDAK" values
-            if (['investmentExperience', 'futuresTradingExperience', 'familyInBappebti', 'declaredBankrupt'].includes(field)) {
-                if (field === 'investmentExperience') {
-                    // Investment experience can be 'YA_BIDANG' or 'TIDAK'
-                    if (!data[field] || !['YA_BIDANG', 'TIDAK'].includes(data[field])) {
-                        errors.push(`${label} is required`);
-                    }
-                } else {
-                    // Other radio fields use 'YA' or 'TIDAK'
-                    if (!data[field] || !['YA', 'TIDAK'].includes(data[field])) {
-                        errors.push(`${label} is required`);
-                    }
-                }
-            } else {
-            if (!data[field]?.trim()) {
-                errors.push(`${label} is required`);
-                }
-            }
-        });
-        
-        // Check conditional fields
-        if (data.nationality === 'OTHER' && !data.nationalityOther?.trim()) {
-            errors.push('Please specify other nationality');
-        }
-        
-        if (data.homeOwnershipStatus === 'LAINNYA' && !data.homeOwnershipStatusOther?.trim()) {
-            errors.push('Please specify other home ownership status');
-        }
-        
-        if (data.accountOpeningPurpose === 'LAINNYA' && !data.accountOpeningPurposeOther?.trim()) {
-            errors.push('Please specify other account opening purpose');
-        }
-        
-        if (data.investmentExperience === 'YA_BIDANG' && !data.investmentExperienceExplanation?.trim()) {
-            errors.push('Please provide details about investment experience');
-        }
-        
-        if (data.jobOfPowerOfAttorney === 'LAINNYA' && !data.jobOfPowerOfAttorneyOther?.trim()) {
-            errors.push('Please specify other job of power of attorney');
-        }
-        
-        if (data.emergencyContactRelationship === 'LAINNYA' && !data.emergencyContactRelationshipOther?.trim()) {
-            errors.push('Please specify other emergency contact relationship');
-        }
-        
-        // Validate conditional employment fields for specific job types
-        if (['SWASTA', 'WIRASWASTA', 'ASN'].includes(data.jobOfPowerOfAttorney)) {
-            const employmentFields = [
-                { field: 'employmentCompanyName', label: 'Employment Company Name' },
-                { field: 'businessField', label: 'Business Field' },
-                { field: 'employmentPosition', label: 'Employment Position' },
-                { field: 'lengthOfWork', label: 'Length of Work' },
-                { field: 'officeStreetAddress', label: 'Office Street Address' },
-                { field: 'officeCity', label: 'Office City' },
-                { field: 'officePostalCode', label: 'Office Postal Code' },
-                { field: 'officePhoneCountryCode', label: 'Office Phone Country Code' },
-                { field: 'officePhoneNo', label: 'Office Phone Number' }
-            ];
-            
-            employmentFields.forEach(({ field, label }) => {
-                if (!data[field]?.trim()) {
-                    errors.push(`${label} is required`);
-                }
-            });
-        }
-        
-        // Validate email format
-        if (data.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.personalEmail)) {
-            errors.push('Please enter a valid email address');
-        }
-        
-        // Validate phone numbers - cannot start with 0 and must have minimum digits
-        if (data.homeTelephoneNo) {
-            const phoneNumber = data.homeTelephoneNo.replace(/\D/g, ''); // Remove non-digits
-            if (phoneNumber.startsWith('0')) {
-                errors.push('Home Telephone Number cannot start with 0');
-            } else if (phoneNumber.length < 8) {
-                errors.push('Home Telephone Number must have at least 8 digits');
-            }
-            if (!data.homeTelephoneCountryCode) {
-                data.homeTelephoneCountryCode = '+62';
-            }
-        }
-        
-        if (data.handphoneNo) {
-            const phoneNumber = data.handphoneNo.replace(/\D/g, ''); // Remove non-digits
-            if (phoneNumber.startsWith('0')) {
-                errors.push('Handphone Number cannot start with 0');
-            } else if (phoneNumber.length < 8) {
-                errors.push('Handphone Number must have at least 8 digits');
-            }
-            if (!data.handphoneCountryCode) {
-                data.handphoneCountryCode = '+62';
-            }
-        }
-        
-        if (data.emergencyContactHandphone) {
-            const phoneNumber = data.emergencyContactHandphone.replace(/\D/g, ''); // Remove non-digits
-            if (phoneNumber.startsWith('0')) {
-                errors.push('Emergency Contact Handphone cannot start with 0');
-            } else if (phoneNumber.length < 8) {
-                errors.push('Emergency Contact Handphone must have at least 8 digits');
-            }
-            if (!data.emergencyContactHandphoneCountryCode) {
-                data.emergencyContactHandphoneCountryCode = '+62';
-            }
-        }
-        
-        // Validate date of birth - must be at least 21 years old
-        if (data.dateOfBirth) {
-            const birthDate = new Date(data.dateOfBirth);
-            const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            // Calculate exact age considering month and day
-            const exactAge = age - (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? 1 : 0);
-            
-            if (exactAge < 21) {
-                errors.push('You must be at least 21 years old');
-            }
-        }
-        
-        // Validate disqualifying questions - these must be answered "TIDAK" (No)
-        if (data.familyInBappebti === 'YA') {
-            errors.push('You must select "Tidak (No)" for the BAPPEBTI family question to proceed');
-        }
-        
-        if (data.declaredBankrupt === 'YA') {
-            errors.push('You must select "Tidak (No)" for the bankruptcy question to proceed');
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validatePersonalDocumentsStep = (data) => {
-        const errors = [];
-        
-        // Define required personal documents that must be uploaded
-        const requiredPersonalDocs = [
-            { key: 'currentAccountFile', name: 'Rekening Koran / Tagihan Kartu Kredit (Current Account / Credit Card Statement)' },
-            { key: 'electricityPhoneAccountFile', name: 'Rekening Listrik / Telepon (Electricity / Phone Account)' },
-            { key: 'photoSelfiePersonalFile', name: 'Foto Terkini (Photo Selfie)' },
-            { key: 'identityPassportPersonalFile', name: 'KTP / SIM / Paspor (Identity No. / SIM / Passport)' },
-            { key: 'npwpPersonalFile', name: 'NPWP (Tax Identification No.)' }
-        ];
-        
-        // Check each required document
-        requiredPersonalDocs.forEach(doc => {
-            if (!data[doc.key]) {
-                errors.push(`Required document missing: ${doc.name}`);
-            }
-        });
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateReadStatementsStep = (data) => {
-        const errors = [];
-        
-        // Updated to match actual field names used in Indonesian Company form
-        const requiredStatements = [
-            { field: 'companyProfileRead', label: 'Company Profile (Read)' },
-            { field: 'companyProfileUnderstanding', label: 'Company Profile (Understanding)' },
-            { field: 'statementRead', label: 'Statement of Having Simulation (Read)' },
-            { field: 'statementUnderstanding', label: 'Statement of Having Simulation (Understanding)' },
-            { field: 'experienceStatementRead', label: 'Statement of Having Experience (Read)' },
-            { field: 'experienceUnderstanding', label: 'Statement of Having Experience (Understanding)' },
-            { field: 'applicationStatementRead', label: 'Account Opening Application (Read)' },
-            { field: 'applicationUnderstanding', label: 'Account Opening Application (Understanding)' },
-            { field: 'riskDisclosureUnderstanding', label: 'Risk Disclosure (Understanding)' },
-            { field: 'mandateStatementRead', label: 'Mandate Agreement (Read)' },
-            { field: 'baktiArbitration', label: 'BAKTI Arbitration Agreement' },
-            { field: 'mandateUnderstanding', label: 'Mandate Agreement (Understanding)' },
-            { field: 'tradingRulesRead', label: 'Trading Rules (Read)' },
-            { field: 'tradingRulesUnderstanding', label: 'Trading Rules (Understanding)' },
-            { field: 'personalAccessPasswordRead', label: 'Personal Access Password (Read)' },
-            { field: 'personalAccessPasswordUnderstanding', label: 'Personal Access Password (Understanding)' }
-        ];
-        
-        // Add individual risk statement fields (1-14) with descriptive labels
-        const riskStatementLabels = [
-            'Risk Disclosure Statement 5.1 - Futures trading suitability and leverage risks',
-            'Risk Disclosure Statement 5.2 - Unlimited loss potential beyond margin',
-            'Risk Disclosure Statement 5.3 - No guaranteed profit warnings', 
-            'Risk Disclosure Statement 5.4 - Leverage and rapid loss mechanisms',
-            'Risk Disclosure Statement 5.5 - Position liquidation difficulties',
-            'Risk Disclosure Statement 5.6 - Risk management limitations',
-            'Risk Disclosure Statement 5.7 - Physical delivery obligations',
-            'Risk Disclosure Statement 5.8 - System failure risks',
-            'Risk Disclosure Statement 5.9 - Trading strategy risks',
-            'Risk Disclosure Statement 5.10 - Day trading specific risks',
-            'Risk Disclosure Statement 5.11 - Stop loss order limitations',
-            'Risk Disclosure Statement 5.12 - Mandate agreement requirements',
-            'Risk Disclosure Statement 5.13 - Comprehensive risk understanding',
-            'Risk Disclosure Statement 5.14 - Indonesian language documentation'
-        ];
-        
-        for (let i = 1; i <= 14; i++) {
-            requiredStatements.push({ 
-                field: `riskStatement${i}`, 
-                label: riskStatementLabels[i - 1] 
-            });
-        }
-        
-        requiredStatements.forEach(({ field, label }) => {
-            if (!data[field]) {
-                errors.push(`Please read and acknowledge ${label}`);
-            }
-        });
-        
-        // Check trading experience (required field)
-        if (!data.tradingExperience) {
-            errors.push('Please select your trading experience (Yes or No)');
-        }
-        
-        // Check conditional fields based on trading experience
-        if (data.tradingExperience === 'ya') {
-            if (!data.brokerCompany?.trim()) {
-                errors.push('Please specify the broker company name');
-            }
-            if (!data.demoAccountNumber?.trim()) {
-                errors.push('Please specify the demo account number');
-            }
-        }
-        
-        return { isValid: errors.length === 0, errors };
-    };
-
-    const validateReviewStep = (data) => {
-        // Review step is just for display - no additional validation needed
-        // All required fields should have been validated in previous steps
-        return { isValid: true, errors: [] };
-    };
 
     const handleStepValidation = (stepIndex, stepData, allData) => {
         console.log(`Validating step ${stepIndex} with data:`, stepData);
-        const validation = validateStep(stepIndex, stepData, allData);
+        const validation = validateStep(stepIndex, stepData);
         
-        // Create field error mapping for red border styling
-        const newFieldErrors = {};
+        // The new validation system already provides properly mapped field errors
+        let newFieldErrors = validation.fieldErrors || {};
+        
         if (!validation.isValid) {
-            validation.errors.forEach(error => {
-                // Email Registration Step errors
-                if (error.includes('Company email address is required') || error.includes('valid email address')) newFieldErrors.email = true;
-                if (error.includes('Demo account selection is required')) newFieldErrors.demoAccountNo = true;
-                
-                // Company Details Step errors
-                if (error.includes('Company Name is required')) newFieldErrors.companyName = true;
-                if (error.includes('Business License Number is required')) newFieldErrors.businessLicenseNo = true;
-                if (error.includes('Business Entity is required')) newFieldErrors.businessEntity = true;
-                if (error.includes('Company NPWP is required')) newFieldErrors.companyNPWP = true;
-                if (error.includes('Company Address is required')) newFieldErrors.streetName = true;
-                if (error.includes('City is required')) newFieldErrors.city = true;
-                if (error.includes('Postal Code is required')) newFieldErrors.postalCode = true;
-                if (error.includes('Place of Establishment is required')) newFieldErrors.placeOfEstablishment = true;
-                if (error.includes('Establishment Date is required')) newFieldErrors.establishmentDate = true;
-                if (error.includes('Legal Form is required')) newFieldErrors.legalForm = true;
-                if (error.includes('Office Telephone Country Code is required')) newFieldErrors.officeTelephoneCountryCode = true;
-                if (error.includes('Office Telephone Number is required')) newFieldErrors.officeTelephoneNo = true;
-                if (error.includes('Office Telephone Number must have at least 8 digits')) newFieldErrors.officeTelephoneNo = true;
-                if (error.includes('Office Telephone Number cannot start with 0')) newFieldErrors.officeTelephoneNo = true;
-                if (error.includes('Home Telephone Number cannot start with 0')) newFieldErrors.homeTelephoneNo = true;
-                if (error.includes('Home Telephone Number must have at least 8 digits')) newFieldErrors.homeTelephoneNo = true;
-                if (error.includes('Handphone Number cannot start with 0')) newFieldErrors.handphoneNo = true;
-                if (error.includes('Handphone Number must have at least 8 digits')) newFieldErrors.handphoneNo = true;
-                if (error.includes('Emergency Contact Handphone cannot start with 0')) newFieldErrors.emergencyContactHandphone = true;
-                if (error.includes('Emergency Contact Handphone must have at least 8 digits')) newFieldErrors.emergencyContactHandphone = true;
-                if (error.includes('Beneficial Owner Name is required')) newFieldErrors.beneficialOwnerName = true;
-                if (error.includes('Beneficial Owner ID Number is required')) newFieldErrors.beneficialOwnerIdNo = true;
-                if (error.includes('Source of Funds is required')) newFieldErrors.sourceOfFunds = true;
-                if (error.includes('Account Purpose is required')) newFieldErrors.accountPurpose = true;
-                if (error.includes('Authorized Person Name is required')) newFieldErrors.authorizedPersonName = true;
-                if (error.includes('Authorized Debit Person is required')) newFieldErrors.authorizedDebitPerson = true;
-                
-                // Conditional field errors for Company Details
-                if (error.includes('Please specify the other legal form')) newFieldErrors.legalFormOther = true;
-                if (error.includes('Please specify the other source of funds')) newFieldErrors.sourceOfFundsOther = true;
-                if (error.includes('Please specify the other account purpose')) newFieldErrors.accountPurposeOther = true;
-                
-                // Power of Attorney Step errors
-                if (error.includes('Full Name is required')) newFieldErrors.fullName = true;
-                if (error.includes('Place of Birth is required')) newFieldErrors.placeOfBirth = true;
-                if (error.includes('Date of Birth is required')) newFieldErrors.dateOfBirth = true;
-                if (error.includes('ID/Passport Number is required')) newFieldErrors.idPassportNo = true;
-                if (error.includes('NPWP Number is required')) newFieldErrors.npwpNo = true;
-                if (error.includes('Gender is required')) newFieldErrors.gender = true;
-                if (error.includes('Mother Name is required')) newFieldErrors.motherName = true;
-                if (error.includes('Marital Status is required')) newFieldErrors.maritalStatus = true;
-                if (error.includes('Nationality is required')) newFieldErrors.nationality = true;
-                if (error.includes('Street Address is required')) newFieldErrors.streetAddress = true;
-                if (error.includes('City is required')) newFieldErrors.addressCity = true;
-                if (error.includes('Postal Code is required')) newFieldErrors.addressPostalCode = true;
-                if (error.includes('Home Telephone Number is required')) newFieldErrors.homeTelephoneNo = true;
-                if (error.includes('Handphone Number is required')) newFieldErrors.handphoneNo = true;
-                if (error.includes('Email is required')) newFieldErrors.personalEmail = true;
-                if (error.includes('Home Ownership Status is required')) newFieldErrors.homeOwnershipStatus = true;
-                if (error.includes('Account Opening Purpose is required')) newFieldErrors.accountOpeningPurpose = true;
-                if (error.includes('Investment Experience is required')) newFieldErrors.investmentExperience = true;
-                if (error.includes('Futures Trading Experience is required')) newFieldErrors.futuresTradingExperience = true;
-                if (error.includes('Family in BAPPEBTI is required')) newFieldErrors.familyInBappebti = true;
-                if (error.includes('Bankruptcy Declaration is required')) newFieldErrors.declaredBankrupt = true;
-                
-                // Emergency Contact and Additional Power of Attorney fields
-                if (error.includes('Emergency Contact Name is required')) newFieldErrors.emergencyContactName = true;
-                if (error.includes('Emergency Contact Handphone is required')) newFieldErrors.emergencyContactHandphone = true;
-                if (error.includes('Emergency Contact Street Address is required')) newFieldErrors.emergencyContactStreetAddress = true;
-                if (error.includes('Emergency Contact City is required')) newFieldErrors.emergencyContactCity = true;
-                if (error.includes('Emergency Contact Postal Code is required')) newFieldErrors.emergencyContactPostalCode = true;
-                if (error.includes('Emergency Contact Relationship is required')) newFieldErrors.emergencyContactRelationship = true;
-                if (error.includes('Job of Power of Attorney is required')) newFieldErrors.jobOfPowerOfAttorney = true;
-                if (error.includes('Annual Income is required')) newFieldErrors.annualIncome = true;
-                if (error.includes('House Location is required')) newFieldErrors.houseLocation = true;
-                if (error.includes('NJOP Value is required')) newFieldErrors.njopValue = true;
-                if (error.includes('Bank Deposit is required')) newFieldErrors.bankDeposit = true;
-                if (error.includes('Total Amount is required')) newFieldErrors.totalAmount = true;
-                
-                // Employment fields (conditional)
-                if (error.includes('Employment Company Name is required')) newFieldErrors.employmentCompanyName = true;
-                if (error.includes('Business Field is required')) newFieldErrors.businessField = true;
-                if (error.includes('Employment Position is required')) newFieldErrors.employmentPosition = true;
-                if (error.includes('Length of Work is required')) newFieldErrors.lengthOfWork = true;
-                if (error.includes('Office Street Address is required')) newFieldErrors.officeStreetAddress = true;
-                if (error.includes('Office City is required')) newFieldErrors.officeCity = true;
-                if (error.includes('Office Postal Code is required')) newFieldErrors.officePostalCode = true;
-                if (error.includes('Office Phone Country Code is required')) newFieldErrors.officePhoneCountryCode = true;
-                if (error.includes('Office Phone Number is required')) newFieldErrors.officePhoneNo = true;
-                
-                // Conditional field errors for Power of Attorney
-                if (error.includes('Please specify other nationality')) newFieldErrors.nationalityOther = true;
-                if (error.includes('Please specify other home ownership status')) newFieldErrors.homeOwnershipStatusOther = true;
-                if (error.includes('Please specify other account opening purpose')) newFieldErrors.accountOpeningPurposeOther = true;
-                if (error.includes('Please provide details about investment experience')) newFieldErrors.investmentExperienceExplanation = true;
-                if (error.includes('Please specify other job of power of attorney')) newFieldErrors.jobOfPowerOfAttorneyOther = true;
-                if (error.includes('Please specify other emergency contact relationship')) newFieldErrors.emergencyContactRelationshipOther = true;
-                if (error.includes('Please enter a valid email address')) newFieldErrors.personalEmail = true;
-                if (error.includes('You must be at least 21 years old')) newFieldErrors.dateOfBirth = true;
-                if (error.includes('You must select "Tidak (No)" for the BAPPEBTI family question to proceed')) newFieldErrors.familyInBappebti = true;
-                if (error.includes('You must select "Tidak (No)" for the bankruptcy question to proceed')) newFieldErrors.declaredBankrupt = true;
-                
-                // Document Upload Step errors
-                if (error.includes('Please upload all required company documents')) newFieldErrors.companyDocumentsUploaded = true;
-                if (error.includes('Please upload all required personal documents')) newFieldErrors.personalDocumentsUploaded = true;
-                
-                // Specific document upload errors
-                if (error.includes('Required document missing: Scan Anggaran Dasar Perusahaan')) newFieldErrors.articlesOfAssociation = true;
-                if (error.includes('Required document missing: Scan Nomor Izin Usaha')) newFieldErrors.certificateOfIncorporation = true;
-                if (error.includes('Required document missing: Laporan Keuangan / Deskripsi Kegiatan Usaha')) newFieldErrors.financialStatements = true;
-                if (error.includes('Required document missing: Struktur Manajemen')) newFieldErrors.managementStructure = true;
-                if (error.includes('Required document missing: Struktur Kepemilikan')) newFieldErrors.ownershipStructure = true;
-                if (error.includes('Required document missing: Spesimen Tanda Tangan Pihak Yang Melaksanakan Transaksi')) newFieldErrors.boardOfResolutionFile = true;
-                if (error.includes('Required document missing: Surat Kuasa')) newFieldErrors.powerOfAttorneyFile = true;
-                
-                // Personal document upload errors
-                if (error.includes('Required document missing: Rekening Koran / Tagihan Kartu Kredit')) newFieldErrors.currentAccountFile = true;
-                if (error.includes('Required document missing: Rekening Listrik / Telepon')) newFieldErrors.electricityPhoneAccountFile = true;
-                if (error.includes('Required document missing: Foto Terkini')) newFieldErrors.photoSelfiePersonalFile = true;
-                if (error.includes('Required document missing: KTP / SIM / Paspor')) newFieldErrors.identityPassportPersonalFile = true;
-                if (error.includes('Required document missing: NPWP')) newFieldErrors.npwpPersonalFile = true;
-                
-                // Read Statements Step errors - detailed mappings
-                if (error.includes('Please read and acknowledge Company Profile (Read)')) newFieldErrors.companyProfileRead = true;
-                if (error.includes('Please read and acknowledge Company Profile (Understanding)')) newFieldErrors.companyProfileUnderstanding = true;
-                if (error.includes('Please read and acknowledge Statement of Having Simulation (Read)')) newFieldErrors.statementRead = true;
-                if (error.includes('Please read and acknowledge Statement of Having Simulation (Understanding)')) newFieldErrors.statementUnderstanding = true;
-                if (error.includes('Please read and acknowledge Statement of Having Experience (Read)')) newFieldErrors.experienceStatementRead = true;
-                if (error.includes('Please read and acknowledge Statement of Having Experience (Understanding)')) newFieldErrors.experienceUnderstanding = true;
-                if (error.includes('Please read and acknowledge Account Opening Application (Read)')) newFieldErrors.applicationStatementRead = true;
-                if (error.includes('Please read and acknowledge Account Opening Application (Understanding)')) newFieldErrors.applicationUnderstanding = true;
-                if (error.includes('Please read and acknowledge Risk Disclosure (Understanding)')) newFieldErrors.riskDisclosureUnderstanding = true;
-                if (error.includes('Please read and acknowledge Mandate Agreement (Read)')) newFieldErrors.mandateStatementRead = true;
-                if (error.includes('Please read and acknowledge BAKTI Arbitration Agreement')) newFieldErrors.baktiArbitration = true;
-                if (error.includes('Please read and acknowledge Mandate Agreement (Understanding)')) newFieldErrors.mandateUnderstanding = true;
-                if (error.includes('Please read and acknowledge Trading Rules (Read)')) newFieldErrors.tradingRulesRead = true;
-                if (error.includes('Please read and acknowledge Trading Rules (Understanding)')) newFieldErrors.tradingRulesUnderstanding = true;
-                if (error.includes('Please read and acknowledge Personal Access Password (Read)')) newFieldErrors.personalAccessPasswordRead = true;
-                if (error.includes('Please read and acknowledge Personal Access Password (Understanding)')) newFieldErrors.personalAccessPasswordUnderstanding = true;
-                if (error.includes('Please select your trading experience')) newFieldErrors.tradingExperience = true;
-                if (error.includes('Please specify the broker company name')) newFieldErrors.brokerCompany = true;
-                if (error.includes('Please specify the demo account number')) newFieldErrors.demoAccountNumber = true;
-                
-                // Risk statement checkboxes - individual mapping with descriptive labels
-                const riskStatementErrorMappings = [
-                    'Risk Disclosure Statement 5.1 - Futures trading suitability and leverage risks',
-                    'Risk Disclosure Statement 5.2 - Unlimited loss potential beyond margin',
-                    'Risk Disclosure Statement 5.3 - No guaranteed profit warnings', 
-                    'Risk Disclosure Statement 5.4 - Leverage and rapid loss mechanisms',
-                    'Risk Disclosure Statement 5.5 - Position liquidation difficulties',
-                    'Risk Disclosure Statement 5.6 - Risk management limitations',
-                    'Risk Disclosure Statement 5.7 - Physical delivery obligations',
-                    'Risk Disclosure Statement 5.8 - System failure risks',
-                    'Risk Disclosure Statement 5.9 - Trading strategy risks',
-                    'Risk Disclosure Statement 5.10 - Day trading specific risks',
-                    'Risk Disclosure Statement 5.11 - Stop loss order limitations',
-                    'Risk Disclosure Statement 5.12 - Mandate agreement requirements',
-                    'Risk Disclosure Statement 5.13 - Comprehensive risk understanding',
-                    'Risk Disclosure Statement 5.14 - Indonesian language documentation'
-                ];
-                
-                for (let i = 1; i <= 14; i++) {
-                    if (error.includes(`Please read and acknowledge ${riskStatementErrorMappings[i - 1]}`)) {
-                        newFieldErrors[`riskStatement${i}`] = true;
-                    }
-                }
-            });
-            
-            // Bank Account errors - handle dynamic bank accounts
-            const bankFieldMappings = [
-                { pattern: /Bank (\d+) - Nama Bank is required/, field: 'bankName' },
-                { pattern: /Bank (\d+) - Cabang is required/, field: 'branch' },
-                { pattern: /Bank (\d+) - No\. Rekening is required/, field: 'accountNo' },
-                { pattern: /Bank (\d+) - Account Holder Name is required/, field: 'accountHolderName' },
-                { pattern: /Bank (\d+) - Bank Telephone Country Code is required/, field: 'bankTelephoneCountryCode' },
-                { pattern: /Bank (\d+) - Bank Telephone No\. is required/, field: 'bankTelephoneNo' },
-                { pattern: /Bank (\d+) - Bank Telephone Number requires at least 4 digits after the country code/, field: 'bankTelephoneNo' },
-                { pattern: /Bank (\d+) - Bank Account Type is required/, field: 'bankAccountType' },
-                { pattern: /Bank (\d+) - Please specify the bank account type/, field: 'bankAccountTypeOther' }
-            ];
-
-            // Check for bank field errors
-            validation.errors.forEach(error => {
-                bankFieldMappings.forEach(({ pattern, field }) => {
-                    const match = error.match(pattern);
-                    if (match) {
-                        const bankIndex = parseInt(match[1]) - 1;
-                        newFieldErrors[field] = true;
-                        newFieldErrors[`${field}_${bankIndex}`] = true;
-                    }
-                });
-            });
-            
-            // Set the field errors
-            console.log('Setting field errors:', newFieldErrors);
-            setFieldErrors(newFieldErrors);
-            
-            // Show notification with all validation errors
             const errorMessage = validation.errors.length === 1 
                 ? validation.errors[0]
                 : `Please fix the following issues: ${validation.errors.join(', ')}`;
@@ -800,11 +137,9 @@ const IndonesianCompanyForm = () => {
                 message: errorMessage,
                 type: 'error'
             });
-        } else {
-            // Clear field errors if validation passes
-            setFieldErrors({});
         }
         
+        setFieldErrors(newFieldErrors);
         return validation.isValid;
     };
 
@@ -1128,23 +463,38 @@ const CompanyDetailsStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
                 ...newAccounts[index], 
                 [field]: value
             };
+            // When country code changes, clear the phone number if no code is selected
+            if (!value) {
+                newAccounts[index] = { ...newAccounts[index], bankTelephoneNo: '' };
+            }
         } else if (field === 'bankTelephoneNo') {
             // Special handling for bank telephone number input
             let phoneNumber = value;
-            
-            // Remove any country code that might be present in the input
             const currentCountryCode = newAccounts[index].bankTelephoneCountryCode;
-            if (currentCountryCode && phoneNumber.startsWith(currentCountryCode)) {
-                phoneNumber = phoneNumber.replace(currentCountryCode, '').trim();
+            
+            // If there's a country code selected, ensure the input starts with it
+            if (currentCountryCode) {
+                // If user tries to delete the country code prefix, prevent it
+                if (!phoneNumber.startsWith(currentCountryCode)) {
+                    // Don't update the field, just return early to prevent deletion
+                    return;
+                } else {
+                    // Extract only the part after the country code
+                    const afterPrefix = phoneNumber.substring(currentCountryCode.length).trim();
+                    // Remove any non-digit characters except spaces and dashes for formatting
+                    const cleanNumber = afterPrefix.replace(/[^\d\s-]/g, '');
+                    // Prevent starting with 0 - remove leading zeros
+                    const finalNumber = cleanNumber.replace(/^0+/, '');
+                    
+                    // Store only the clean number part (without country code)
+                    newAccounts[index] = { ...newAccounts[index], [field]: finalNumber };
+                }
+            } else {
+                // No country code selected, store the clean number
+                phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                phoneNumber = phoneNumber.replace(/^0+/, '');
+                newAccounts[index] = { ...newAccounts[index], [field]: phoneNumber };
             }
-            
-            // Remove any non-digit characters except spaces and dashes for formatting
-            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
-            
-            // Prevent starting with 0 - remove leading zeros
-            phoneNumber = phoneNumber.replace(/^0+/, '');
-            
-            newAccounts[index] = { ...newAccounts[index], [field]: phoneNumber };
         } else {
         newAccounts[index] = { ...newAccounts[index], [field]: value };
             
@@ -1365,19 +715,29 @@ const CompanyDetailsStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
                                     <Form.Control
                                         type="tel"
                                         placeholder="Enter office telephone number"
-                                        value={data.officeTelephoneNo || ''}
+                                        value={
+                                            data.officeTelephoneNo 
+                                                ? `+62 ${data.officeTelephoneNo}`
+                                                : '+62 '
+                                        }
                                         onChange={(e) => {
                                             let phoneNumber = e.target.value;
+                                            const prefix = '+62';
                                             
-                                            // Remove any non-digit characters except spaces and dashes for formatting
-                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
                                             
-                                            // Prevent starting with 0 - remove leading zeros
-                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
                                             
                                             const newData = { 
                                                 ...data, 
-                                                officeTelephoneNo: phoneNumber,
+                                                officeTelephoneNo: finalNumber,
                                                 officeTelephoneCountryCode: '+62'
                                             };
                                             if (clearFieldError && fieldErrors.officeTelephoneNo) {
@@ -1630,7 +990,13 @@ const CompanyDetailsStep = ({ data = {}, onChange, fieldErrors = {}, clearFieldE
                                                     <Form.Control
                                                         type="tel"
                                                         placeholder="Enter bank telephone number"
-                                                        value={account.bankTelephoneNo || ''}
+                                                        value={
+                                                            account.bankTelephoneCountryCode && account.bankTelephoneNo 
+                                                                ? `${account.bankTelephoneCountryCode} ${account.bankTelephoneNo}`
+                                                                : account.bankTelephoneCountryCode 
+                                                                    ? `${account.bankTelephoneCountryCode} `
+                                                                    : account.bankTelephoneNo || ''
+                                                        }
                                                         onChange={(e) => updateBankAccount(index, 'bankTelephoneNo', e.target.value)}
                                                         isInvalid={fieldErrors.bankTelephoneNo || fieldErrors[`bankTelephoneNo_${index}`]}
                                                         required
@@ -2295,19 +1661,29 @@ const PowerOfAttorneyStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter home telephone number"
-                                value={data.homeTelephoneNo || ''}
+                                value={
+                                    data.homeTelephoneNo 
+                                        ? `+62 ${data.homeTelephoneNo}`
+                                        : '+62 '
+                                }
                                         onChange={(e) => {
                                             let phoneNumber = e.target.value;
+                                            const prefix = '+62';
                                             
-                                            // Remove any non-digit characters except spaces and dashes for formatting
-                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
                                             
-                                            // Prevent starting with 0 - remove leading zeros
-                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
                                             
                                             const newData = { 
                                                 ...data, 
-                                                homeTelephoneNo: phoneNumber,
+                                                homeTelephoneNo: finalNumber,
                                                 homeTelephoneCountryCode: '+62'
                                             };
                                             if (clearFieldError && fieldErrors.homeTelephoneNo) {
@@ -2338,19 +1714,29 @@ const PowerOfAttorneyStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter handphone number"
-                                value={data.handphoneNo || ''}
+                                value={
+                                    data.handphoneNo 
+                                        ? `+62 ${data.handphoneNo}`
+                                        : '+62 '
+                                }
                                         onChange={(e) => {
                                             let phoneNumber = e.target.value;
+                                            const prefix = '+62';
                                             
-                                            // Remove any non-digit characters except spaces and dashes for formatting
-                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
                                             
-                                            // Prevent starting with 0 - remove leading zeros
-                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
                                             
                                             const newData = { 
                                                 ...data, 
-                                                handphoneNo: phoneNumber,
+                                                handphoneNo: finalNumber,
                                                 handphoneCountryCode: '+62'
                                             };
                                             if (clearFieldError && fieldErrors.handphoneNo) {
@@ -2664,19 +2050,29 @@ const PowerOfAttorneyStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                             <Form.Control
                                 type="tel"
                                 placeholder="Enter emergency contact handphone"
-                                value={data.emergencyContactHandphone || ''}
+                                value={
+                                    data.emergencyContactHandphone 
+                                        ? `+62 ${data.emergencyContactHandphone}`
+                                        : '+62 '
+                                }
                                         onChange={(e) => {
                                             let phoneNumber = e.target.value;
+                                            const prefix = '+62';
                                             
-                                            // Remove any non-digit characters except spaces and dashes for formatting
-                                            phoneNumber = phoneNumber.replace(/[^\d\s-]/g, '');
+                                            // If user tries to delete the +62 prefix, prevent it
+                                            if (!phoneNumber.startsWith(prefix)) {
+                                                // Don't update the field, just return to prevent deletion
+                                                return;
+                                            }
                                             
-                                            // Prevent starting with 0 - remove leading zeros
-                                            phoneNumber = phoneNumber.replace(/^0+/, '');
+                                            const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                            // Only keep digits, remove all non-digit characters
+                                            const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                            const finalNumber = cleanNumber.replace(/^0+/, '');
                                             
                                             const newData = { 
                                                 ...data, 
-                                                emergencyContactHandphone: phoneNumber,
+                                                emergencyContactHandphone: finalNumber,
                                                 emergencyContactHandphoneCountryCode: '+62'
                                             };
                                             if (clearFieldError && fieldErrors.emergencyContactHandphone) {
@@ -2953,28 +2349,47 @@ const PowerOfAttorneyStep = ({ data = {}, onChange, fieldErrors = {}, clearField
                                     <Form.Label className="text-muted" style={{ minHeight: '24px' }}>No. Telepon Kantor (Office Telephone No.) <span className="text-danger">*</span></Form.Label>
                                     <Row>
                                         <Col md={4}>
-                                            <Form.Select
-                                                value={data.officePhoneCountryCode || ''}
-                                                onChange={(e) => handleChange('officePhoneCountryCode', e.target.value)}
-                                                isInvalid={fieldErrors.officePhoneCountryCode}
-                                                required
-                                            >
-                                                <option value="">Code</option>
-                                                <option value="+62">+62 (ID)</option>
-                                                <option value="+65">+65 (SG)</option>
-                                                <option value="+60">+60 (MY)</option>
-                                                <option value="+1">+1 (US/CA)</option>
-                                                <option value="+44">+44 (UK)</option>
-                                                <option value="+61">+61 (AU)</option>
-                                                <option value="+91">+91 (IN)</option>
-                                            </Form.Select>
+                                            <Form.Control
+                                                type="text"
+                                                value="+62 (ID)"
+                                                readOnly
+                                                style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                                            />
                                         </Col>
                                         <Col md={8}>
                                             <Form.Control
                                                 type="tel"
                                                 placeholder="Enter office phone number"
-                                                value={data.officePhoneNo || ''}
-                                                onChange={(e) => handleChange('officePhoneNo', e.target.value)}
+                                                value={
+                                                    data.officePhoneNo 
+                                                        ? `+62 ${data.officePhoneNo}`
+                                                        : '+62 '
+                                                }
+                                                onChange={(e) => {
+                                                    let phoneNumber = e.target.value;
+                                                    const prefix = '+62';
+                                                    
+                                                    // If user tries to delete the +62 prefix, prevent it
+                                                    if (!phoneNumber.startsWith(prefix)) {
+                                                        // Don't update the field, just return to prevent deletion
+                                                        return;
+                                                    }
+                                                    
+                                                    const afterPrefix = phoneNumber.substring(prefix.length).trim();
+                                                    // Only keep digits, remove all non-digit characters
+                                                    const cleanNumber = afterPrefix.replace(/\D/g, '');
+                                                    const finalNumber = cleanNumber.replace(/^0+/, '');
+                                                    
+                                                    const newData = { 
+                                                        ...data, 
+                                                        officePhoneNo: finalNumber,
+                                                        officePhoneCountryCode: '+62'
+                                                    };
+                                                    if (clearFieldError && fieldErrors.officePhoneNo) {
+                                                        clearFieldError('officePhoneNo');
+                                                    }
+                                                    handleChange('officePhoneNo', finalNumber);
+                                                }}
                                                 isInvalid={fieldErrors.officePhoneNo}
                                                 required
                                             />

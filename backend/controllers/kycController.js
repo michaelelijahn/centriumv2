@@ -121,7 +121,7 @@ const submitForeignCompanyKYC = async (req, res, next) => {
             safeValue(formData.placeOfEstablishment),
             safeValue(formData.dateOfEstablishment),
             safeValue(formData.countryCode),
-            safeValue(formData.officeTelephoneNo),
+            safeValue(formData.officePhoneNumber),
             safeValue(formData.beneficialOwnerName),
             safeValue(formData.beneficialOwnerPassportNo),
             safeValue(formData.sourceOfFunds),
@@ -1765,37 +1765,37 @@ const submitRegulatedCompanyKYC = async (req, res, next) => {
         
         // 2. Insert email registration data
         debugLog(`=== INSERTING EMAIL DATA ===`);
-        debugLog(`Email: ${formData.email}, Demo Account: ${formData.demoAccountNo}`);
+        debugLog(`Email: ${formData.email}, Demo Account (camelCase): ${formData.demoAccountNo}, Demo Account (snake_case): ${formData.demo_account_no}`);
         await connection.execute(
             `INSERT INTO kyc_regulated_company_email (application_id, email, demo_account_no) 
              VALUES (?, ?, ?)`,
-            [applicationId, safeValue(formData.email), safeValue(formData.demoAccountNo)]
+            [applicationId, safeValue(formData.email), safeValue(formData.demo_account_no)]
         );
         
         // 3. Insert company details (ONLY fields that exist in the form)
         debugLog(`=== INSERTING COMPANY DETAILS ===`);
         const companyDetailsParams = [
             applicationId,
-            safeValue(formData.companyRegistrationName),
-            safeValue(formData.companyLicenseNo),
-            safeValue(formData.natureOfBusiness),
-            safeValue(formData.companyLegalForm),
-            safeValue(formData.companyLegalFormOther),
-            safeValue(formData.streetAddress),
+            safeValue(formData.company_registration_name),
+            safeValue(formData.company_license_no),
+            safeValue(formData.nature_of_business),
+            safeValue(formData.company_legal_form),
+            safeValue(formData.company_legal_form_other),
+            safeValue(formData.street_address),
             safeValue(formData.city),
-            safeValue(formData.postalCode),
+            safeValue(formData.postal_code),
             safeValue(formData.country),
-            safeValue(formData.countryOther),
-            safeValue(formData.placeOfEstablishment),
-            safeValue(formData.dateOfEstablishment),
-            safeValue(formData.countryCode),
-            safeValue(formData.officeTelephoneNo),
-            safeValue(formData.beneficialOwnerName),
-            safeValue(formData.beneficialOwnerPassportNo),
-            safeValue(formData.sourceOfFunds),
-            safeValue(formData.sourceOfFundsOther),
-            safeValue(formData.tradingAccountPurpose),
-            safeValue(formData.tradingAccountPurposeOther)
+            safeValue(formData.country_other),
+            safeValue(formData.place_of_establishment),
+            safeValue(formData.date_of_establishment),
+            safeValue(formData.country_code),
+            safeValue(formData.office_telephone_no),
+            safeValue(formData.beneficial_owner_name),
+            safeValue(formData.beneficial_owner_passport_no),
+            safeValue(formData.source_of_funds),
+            safeValue(formData.source_of_funds_other),
+            safeValue(formData.trading_account_purpose),
+            safeValue(formData.trading_account_purpose_other)
         ];
         
         debugLog(`Company details params: ${JSON.stringify(companyDetailsParams)}`);
@@ -1814,33 +1814,35 @@ const submitRegulatedCompanyKYC = async (req, res, next) => {
         debugLog(`=== INSERTING AUTHORIZED PERSON DATA ===`);
         const authorizedPersonParams = [
             applicationId,
-            safeValue(formData.authorizePersonTitle),
-            safeValue(formData.authorizePersonFullName),
-            safeValue(formData.authorizePersonPlaceOfBirth),
-            safeValue(formData.authorizePersonDateOfBirth),
-            safeValue(formData.authorizePersonPassportId),
-            safeValue(formData.authorizePersonEmail),
-            safeValue(formData.authorizePersonGender),
-            safeValue(formData.authorizePersonMaritalStatus),
-            safeValue(formData.authorizePersonCitizen),
-            safeValue(formData.authorizePersonCitizenOther),
-            safeValue(formData.authorizePersonCountryCode),
-            safeValue(formData.authorizePersonPhoneNumber),
-            safeValue(formData.authorizePersonStreetAddress),
-            safeValue(formData.authorizePersonCity),
-            safeValue(formData.authorizePersonPostalCode),
-            safeValue(formData.authorizePersonCountry),
-            safeValue(formData.authorizePersonCountryOther),
-            safeValue(formData.authorizePersonInvestmentExperience),
-            safeValue(formData.authorizePersonInvestmentExperienceDetails),
-            safeValue(formData.authorizePersonCompanyName),
-            safeValue(formData.authorizePersonBusinessNature),
-            safeValue(formData.authorizePersonJobPosition),
-            safeValue(formData.authorizePersonOfficeAddress),
-            safeValue(formData.authorizePersonOfficeCity),
-            safeValue(formData.authorizePersonOfficePostalCode),
-            safeValue(formData.authorizePersonOfficeCountry),
-            safeValue(formData.authorizePersonOfficeCountryOther)
+            safeValue(formData.title),
+            safeValue(formData.full_name),
+            safeValue(formData.place_of_birth),
+            safeValue(formData.date_of_birth),
+            safeValue(formData.passport_id),
+            safeValue(formData.email),
+            safeValue(formData.gender),
+            safeValue(formData.marital_status),
+            safeValue(formData.citizen),
+            safeValue(formData.citizen_other),
+            safeValue(formData.country_code),
+            safeValue(formData.phone_number),
+            safeValue(formData.street_address),
+            safeValue(formData.city),
+            safeValue(formData.postal_code),
+            safeValue(formData.country),
+            safeValue(formData.country_other),
+            safeValue(formData.investment_experience),
+            safeValue(formData.investment_experience_details),
+            safeValue(formData.family_in_bappebti),
+            safeValue(formData.declared_bankrupt),
+            safeValue(formData.company_name),
+            safeValue(formData.business_nature),
+            safeValue(formData.job_position),
+            safeValue(formData.office_address),
+            safeValue(formData.office_city),
+            safeValue(formData.office_postal_code),
+            safeValue(formData.office_country),
+            safeValue(formData.office_country_other)
         ];
         
         debugLog(`Authorized person params: ${JSON.stringify(authorizedPersonParams)}`);
@@ -1849,9 +1851,9 @@ const submitRegulatedCompanyKYC = async (req, res, next) => {
                 application_id, title, full_name, place_of_birth, date_of_birth, passport_id,
                 email, gender, marital_status, citizen, citizen_other, country_code, phone_number,
                 street_address, city, postal_code, country, country_other, investment_experience,
-                investment_experience_details, company_name, business_nature, job_position,
+                investment_experience_details, family_in_bappebti, declared_bankrupt, company_name, business_nature, job_position,
                 office_address, office_city, office_postal_code, office_country, office_country_other
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             authorizedPersonParams
         );
 
